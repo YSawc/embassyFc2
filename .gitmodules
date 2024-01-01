@@ -1,3 +1,3 @@
-[submodule "embassy"]
-	path = embassy
+[submodule "packages/submodules/embassy"]
+	path = packages/submodules/embassy
 	url = git@github.com:embassy-rs/embassy.git
