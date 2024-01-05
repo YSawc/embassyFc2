@@ -2,7 +2,7 @@ module ModeSelector (
     CLK         : input  logic,
     RST         : input  logic,
     EN          : input  logic,
-    data        : input  int  ,
+    data        : input  logic<8>  ,
     mode        : output ModePkg::Mode,
 ) {
     var n_mode        : ModePkg::Mode;
@@ -10,10 +10,10 @@ module ModeSelector (
     always_comb {
     n_mode = mode;
         if EN {
-            case data {
-                2      : n_mode = data as ModePkg::Mode;
-                8'hfe  : n_mode = data as ModePkg::Mode;
-                default: n_mode = ModePkg::Mode::stop;
+            if data >= 2 && data <= 8'hfe {
+                n_mode = data as ModePkg::Mode;
+            } else {
+                n_mode = ModePkg::Mode::stop;
             }
         }
     }

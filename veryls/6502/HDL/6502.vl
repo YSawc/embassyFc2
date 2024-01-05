@@ -39,6 +39,13 @@ module main (
         data: modeReadData,
         mode              ,
     );
+    var writeData: logic<8>;
+
+    assign writeData = if mode == ModePkg::Mode::callback {
+        ModePkg::Mode::callback as byte
+    } else {
+        7'b0011010
+    };
     var cpuEnable: logic = mode != ModePkg::Mode::stop;
 
     var targetAddr   : logic<16> = 16'h5;
@@ -66,7 +73,7 @@ module main (
         CLK                   ,
         RST                   ,
         WE      : write_enable,
-        DATA_IN : 7'b0110010  ,
+        DATA_IN : writeData  ,
         data_out: GPIO_0_0    ,
         busy    : write_busy  ,
     );
