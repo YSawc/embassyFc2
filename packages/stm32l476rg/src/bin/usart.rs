@@ -25,8 +25,8 @@ fn main() -> ! {
         Normal = 2,
         Sequence = 0xFE,
     }
-    unwrap!(usart.blocking_write(&[Mode::Stop as u8, 1]));
-    // unwrap!(usart.blocking_write(&[Mode::Normal as u8, 1]));
+    // unwrap!(usart.blocking_write(&[Mode::Stop as u8, 1]));
+    unwrap!(usart.blocking_write(&[Mode::Normal as u8, 1]));
     info!("wrote mode");
 
     let mut buf = [0x0u8; 1];
