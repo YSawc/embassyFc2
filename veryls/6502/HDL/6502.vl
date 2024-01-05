@@ -27,17 +27,17 @@ module main (
         RST                        ,
         DATA_IN    : GPIO_0_1      ,
         RE         : modeReadEnable,
-        read_finish: 0,
+        read_finish: 0             ,
         data_out   : modeReadData  ,
         busy       : 0             ,
     );
     var modeSelectorEnable: logic = modeReadData != 0;
     inst modeSelector: ModeSelector (
-        CLK               ,
-        RST               ,
-        EN  : modeSelectorEnable           ,
-        data: modeReadData,
-        mode              ,
+        CLK                     ,
+        RST                     ,
+        EN  : modeSelectorEnable,
+        data: modeReadData      ,
+        mode                    ,
     );
     var writeData: logic<8>;
 
@@ -52,9 +52,9 @@ module main (
     var targetSection: logic<16>;
     assign targetSection = CpuMemoryMapPkg::targetSection(targetAddr);
 
-    var read_enable          : logic;
-    assign read_enable = cpuEnable && (~write_busy);
-    var write_enable          : logic;
+    var read_enable : logic;
+    assign read_enable  = cpuEnable && (~write_busy);
+    var write_enable: logic;
     assign write_enable = cpuEnable && (~read_busy);
     var read_finish : logic   ;
     var read_busy   : logic   ;
@@ -64,7 +64,7 @@ module main (
         CLK                     ,
         RST                     ,
         DATA_IN    : GPIO_0_1   ,
-        RE: read_enable                      ,
+        RE         : read_enable,
         read_finish: read_finish,
         data_out   : read_buffer,
         busy       : read_busy  ,
@@ -73,7 +73,7 @@ module main (
         CLK                   ,
         RST                   ,
         WE      : write_enable,
-        DATA_IN : writeData  ,
+        DATA_IN : writeData   ,
         data_out: GPIO_0_0    ,
         busy    : write_busy  ,
     );

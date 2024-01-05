@@ -9,7 +9,7 @@ package RegisterPkg {
     }
     var register: Register;
 
-    function init() -> void {
+    function init () -> void {
         register.a = 0;
         register.x = 0;
         register.y = 0;
