@@ -20,12 +20,23 @@ fn main() -> ! {
     let config = Config::default();
     let mut usart = Uart::new(p.UART4, p.PA1, p.PA0, Irqs, NoDma, NoDma, config).unwrap();
 
-    unwrap!(usart.blocking_write(b"Hello Embassy World!\r\n"));
-    info!("wrote Hello, starting echo");
+    enum Mode {
+        Stop,
+        Normal = 2,
+        Sequence = 0xFE,
+    }
+    unwrap!(usart.blocking_write(&[Mode::Stop as u8, 1]));
+    // unwrap!(usart.blocking_write(&[Mode::Normal as u8, 1]));
+    info!("wrote mode");
 
-    let mut buf = [0x32u8; 1];
+    let mut buf = [0x0u8; 1];
     loop {
-        // unwrap!(usart.blocking_read(&mut buf));
-        unwrap!(usart.blocking_write(&buf));
+        // unwrap!(usart.blocking_write(&[0x18u8, 1]));
+        // info!("wrote data");
+        match usart.blocking_read(&mut buf) {
+            Ok(_) => info!("read data: {}", buf),
+            Err(_) => (),
+        }
+        buf = [0x0u8; 1];
     }
 }
