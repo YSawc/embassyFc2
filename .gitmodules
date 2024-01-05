@@ -1,6 +1,3 @@
-[submodule "packages/embassy"]
-	path = packages/embassy
-	url = git@github.com:embassy-rs/embassy.git
 [submodule "submodules/embassy"]
 	path = submodules/embassy
 	url = git@github.com:embassy-rs/embassy.git
