@@ -1,0 +1,402 @@
+package OperatorsPkg {
+    enum OpeKind: logic<7> {
+        Adc,
+        Sbc, // flags: N V Z C
+
+        And,
+        Ora,
+        Eor, // flags: N Z
+
+        Asl,
+        Lsr,
+        Rol,
+        Ror, // flags: N Z C
+
+        Bcc,
+        Bcs,
+        Beq,
+        Bne,
+        Bvc,
+        Bvs,
+        Bpl,
+        Bmi, // flags: none
+
+        Bit, // flags: N V Z
+
+        Jmp,
+        Jsr,
+        Rts, // flags: none
+
+        Brk, // flags: Bi
+        Rti, // flags: all
+
+        Cmp,
+        Cpx,
+        Cpy,
+        Inc,
+        Dec,
+        Inx,
+        Dex,
+        Iny,
+        Dey, // flags: N Z
+
+        Clc,
+        Sec,
+        Cli,
+        Sei,
+        Cld,
+        Sed,
+        Clv, // flags: N Z
+
+        Lda,
+        Ldx,
+        Ldy, // flags: N Z
+
+        Sta,
+        Stx,
+        Sty, // flags: none
+
+        Tax,
+        Txa,
+        Tay,
+        Tya,
+        Tsx, // flags: N Z
+        Txs, // flags: none
+
+        Pha, // flags: none
+        Pla, // flags: N Z
+        Php, // flags: none
+        Plp, // flags: all
+        Nop, // flags: none
+
+        Dop,
+        Kil,
+        Slo,
+        Aac,
+        Atx,
+        Top,
+        Rla,
+        Sre,
+        Dcp,
+        Asr,
+        Rra,
+        Arr,
+        Sax,
+        Xaa,
+        Axa,
+        Xas,
+        Sxa,
+        Sya,
+        Lax,
+        Lxa,
+        Lar,
+        Las,
+        Axs,
+        Isb,
+    }
+
+    enum AddrMode: logic<4> {
+        Acc,
+        Imm,
+        Abs,
+        AbsX,
+        AbsY,
+        Zp,
+        ZpX,
+        ZpY,
+        Impl,
+        Rel,
+        IndX,
+        IndY,
+        Ind,
+        Nop,
+    }
+
+    struct Operator {
+        ope_kind : OpeKind    ,
+        addr_mode: AddrMode   ,
+        cycle    : logic   <7>,
+    }
+    var operators: Operator<8'hff>;
+
+    function prepare_operators () -> void {
+        // x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 xA xB xC xD xE xF
+        var cycles: logic<7> [8'hff] = { //
+        7, 6, 2, 8, 3, 3, 5, 5, 3, 2, 2, 2, 4, 4, 6, 6, // 0x00
+         2, 5, 2, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 6, 7, // 0x10
+         6, 6, 2, 8, 3, 3, 5, 5, 4, 2, 2, 2, 4, 4, 6, 6, // 0x20
+         2, 5, 2, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 6, 7, // 0x30
+         6, 6, 2, 8, 3, 3, 5, 5, 3, 2, 2, 2, 3, 4, 6, 6, // 0x40
+         2, 5, 2, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 6, 7, // 0x50
+         6, 6, 2, 8, 3, 3, 5, 5, 4, 2, 2, 2, 5, 4, 6, 6, // 0x60
+         2, 5, 2, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 6, 7, // 0x70
+         2, 6, 6, 6, 3, 3, 3, 3, 2, 2, 2, 2, 4, 4, 4, 4, // 0x80
+         2, 5, 2, 6, 4, 4, 4, 4, 2, 5, 2, 5, 5, 4, 5, 5, // 0x90
+         2, 6, 2, 6, 3, 3, 3, 3, 2, 2, 2, 2, 4, 4, 4, 4, // 0xA0
+         2, 5, 2, 5, 4, 4, 4, 4, 2, 4, 2, 4, 4, 4, 4, 4, // 0xB0
+         2, 6, 2, 8, 3, 3, 5, 5, 2, 2, 2, 2, 4, 4, 6, 6, // 0xC0
+         2, 5, 2, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7, // 0xD0
+         2, 6, 3, 8, 3, 3, 5, 5, 2, 2, 2, 2, 4, 4, 6, 6, // 0xE0
+         2, 5, 2, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7, // 0xF0
+        };
+
+        operators = { //
+        {OpeKind::Brk, AddrMode::Impl, cycles[8'h00]}, //
+         {OpeKind::Ora, AddrMode::IndX, cycles[8'h01]}, //
+         {OpeKind::Kil, AddrMode::Impl, cycles[8'h02]}, //
+         {OpeKind::Slo, AddrMode::IndX, cycles[8'h03]}, //
+         {OpeKind::Dop, AddrMode::Zp, cycles[8'h04]}, //
+         {OpeKind::Ora, AddrMode::Zp, cycles[8'h05]}, //
+         {OpeKind::Asl, AddrMode::Zp, cycles[8'h06]}, //
+         {OpeKind::Slo, AddrMode::Zp, cycles[8'h07]}, //
+         {OpeKind::Php, AddrMode::Impl, cycles[8'h08]}, //
+         {OpeKind::Ora, AddrMode::Imm, cycles[8'h09]}, //
+         {OpeKind::Asl, AddrMode::Acc, cycles[8'h0A]}, //
+         {OpeKind::Aac, AddrMode::Imm, cycles[8'h0B]}, //
+         {OpeKind::Top, AddrMode::Abs, cycles[8'h0C]}, //
+         {OpeKind::Ora, AddrMode::Abs, cycles[8'h0D]}, //
+         {OpeKind::Asl, AddrMode::Abs, cycles[8'h0E]}, //
+         {OpeKind::Slo, AddrMode::Abs, cycles[8'h0F]}, //
+         {OpeKind::Bpl, AddrMode::Rel, cycles[8'h10]}, //
+         {OpeKind::Ora, AddrMode::IndY, cycles[8'h11]}, //
+         {OpeKind::Kil, AddrMode::Impl, cycles[8'h12]}, //
+         {OpeKind::Slo, AddrMode::IndY, cycles[8'h13]}, //
+         {OpeKind::Dop, AddrMode::ZpX, cycles[8'h14]}, //
+         {OpeKind::Ora, AddrMode::ZpX, cycles[8'h15]}, //
+         {OpeKind::Asl, AddrMode::ZpX, cycles[8'h16]}, //
+         {OpeKind::Slo, AddrMode::ZpX, cycles[8'h17]}, //
+         {OpeKind::Clc, AddrMode::Impl, cycles[8'h18]}, //
+         {OpeKind::Ora, AddrMode::AbsY, cycles[8'h19]}, //
+         {OpeKind::Nop, AddrMode::Nop, cycles[8'h1A]}, //
+         {OpeKind::Slo, AddrMode::AbsY, cycles[8'h1B]}, //
+         {OpeKind::Top, AddrMode::AbsX, cycles[8'h1C]}, //
+         {OpeKind::Ora, AddrMode::AbsX, cycles[8'h1D]}, //
+         {OpeKind::Asl, AddrMode::AbsX, cycles[8'h1E]}, //
+         {OpeKind::Slo, AddrMode::AbsX, cycles[8'h1F]}, //
+         {OpeKind::Jsr, AddrMode::Abs, cycles[8'h20]}, //
+         {OpeKind::And, AddrMode::IndX, cycles[8'h21]}, //
+         {OpeKind::Kil, AddrMode::Impl, cycles[8'h22]}, //
+         {OpeKind::Rla, AddrMode::IndX, cycles[8'h23]}, //
+         {OpeKind::Bit, AddrMode::Zp, cycles[8'h24]}, //
+         {OpeKind::And, AddrMode::Zp, cycles[8'h25]}, //
+         {OpeKind::Rol, AddrMode::Zp, cycles[8'h26]}, //
+         {OpeKind::Rla, AddrMode::Zp, cycles[8'h27]}, //
+         {OpeKind::Plp, AddrMode::Impl, cycles[8'h28]}, //
+         {OpeKind::And, AddrMode::Imm, cycles[8'h29]}, //
+         {OpeKind::Rol, AddrMode::Acc, cycles[8'h2A]}, //
+         {OpeKind::Aac, AddrMode::Imm, cycles[8'h2B]}, //
+         {OpeKind::Bit, AddrMode::Abs, cycles[8'h2C]}, //
+         {OpeKind::And, AddrMode::Abs, cycles[8'h2D]}, //
+         {OpeKind::Rol, AddrMode::Abs, cycles[8'h2E]}, //
+         {OpeKind::Rla, AddrMode::Abs, cycles[8'h2F]}, //
+         {OpeKind::Bmi, AddrMode::Rel, cycles[8'h30]}, //
+         {OpeKind::And, AddrMode::IndY, cycles[8'h31]}, //
+         {OpeKind::Kil, AddrMode::Impl, cycles[8'h32]}, //
+         {OpeKind::Rla, AddrMode::IndY, cycles[8'h33]}, //
+         {OpeKind::Dop, AddrMode::ZpX, cycles[8'h34]}, //
+         {OpeKind::And, AddrMode::ZpX, cycles[8'h35]}, //
+         {OpeKind::Rol, AddrMode::ZpX, cycles[8'h36]}, //
+         {OpeKind::Rla, AddrMode::ZpX, cycles[8'h37]}, //
+         {OpeKind::Sec, AddrMode::Impl, cycles[8'h38]}, //
+         {OpeKind::And, AddrMode::AbsY, cycles[8'h39]}, //
+         {OpeKind::Nop, AddrMode::Nop, cycles[8'h3A]}, //
+         {OpeKind::Rla, AddrMode::AbsY, cycles[8'h3B]}, //
+         {OpeKind::Top, AddrMode::AbsX, cycles[8'h3C]}, //
+         {OpeKind::And, AddrMode::AbsX, cycles[8'h3D]}, //
+         {OpeKind::Rol, AddrMode::AbsX, cycles[8'h3E]}, //
+         {OpeKind::Rla, AddrMode::AbsX, cycles[8'h3F]}, //
+         {OpeKind::Rti, AddrMode::Impl, cycles[8'h40]}, //
+         {OpeKind::Eor, AddrMode::IndX, cycles[8'h41]}, //
+         {OpeKind::Kil, AddrMode::Impl, cycles[8'h42]}, //
+         {OpeKind::Sre, AddrMode::IndX, cycles[8'h43]}, //
+         {OpeKind::Dop, AddrMode::Zp, cycles[8'h44]}, //
+         {OpeKind::Eor, AddrMode::Zp, cycles[8'h45]}, //
+         {OpeKind::Lsr, AddrMode::Zp, cycles[8'h46]}, //
+         {OpeKind::Sre, AddrMode::Zp, cycles[8'h47]}, //
+         {OpeKind::Pha, AddrMode::Impl, cycles[8'h48]}, //
+         {OpeKind::Eor, AddrMode::Imm, cycles[8'h49]}, //
+         {OpeKind::Lsr, AddrMode::Acc, cycles[8'h4A]}, //
+         {OpeKind::Asr, AddrMode::Imm, cycles[8'h4B]}, //
+         {OpeKind::Jmp, AddrMode::Abs, cycles[8'h4C]}, //
+         {OpeKind::Eor, AddrMode::Abs, cycles[8'h4D]}, //
+         {OpeKind::Lsr, AddrMode::Abs, cycles[8'h4E]}, //
+         {OpeKind::Sre, AddrMode::Abs, cycles[8'h4F]}, //
+         {OpeKind::Bvc, AddrMode::Rel, cycles[8'h50]}, //
+         {OpeKind::Eor, AddrMode::IndY, cycles[8'h51]}, //
+         {OpeKind::Kil, AddrMode::Impl, cycles[8'h52]}, //
+         {OpeKind::Sre, AddrMode::IndY, cycles[8'h53]}, //
+         {OpeKind::Dop, AddrMode::ZpX, cycles[8'h54]}, //
+         {OpeKind::Eor, AddrMode::ZpX, cycles[8'h55]}, //
+         {OpeKind::Lsr, AddrMode::ZpX, cycles[8'h56]}, //
+         {OpeKind::Sre, AddrMode::ZpX, cycles[8'h57]}, //
+         {OpeKind::Cli, AddrMode::Impl, cycles[8'h58]}, //
+         {OpeKind::Eor, AddrMode::AbsY, cycles[8'h59]}, //
+         {OpeKind::Nop, AddrMode::Nop, cycles[8'h5A]}, //
+         {OpeKind::Sre, AddrMode::AbsY, cycles[8'h5B]}, //
+         {OpeKind::Top, AddrMode::AbsX, cycles[8'h5C]}, //
+         {OpeKind::Eor, AddrMode::AbsX, cycles[8'h5D]}, //
+         {OpeKind::Lsr, AddrMode::AbsX, cycles[8'h5E]}, //
+         {OpeKind::Sre, AddrMode::AbsX, cycles[8'h5F]}, //
+         {OpeKind::Rts, AddrMode::Impl, cycles[8'h60]}, //
+         {OpeKind::Adc, AddrMode::IndX, cycles[8'h61]}, //
+         {OpeKind::Kil, AddrMode::Impl, cycles[8'h62]}, //
+         {OpeKind::Rra, AddrMode::IndX, cycles[8'h63]}, //
+         {OpeKind::Dop, AddrMode::Zp, cycles[8'h64]}, //
+         {OpeKind::Adc, AddrMode::Zp, cycles[8'h65]}, //
+         {OpeKind::Ror, AddrMode::Zp, cycles[8'h66]}, //
+         {OpeKind::Rra, AddrMode::Zp, cycles[8'h67]}, //
+         {OpeKind::Pla, AddrMode::Impl, cycles[8'h68]}, //
+         {OpeKind::Adc, AddrMode::Imm, cycles[8'h69]}, //
+         {OpeKind::Ror, AddrMode::Acc, cycles[8'h6A]}, //
+         {OpeKind::Arr, AddrMode::Imm, cycles[8'h6B]}, //
+         {OpeKind::Jmp, AddrMode::Ind, cycles[8'h6C]}, //
+         {OpeKind::Adc, AddrMode::Abs, cycles[8'h6D]}, //
+         {OpeKind::Ror, AddrMode::Abs, cycles[8'h6E]}, //
+         {OpeKind::Rra, AddrMode::Abs, cycles[8'h6F]}, //
+         {OpeKind::Bvs, AddrMode::Rel, cycles[8'h70]}, //
+         {OpeKind::Adc, AddrMode::IndY, cycles[8'h71]}, //
+         {OpeKind::Kil, AddrMode::Impl, cycles[8'h72]}, //
+         {OpeKind::Rra, AddrMode::IndY, cycles[8'h73]}, //
+         {OpeKind::Dop, AddrMode::ZpX, cycles[8'h74]}, //
+         {OpeKind::Adc, AddrMode::ZpX, cycles[8'h75]}, //
+         {OpeKind::Ror, AddrMode::ZpX, cycles[8'h76]}, //
+         {OpeKind::Rra, AddrMode::ZpX, cycles[8'h77]}, //
+         {OpeKind::Sei, AddrMode::Impl, cycles[8'h78]}, //
+         {OpeKind::Adc, AddrMode::AbsY, cycles[8'h79]}, //
+         {OpeKind::Nop, AddrMode::Nop, cycles[8'h7A]}, //
+         {OpeKind::Rra, AddrMode::AbsY, cycles[8'h7B]}, //
+         {OpeKind::Top, AddrMode::AbsX, cycles[8'h7C]}, //
+         {OpeKind::Adc, AddrMode::AbsX, cycles[8'h7D]}, //
+         {OpeKind::Ror, AddrMode::AbsX, cycles[8'h7E]}, //
+         {OpeKind::Rra, AddrMode::AbsX, cycles[8'h7F]}, //
+         {OpeKind::Dop, AddrMode::Imm, cycles[8'h80]}, //
+         {OpeKind::Sta, AddrMode::IndX, cycles[8'h81]}, //
+         {OpeKind::Dop, AddrMode::Imm, cycles[8'h82]}, //
+         {OpeKind::Sax, AddrMode::IndX, cycles[8'h83]}, //
+         {OpeKind::Sty, AddrMode::Zp, cycles[8'h84]}, //
+         {OpeKind::Sta, AddrMode::Zp, cycles[8'h85]}, //
+         {OpeKind::Stx, AddrMode::Zp, cycles[8'h86]}, //
+         {OpeKind::Sax, AddrMode::Zp, cycles[8'h87]}, //
+         {OpeKind::Dey, AddrMode::Impl, cycles[8'h88]}, //
+         {OpeKind::Dop, AddrMode::Imm, cycles[8'h89]}, //
+         {OpeKind::Txa, AddrMode::Impl, cycles[8'h8A]}, //
+         {OpeKind::Xaa, AddrMode::Imm, cycles[8'h8B]}, //
+         {OpeKind::Sty, AddrMode::Abs, cycles[8'h8C]}, //
+         {OpeKind::Sta, AddrMode::Abs, cycles[8'h8D]}, //
+         {OpeKind::Stx, AddrMode::Abs, cycles[8'h8E]}, //
+         {OpeKind::Sax, AddrMode::Abs, cycles[8'h8F]}, //
+         {OpeKind::Bcc, AddrMode::Rel, cycles[8'h90]}, //
+         {OpeKind::Sta, AddrMode::IndY, cycles[8'h91]}, //
+         {OpeKind::Kil, AddrMode::Impl, cycles[8'h92]}, //
+         {OpeKind::Axa, AddrMode::ZpY, cycles[8'h93]}, //
+         {OpeKind::Sty, AddrMode::ZpX, cycles[8'h94]}, //
+         {OpeKind::Sta, AddrMode::ZpX, cycles[8'h95]}, //
+         {OpeKind::Stx, AddrMode::ZpY, cycles[8'h96]}, //
+         {OpeKind::Sax, AddrMode::ZpY, cycles[8'h97]}, //
+         {OpeKind::Tya, AddrMode::Impl, cycles[8'h98]}, //
+         {OpeKind::Sta, AddrMode::AbsY, cycles[8'h99]}, //
+         {OpeKind::Txs, AddrMode::Impl, cycles[8'h9A]}, //
+         {OpeKind::Xas, AddrMode::AbsY, cycles[8'h9B]}, //
+         {OpeKind::Sya, AddrMode::AbsX, cycles[8'h9C]}, //
+         {OpeKind::Sta, AddrMode::AbsX, cycles[8'h9D]}, //
+         {OpeKind::Sxa, AddrMode::AbsX, cycles[8'h9E]}, //
+         {OpeKind::Axa, AddrMode::AbsY, cycles[8'h9F]}, //
+         {OpeKind::Ldy, AddrMode::Imm, cycles[8'hA0]}, //
+         {OpeKind::Lda, AddrMode::IndX, cycles[8'hA1]}, //
+         {OpeKind::Ldx, AddrMode::Imm, cycles[8'hA2]}, //
+         {OpeKind::Lax, AddrMode::IndX, cycles[8'hA3]}, //
+         {OpeKind::Ldy, AddrMode::Zp, cycles[8'hA4]}, //
+         {OpeKind::Lda, AddrMode::Zp, cycles[8'hA5]}, //
+         {OpeKind::Ldx, AddrMode::Zp, cycles[8'hA6]}, //
+         {OpeKind::Lax, AddrMode::Zp, cycles[8'hA7]}, //
+         {OpeKind::Tay, AddrMode::Impl, cycles[8'hA8]}, //
+         {OpeKind::Lda, AddrMode::Imm, cycles[8'hA9]}, //
+         {OpeKind::Tax, AddrMode::Impl, cycles[8'hAA]}, //
+         {OpeKind::Lxa, AddrMode::Imm, cycles[8'hAB]}, //
+         {OpeKind::Ldy, AddrMode::Abs, cycles[8'hAC]}, //
+         {OpeKind::Lda, AddrMode::Abs, cycles[8'hAD]}, //
+         {OpeKind::Ldx, AddrMode::Abs, cycles[8'hAE]}, //
+         {OpeKind::Lax, AddrMode::Abs, cycles[8'hAF]}, //
+         {OpeKind::Bcs, AddrMode::Rel, cycles[8'hB0]}, //
+         {OpeKind::Lda, AddrMode::IndY, cycles[8'hB1]}, //
+         {OpeKind::Kil, AddrMode::Impl, cycles[8'hB2]}, //
+         {OpeKind::Lax, AddrMode::IndY, cycles[8'hB3]}, //
+         {OpeKind::Ldy, AddrMode::ZpX, cycles[8'hB4]}, //
+         {OpeKind::Lda, AddrMode::ZpX, cycles[8'hB5]}, //
+         {OpeKind::Ldx, AddrMode::ZpY, cycles[8'hB6]}, //
+         {OpeKind::Lax, AddrMode::ZpY, cycles[8'hB7]}, //
+         {OpeKind::Clv, AddrMode::Impl, cycles[8'hB8]}, //
+         {OpeKind::Lda, AddrMode::AbsY, cycles[8'hB9]}, //
+         {OpeKind::Tsx, AddrMode::Impl, cycles[8'hBA]}, //
+         {OpeKind::Las, AddrMode::AbsY, cycles[8'hBB]}, //
+         {OpeKind::Ldy, AddrMode::AbsX, cycles[8'hBC]}, //
+         {OpeKind::Lda, AddrMode::AbsX, cycles[8'hBD]}, //
+         {OpeKind::Ldx, AddrMode::AbsY, cycles[8'hBE]}, //
+         {OpeKind::Lax, AddrMode::AbsY, cycles[8'hBF]}, //
+         {OpeKind::Cpy, AddrMode::Imm, cycles[8'hC0]}, //
+         {OpeKind::Cmp, AddrMode::IndX, cycles[8'hC1]}, //
+         {OpeKind::Dop, AddrMode::Imm, cycles[8'hC2]}, //
+         {OpeKind::Dcp, AddrMode::IndX, cycles[8'hC3]}, //
+         {OpeKind::Cpy, AddrMode::Zp, cycles[8'hC4]}, //
+         {OpeKind::Cmp, AddrMode::Zp, cycles[8'hC5]}, //
+         {OpeKind::Dec, AddrMode::Zp, cycles[8'hC6]}, //
+         {OpeKind::Dcp, AddrMode::Zp, cycles[8'hC7]}, //
+         {OpeKind::Iny, AddrMode::Impl, cycles[8'hC8]}, //
+         {OpeKind::Cmp, AddrMode::Imm, cycles[8'hC9]}, //
+         {OpeKind::Dex, AddrMode::Impl, cycles[8'hCA]}, //
+         {OpeKind::Axs, AddrMode::Imm, cycles[8'hCB]}, //
+         {OpeKind::Cpy, AddrMode::Abs, cycles[8'hCC]}, //
+         {OpeKind::Cmp, AddrMode::Abs, cycles[8'hCD]}, //
+         {OpeKind::Dec, AddrMode::Abs, cycles[8'hCE]}, //
+         {OpeKind::Dcp, AddrMode::Abs, cycles[8'hCF]}, //
+         {OpeKind::Bne, AddrMode::Rel, cycles[8'hD0]}, //
+         {OpeKind::Cmp, AddrMode::IndY, cycles[8'hD1]}, //
+         {OpeKind::Kil, AddrMode::Impl, cycles[8'hD2]}, //
+         {OpeKind::Dcp, AddrMode::IndY, cycles[8'hD3]}, //
+         {OpeKind::Dop, AddrMode::ZpX, cycles[8'hD4]}, //
+         {OpeKind::Cmp, AddrMode::ZpX, cycles[8'hD5]}, //
+         {OpeKind::Dec, AddrMode::ZpX, cycles[8'hD6]}, //
+         {OpeKind::Dcp, AddrMode::ZpX, cycles[8'hD7]}, //
+         {OpeKind::Cld, AddrMode::Impl, cycles[8'hD8]}, //
+         {OpeKind::Cmp, AddrMode::AbsY, cycles[8'hD9]}, //
+         {OpeKind::Nop, AddrMode::Nop, cycles[8'hDA]}, //
+         {OpeKind::Dcp, AddrMode::AbsY, cycles[8'hDB]}, //
+         {OpeKind::Top, AddrMode::AbsX, cycles[8'hDC]}, //
+         {OpeKind::Cmp, AddrMode::AbsX, cycles[8'hDD]}, //
+         {OpeKind::Dec, AddrMode::AbsX, cycles[8'hDE]}, //
+         {OpeKind::Dcp, AddrMode::AbsX, cycles[8'hDF]}, //
+         {OpeKind::Cpx, AddrMode::Imm, cycles[8'hE0]}, //
+         {OpeKind::Sbc, AddrMode::IndX, cycles[8'hE1]}, //
+         {OpeKind::Dop, AddrMode::Imm, cycles[8'hE2]}, //
+         {OpeKind::Isb, AddrMode::IndX, cycles[8'hE3]}, //
+         {OpeKind::Cpx, AddrMode::Zp, cycles[8'hE4]}, //
+         {OpeKind::Sbc, AddrMode::Zp, cycles[8'hE5]}, //
+         {OpeKind::Inc, AddrMode::Zp, cycles[8'hE6]}, //
+         {OpeKind::Isb, AddrMode::Zp, cycles[8'hE7]}, //
+         {OpeKind::Inx, AddrMode::Impl, cycles[8'hE8]}, //
+         {OpeKind::Sbc, AddrMode::Imm, cycles[8'hE9]}, //
+         {OpeKind::Nop, AddrMode::Impl, cycles[8'hEA]}, //
+         {OpeKind::Sbc, AddrMode::Imm, cycles[8'hEB]}, //
+         {OpeKind::Cpx, AddrMode::Abs, cycles[8'hEC]}, //
+         {OpeKind::Sbc, AddrMode::Abs, cycles[8'hED]}, //
+         {OpeKind::Inc, AddrMode::Abs, cycles[8'hEE]}, //
+         {OpeKind::Isb, AddrMode::Abs, cycles[8'hEF]}, //
+         {OpeKind::Beq, AddrMode::Rel, cycles[8'hF0]}, //
+         {OpeKind::Sbc, AddrMode::IndY, cycles[8'hF1]}, //
+         {OpeKind::Kil, AddrMode::Impl, cycles[8'hF2]}, //
+         {OpeKind::Isb, AddrMode::IndY, cycles[8'hF3]}, //
+         {OpeKind::Dop, AddrMode::ZpX, cycles[8'hF4]}, //
+         {OpeKind::Sbc, AddrMode::ZpX, cycles[8'hF5]}, //
+         {OpeKind::Inc, AddrMode::ZpX, cycles[8'hF6]}, //
+         {OpeKind::Isb, AddrMode::ZpX, cycles[8'hF7]}, //
+         {OpeKind::Sed, AddrMode::Impl, cycles[8'hF8]}, //
+         {OpeKind::Sbc, AddrMode::AbsY, cycles[8'hF9]}, //
+         {OpeKind::Nop, AddrMode::Nop, cycles[8'hFA]}, //
+         {OpeKind::Isb, AddrMode::AbsY, cycles[8'hFB]}, //
+         {OpeKind::Top, AddrMode::AbsX, cycles[8'hFC]}, //
+         {OpeKind::Sbc, AddrMode::AbsX, cycles[8'hFD]}, //
+         {OpeKind::Inc, AddrMode::AbsX, cycles[8'hFE]}, //
+         {OpeKind::Isb, AddrMode::AbsX, cycles[8'hFF]} //
+        };
+    }
+}

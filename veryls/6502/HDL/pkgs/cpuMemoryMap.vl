@@ -1,0 +1,66 @@
+package CpuMemoryMapPkg {
+    enum CpuMemoryMapEnum: logic<4> {
+        wram,
+        wram_mirror,
+        ppu_register,
+        ppu_register_mirror,
+        cpu2A03,
+        apu_io,
+        erom,
+        eram,
+        prg_rom1,
+        prg_rom2,
+    }
+
+    function targetSection (
+        addr: input int,
+    ) -> byte {
+        if addr >= 16'h000 && addr <= 16'h7ff {
+            return CpuMemoryMapEnum::wram as byte;
+        } else if addr >= 16'h0800 && addr <= 16'h1fff {
+            return CpuMemoryMapEnum::wram_mirror as byte;
+        } else if addr >= 16'h2000 && addr <= 16'h2007 {
+            return CpuMemoryMapEnum::ppu_register as byte;
+        } else if addr >= 16'h2008 && addr <= 16'h3fff {
+            return CpuMemoryMapEnum::ppu_register_mirror as byte;
+        } else if addr >= 16'h4000 && addr <= 16'h4017 {
+            return CpuMemoryMapEnum::cpu2A03 as byte;
+        } else if addr >= 16'h4018 && addr <= 16'h401f {
+            return CpuMemoryMapEnum::apu_io as byte;
+        } else if addr >= 16'h4020 && addr <= 16'h5fff {
+            return CpuMemoryMapEnum::erom as byte;
+        } else if addr >= 16'h6000 && addr <= 16'h7fff {
+            return CpuMemoryMapEnum::eram as byte;
+        } else if addr >= 16'h8000 && addr <= 16'hbfff {
+            return CpuMemoryMapEnum::prg_rom1 as byte;
+        } else if addr >= 16'hc000 {
+            return CpuMemoryMapEnum::prg_rom2 as byte;
+        }
+    }
+
+    function relativeAddr (
+        addr: input int,
+    ) -> int {
+        if addr >= 16'h000 && addr <= 16'h7ff {
+            return addr;
+        } else if addr >= 16'h0800 && addr <= 16'h1fff {
+            return addr - 16'h0800;
+        } else if addr >= 16'h2000 && addr <= 16'h2007 {
+            return addr - 16'h2000;
+        } else if addr >= 16'h2008 && addr <= 16'h3fff {
+            return addr - 16'h2008;
+        } else if addr >= 16'h4000 && addr <= 16'h4017 {
+            return addr - 16'h4000;
+        } else if addr >= 16'h4018 && addr <= 16'h401f {
+            return addr - 16'h4018;
+        } else if addr >= 16'h4020 && addr <= 16'h5fff {
+            return addr - 16'h4020;
+        } else if addr >= 16'h6000 && addr <= 16'h7fff {
+            return addr - 16'h6000;
+        } else if addr >= 16'h8000 && addr <= 16'hbfff {
+            return addr - 16'h8000;
+        } else if addr >= 16'hc000 && addr <= 16'hffff {
+            return addr - 16'hc000;
+        }
+    }
+}

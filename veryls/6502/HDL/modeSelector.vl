@@ -1,0 +1,28 @@
+module ModeSelector (
+    CLK         : input  logic,
+    RST         : input  logic,
+    EN          : input  logic,
+    data        : input  int  ,
+    mode        : output ModePkg::Mode,
+) {
+    var n_mode        : ModePkg::Mode;
+
+    always_comb {
+    n_mode = mode;
+        if EN {
+            case data {
+                2      : n_mode = data as ModePkg::Mode;
+                8'hfe  : n_mode = data as ModePkg::Mode;
+                default: n_mode = ModePkg::Mode::stop;
+            }
+        }
+    }
+
+    always_ff (posedge CLK, async_high RST) {
+        if_reset {
+            mode         = ModePkg::Mode::stop;
+        } else {
+            mode         = n_mode;
+        }
+    }
+}

@@ -1,0 +1,130 @@
+package PPkg {
+    struct P {
+        carry     : logic,
+        zero      : logic,
+        interrupt : logic,
+        decimal   : logic,
+        break_mode: logic,
+        reserved  : logic,
+        overflow  : logic,
+        negative  : logic,
+    }
+    var p: P;
+
+    function init () -> void {
+        p.carry      = 0;
+        p.zero       = 0;
+        p.interrupt  = 1;
+        p.decimal    = 0;
+        p.break_mode = 0;
+        p.reserved   = 1;
+        p.overflow   = 0;
+        p.negative   = 0;
+    }
+
+    function set (
+        data: input logic<7>,
+    ) -> void {
+        p.carry      = (data & 8'b00000001) != 0;
+        p.zero       = (data & 8'b00000010) != 0;
+        p.interrupt  = (data & 8'b00000100) != 0;
+        p.decimal    = (data & 8'b00001000) != 0;
+        p.break_mode = (data & 8'b00010000) != 0;
+        p.reserved   = (data & 8'b00100000) != 0;
+        p.overflow   = (data & 8'b01000000) != 0;
+        p.negative   = (data & 8'b10000000) != 0;
+    }
+
+    function to_n () -> logic<7> {
+        var data: logic<7> = 0;
+        data += (p.carry & 8'b00000001);
+        data += (p.zero & 8'b00000010);
+        data += (p.interrupt & 8'b00000100);
+        data += (p.decimal & 8'b00001000);
+        data += (p.break_mode & 8'b00010000);
+        data += (p.reserved & 8'b00010000);
+        data += (p.overflow & 8'b01000000);
+        data += (p.negative & 8'b10000000);
+        return data;
+    }
+
+    function set_carry (
+        data: input logic,
+    ) -> void {
+        p.carry = data;
+    }
+
+    function get_carry () -> logic {
+        return p.carry;
+    }
+
+    function set_zero (
+        data: input logic,
+    ) -> void {
+        p.zero = data;
+    }
+
+    function get_zero () -> logic {
+        return p.zero;
+    }
+
+    function set_interrupt (
+        data: input logic,
+    ) -> void {
+        p.zero = data;
+    }
+
+    function get_interrupt () -> logic {
+        return p.interrupt;
+    }
+
+    function set_decimal (
+        data: input logic,
+    ) -> void {
+        p.decimal = data;
+    }
+
+    function get_decimal () -> logic {
+        return p.decimal;
+    }
+
+    function set_break_mode (
+        data: input logic,
+    ) -> void {
+        p.decimal = data;
+    }
+
+    function get_break_mode () -> logic {
+        return p.break_mode;
+    }
+
+    function set_reserved (
+        data: input logic,
+    ) -> void {
+        p.reserved = data;
+    }
+
+    function get_reserved () -> logic {
+        return p.reserved;
+    }
+
+    function set_overflow (
+        data: input logic,
+    ) -> void {
+        p.overflow = data;
+    }
+
+    function get_overflow () -> logic {
+        return p.overflow;
+    }
+
+    function set_negative (
+        data: input logic,
+    ) -> void {
+        p.negative = data;
+    }
+
+    function get_negative () -> logic {
+        return p.negative;
+    }
+}

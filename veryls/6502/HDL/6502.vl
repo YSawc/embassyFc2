@@ -1,0 +1,73 @@
+module main (
+    CLK     : input  logic   ,
+    RST     : input  logic   ,
+    KEY     : input  logic<3>,
+    HEX0    : output logic<7>,
+    GPIO_0_0: output logic   ,
+    GPIO_0_1: input  logic   ,
+) {
+    struct CPU {
+        register : RegisterPkg::Register        ,
+        operators: OperatorsPkg::Operator<8'hff>,
+        cycle    : logic                 <15>   ,
+    }
+    var cpu: CPU;
+
+    function init -> void {
+        RegisterPkg::init              ();
+        OperatorsPkg::prepare_operators();
+        cpu.cycle                       = 0;
+    }
+
+    var mode          : ModePkg::Mode;
+    var modeReadEnable: logic         = mode == ModePkg::Mode::stop;
+    var modeReadData  : int          ;
+    inst modeReadRx: Rx (
+        CLK                        ,
+        RST                        ,
+        DATA_IN    : GPIO_0_1      ,
+        RE         : modeReadEnable,
+        read_finish: 0,
+        data_out   : modeReadData  ,
+        busy       : 0             ,
+    );
+    var modeSelectorEnable: logic = modeReadData != 0;
+    inst modeSelector: ModeSelector (
+        CLK               ,
+        RST               ,
+        EN  : modeSelectorEnable           ,
+        data: modeReadData,
+        mode              ,
+    );
+    var cpuEnable: logic = mode != ModePkg::Mode::stop;
+
+    var targetAddr   : logic<16> = 16'h5;
+    var targetSection: logic<16>;
+    assign targetSection = CpuMemoryMapPkg::targetSection(targetAddr);
+
+    var read_enable          : logic;
+    assign read_enable = cpuEnable && (~write_busy);
+    var write_enable          : logic;
+    assign write_enable = cpuEnable && (~read_busy);
+    var read_finish : logic   ;
+    var read_busy   : logic   ;
+    var write_busy  : logic   ;
+    var read_buffer : logic<8>;
+    inst rx: Rx (
+        CLK                     ,
+        RST                     ,
+        DATA_IN    : GPIO_0_1   ,
+        RE: read_enable                      ,
+        read_finish: read_finish,
+        data_out   : read_buffer,
+        busy       : read_busy  ,
+    );
+    inst tx: Tx (
+        CLK                   ,
+        RST                   ,
+        WE      : write_enable,
+        DATA_IN : 7'b0110010  ,
+        data_out: GPIO_0_0    ,
+        busy    : write_busy  ,
+    );
+}
