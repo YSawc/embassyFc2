@@ -296,7 +296,7 @@ dependencies = [
 
 [[package]]
 name = "embassy-net"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "as-slice 0.2.1",
  "atomic-pool",
@@ -906,7 +906,7 @@ dependencies = [
 [[package]]
 name = "stm32-metapac"
 version = "14.0.0"
-source = "git+https://github.com/embassy-rs/stm32-data-generated?tag=stm32-data-8caf2f0bda28baf4393899dc67ba57f058087f5a#84082dac601f365d2d3deed9b460b88877ef9120"
+source = "git+https://github.com/embassy-rs/stm32-data-generated?tag=stm32-data-f9f48b067be92fa9ea9dbdce0e85b5d0eb989790#0486254823f45263b1e5f3ea54489a377396b678"
 dependencies = [
  "cortex-m",
  "cortex-m-rt",
