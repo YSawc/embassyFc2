@@ -36,5 +36,7 @@ static_cell = "2"
 
 micromath = "2.0.0"
 
+embassy_fc2_app = { path = "../app" }
+
 [profile.release]
 debug = 2

@@ -433,6 +433,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "embassy_fc2_app"
+version = "0.1.0"
+
+[[package]]
 name = "embedded-hal"
 version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -930,6 +934,7 @@ dependencies = [
  "embassy-sync",
  "embassy-time",
  "embassy-usb",
+ "embassy_fc2_app",
  "embedded-hal 0.2.7",
  "embedded-hal 1.0.0-rc.3",
  "embedded-hal-async",

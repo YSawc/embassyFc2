@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "app"
+name = "embassy_fc2_app"
 version = "0.1.0"

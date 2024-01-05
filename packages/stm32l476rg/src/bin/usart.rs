@@ -2,6 +2,7 @@
 #![no_main]
 
 use defmt::*;
+use embassy_fc2_app::middleware::mode::Mode;
 use embassy_stm32::dma::NoDma;
 use embassy_stm32::usart::{Config, Uart};
 use embassy_stm32::{bind_interrupts, peripherals, usart};
@@ -20,12 +21,6 @@ fn main() -> ! {
     let config = Config::default();
     let mut usart = Uart::new(p.UART4, p.PA1, p.PA0, Irqs, NoDma, NoDma, config).unwrap();
 
-    enum Mode {
-        Stop,
-        Normal = 2,
-        Sequence = 0xFE,
-    }
-    // unwrap!(usart.blocking_write(&[Mode::Stop as u8, 1]));
     unwrap!(usart.blocking_write(&[Mode::Normal as u8, 1]));
     info!("wrote mode");
 
