@@ -62,16 +62,10 @@ module Rx #(
                             n_rising_finish = 1;
                         }
                     } else {
-                        n_status = Status::receive;
-                        if bit_count == 8 {
-                            n_bit_count  += 1;
-                            n_wait_count =  0;
-                            n_data_reg   =  {DATA_IN, data_reg[8:1]};
-                        } else {
-                            n_bit_count  += 1;
-                            n_wait_count =  0;
-                            n_data_reg   =  {DATA_IN, data_reg[8:1]};
-                        }
+                        n_status     =  Status::receive;
+                        n_bit_count  += 1;
+                        n_wait_count =  0;
+                        n_data_reg   =  {DATA_IN, data_reg[8:1]};
                     }
                 } else {
                     n_wait_count += 1;
