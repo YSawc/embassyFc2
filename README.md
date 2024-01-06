@@ -2,6 +2,7 @@
 famicom simulator written with rust and [veryl](https://github.com/dalance/veryl).
 This repository includes embed software and hardware projects.
 
+
 #### examples
 - callback test
 1. run veryls/6502 in simulator
@@ -21,4 +22,30 @@ INFO  test passed!
 └─ callback_test::__cortex_m_rt_main @ src/bin/callback_test.rs:38
 INFO  wait kill..
 └─ callback_test::__cortex_m_rt_main @ src/bin/callback_test.rs:41
+```
+#### requirements
+- usbblaster rules
+```
+cat /etc/udev/rules.d/51-usbblaster.rules
+# USB-Blaster
+SUBSYSTEM=="usb", ATTRS{idVendor}=="09fb", ATTRS{idProduct}=="6001", MODE="0666"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="09fb", ATTRS{idProduct}=="6002", MODE="0666"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="09fb", ATTRS{idProduct}=="6003", MODE="0666"
+
+# USB-Blaster II
+SUBSYSTEM=="usb", ATTRS{idVendor}=="09fb", ATTRS{idProduct}=="6010", MODE="0666"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="09fb", ATTRS{idProduct}=="6810", MODE="0666"
+```
+
+- stm32 rules
+```
+❯ cat /etc/udev/rules.d/49-stm32.rules
+# 0483:5740 - STM32F4 Dsicovery in USB Serial Mode (CN5)
+ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", ENV{ID_MM_DEVICE_IGNORE}="1"
+ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", ENV{MTP_NO_PROBE}="1"
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", MODE:="0666"
+KERNEL=="ttyACM*", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", MODE:="0666"
+
+# 0483:df11 - STM32F4 Discovery in DFU mode (CN5)
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", MODE:="0666"
 ```
