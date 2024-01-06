@@ -33,14 +33,13 @@ module Rx #(
         n_data_reg    = data_reg;
         n_read_finish = read_finish;
         if read_finish {
-            data_out = data_reg[8:1];
+            data_out = data_reg[7:1];
         } else {
             data_out = 0;
         }
         case status {
             Status::idle: {
-                busy          = 0;
-                n_read_finish = 0;
+                busy = 0;
                 if RE {
                     if DATA_IN == 0 {
                         n_status = Status::receive;
@@ -49,17 +48,24 @@ module Rx #(
             }
             Status::receive: {
                 busy = 1;
-                if wait_count == wait_div {
-                    n_wait_count = 0;
-                    if bit_count == 9 {
-                        n_status    = Status::idle;
-                        n_bit_count = 0;
+                if wait_count >= wait_div {
+                    if bit_count >= 9 {
+                        n_wait_count = 0;
+                        n_status     = Status::idle;
+                        n_bit_count  = 0;
                     } else {
-                        n_status    =  Status::receive;
-                        n_data_reg  =  {DATA_IN, data_reg[8:1]};
-                        n_bit_count += 1;
+                        n_status = Status::receive;
                         if bit_count == 8 {
-                            n_read_finish = 1;
+                            if DATA_IN == 1 {
+                                n_read_finish =  1;
+                                n_bit_count   += 1;
+                                n_wait_count  =  0;
+                                n_data_reg    =  {DATA_IN, data_reg[8:1]};
+                            }
+                        } else {
+                            n_data_reg   =  {DATA_IN, data_reg[8:1]};
+                            n_wait_count =  0;
+                            n_bit_count  += 1;
                         }
                     }
                 } else {

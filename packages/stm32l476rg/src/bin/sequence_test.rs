@@ -17,13 +17,11 @@ fn main() -> ! {
     let p = embassy_stm32::init(Default::default());
     let config = Config::default();
     let mut usart = Uart::new(p.UART4, p.PA1, p.PA0, Irqs, NoDma, NoDma, config).unwrap();
-    unwrap!(usart.blocking_write(&[Mode::Sequence as u8, 1]));
-    info!("wrote mode");
-    let mut c = 100000;
-    while c >= 0 {
-        c -= 1;
-    }
-    unwrap!(usart.blocking_write(&[3 as u8, 1]));
-    info!("wrote sequence count");
+    let mut buf = [0x0u8; 2];
+    buf[0] = Mode::Sequence as u8;
+    buf[1] = 3;
+    unwrap!(usart.blocking_write(&buf));
+    info!("wrote mode and additional data.");
+
     loop {}
 }

@@ -20,18 +20,19 @@ module main (
     }
 
     var mode          : ModePkg::Mode;
-    var modeReadEnable: logic         = mode == ModePkg::Mode::stop;
+    var modeReadEnable: logic         = (~modeReadFinish) && mode == ModePkg::Mode::stop;
+    var modeReadFinish: logic        ;
     var modeReadData  : int          ;
     inst modeReadRx: Rx (
         CLK                        ,
         RST                        ,
         DATA_IN    : GPIO_0_1      ,
         RE         : modeReadEnable,
-        read_finish: 0             ,
+        read_finish: modeReadFinish,
         data_out   : modeReadData  ,
         busy       : 0             ,
     );
-    var modeSelectorEnable: logic = modeReadData != 0;
+    var modeSelectorEnable: logic = modeReadFinish && (modeReadData != 0);
     inst modeSelector: ModeSelector (
         CLK                     ,
         RST                     ,
