@@ -18,22 +18,25 @@ module Rx #(
         idle,
         receive,
     }
-    var status       : Status   ;
-    var n_status     : Status   ;
-    var data_reg     : logic <9>;
-    var n_data_reg   : logic <9>;
-    var bit_count    : logic <5>;
-    var n_bit_count  : logic <5>;
-    var n_read_finish: logic    ;
+    var status         : Status   ;
+    var n_status       : Status   ;
+    var data_reg       : logic <9>;
+    var n_data_reg     : logic <9>;
+    var bit_count      : logic <5>;
+    var n_bit_count    : logic <5>;
+    var n_read_finish  : logic    ;
+    var rising_finish  : logic    ;
+    var n_rising_finish: logic    ;
 
     always_comb {
-        n_wait_count  = wait_count;
-        n_bit_count   = bit_count;
-        n_status      = status;
-        n_data_reg    = data_reg;
-        n_read_finish = read_finish;
+        n_wait_count    = wait_count;
+        n_bit_count     = bit_count;
+        n_status        = status;
+        n_data_reg      = data_reg;
+        n_read_finish   = read_finish;
+        n_rising_finish = rising_finish;
         if read_finish {
-            data_out = data_reg[7:1];
+            data_out = data_reg[8:1];
         } else {
             data_out = 0;
         }
@@ -50,22 +53,24 @@ module Rx #(
                 busy = 1;
                 if wait_count >= wait_div {
                     if bit_count >= 9 {
-                        n_wait_count = 0;
-                        n_status     = Status::idle;
-                        n_bit_count  = 0;
+                        if rising_finish {
+                            n_read_finish = 1;
+                            n_wait_count  = 0;
+                            n_status      = Status::idle;
+                            n_bit_count   = 0;
+                        } else if DATA_IN == 1 {
+                            n_rising_finish = 1;
+                        }
                     } else {
                         n_status = Status::receive;
                         if bit_count == 8 {
-                            if DATA_IN == 1 {
-                                n_read_finish =  1;
-                                n_bit_count   += 1;
-                                n_wait_count  =  0;
-                                n_data_reg    =  {DATA_IN, data_reg[8:1]};
-                            }
-                        } else {
-                            n_data_reg   =  {DATA_IN, data_reg[8:1]};
-                            n_wait_count =  0;
                             n_bit_count  += 1;
+                            n_wait_count =  0;
+                            n_data_reg   =  {DATA_IN, data_reg[8:1]};
+                        } else {
+                            n_bit_count  += 1;
+                            n_wait_count =  0;
+                            n_data_reg   =  {DATA_IN, data_reg[8:1]};
                         }
                     }
                 } else {
@@ -77,17 +82,19 @@ module Rx #(
 
     always_ff (posedge CLK, async_high RST) {
         if_reset {
-            status      = Status::idle;
-            wait_count  = 0;
-            data_reg    = 0;
-            bit_count   = 0;
-            read_finish = 0;
+            status        = Status::idle;
+            wait_count    = 0;
+            data_reg      = 0;
+            bit_count     = 0;
+            read_finish   = 0;
+            rising_finish = 0;
         } else {
-            status      = n_status;
-            wait_count  = n_wait_count;
-            data_reg    = n_data_reg;
-            bit_count   = n_bit_count;
-            read_finish = n_read_finish;
+            status        = n_status;
+            wait_count    = n_wait_count;
+            data_reg      = n_data_reg;
+            bit_count     = n_bit_count;
+            read_finish   = n_read_finish;
+            rising_finish = n_rising_finish;
         }
     }
 }
