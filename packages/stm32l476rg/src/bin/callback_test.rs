@@ -17,16 +17,20 @@ fn main() -> ! {
     let p = embassy_stm32::init(Default::default());
     let config = Config::default();
     let mut usart = Uart::new(p.UART4, p.PA1, p.PA0, Irqs, NoDma, NoDma, config).unwrap();
-    unwrap!(usart.blocking_write(&[Mode::Callback as u8, 1]));
-    info!("wrote mode");
-
-    let mut buf = [0x0u8; 1];
+    let mut buf = [0x0u8; 2];
+    buf[0] = Mode::Callback as u8;
+    buf[1] = 0xba;
+    unwrap!(usart.blocking_write(&buf));
+    info!("wrote mode and additional data.");
     loop {
         match usart.blocking_read(&mut buf) {
             Ok(_) => {
                 match buf.first().unwrap() {
-                    3 => info!("test passed!"),
-                    _ => info!("callback received but not expected value returned!"),
+                    0xba => info!("test passed!"),
+                    v => info!(
+                        "callback received but not expected value returned! return value is {:?}",
+                        v
+                    ),
                 }
                 info!("wait kill..");
                 loop {}

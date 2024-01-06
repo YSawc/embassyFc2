@@ -41,6 +41,18 @@ module main (
         mode                    ,
     );
 
+    var callbackReadRxEnable: logic<8> = modeReadFinish && (mode == ModePkg::Mode::callback);
+    var callbackReturnValue : int     ;
+    inst callbackReadRx: Rx (
+        CLK                              ,
+        RST                              ,
+        DATA_IN    : GPIO_0_1            ,
+        RE         : callbackReadRxEnable,
+        read_finish: 0                   ,
+        data_out   : callbackReturnValue ,
+        busy       : 0                   ,
+    );
+
     var sequenceCountReadRxFinish: logic   ;
     var sequenceCountReadRxEnable: logic    = (mode == ModePkg::Mode::sequence) && ~sequenceCountReadRxFinish;
     var sequenceArgsCount        : logic<8>;
@@ -56,7 +68,7 @@ module main (
 
     var writeData: logic<8>;
     assign writeData = if mode == ModePkg::Mode::callback {
-        ModePkg::Mode::callback as byte
+        callbackReturnValue
     } else {
         7'b0011010
     };
