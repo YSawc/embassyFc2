@@ -18,17 +18,12 @@ fn main() -> ! {
     let config = Config::default();
     let mut usart = Uart::new(p.UART4, p.PA1, p.PA0, Irqs, NoDma, NoDma, config).unwrap();
     unwrap!(usart.blocking_write(&[Mode::Sequence as u8, 1]));
-    // unwrap!(usart.blocking_write(&[Mode::Sequence as u8, 1]));
     info!("wrote mode");
+    let mut c = 100000;
+    while c >= 0 {
+        c -= 1;
+    }
     unwrap!(usart.blocking_write(&[3 as u8, 1]));
     info!("wrote sequence count");
-
-    // let mut buf = [0x0u8; 1];
-    loop {
-        // match usart.blocking_read(&mut buf) {
-        //     Ok(_) => info!("read data: {}", buf),
-        //     Err(_) => (),
-        // }
-        // buf = [0x0u8; 1];
-    }
+    loop {}
 }
