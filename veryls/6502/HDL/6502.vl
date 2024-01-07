@@ -19,69 +19,69 @@ module main (
         cpu.cycle                       = 0;
     }
 
-    var mode          : ModePkg::Mode;
-    var modeReadEnable: logic         = (~modeReadFinish) && mode == ModePkg::Mode::stop;
-    var modeReadFinish: logic        ;
-    var modeReadData  : int          ;
-    inst modeReadRx: Rx (
-        CLK                        ,
-        RST                        ,
-        DATA_IN    : GPIO_0_1      ,
-        RE         : modeReadEnable,
-        read_finish: modeReadFinish,
-        data_out   : modeReadData  ,
-        busy       : 0             ,
+    var mode            : ModePkg::Mode;
+    var mode_read_enable: logic         = (~mode_read_finish) && mode == ModePkg::Mode::stop;
+    var mode_read_finish: logic        ;
+    var mode_read_data  : int          ;
+    inst mode_read_rx: Rx (
+        CLK                          ,
+        RST                          ,
+        DATA_IN    : GPIO_0_1        ,
+        RE         : mode_read_enable,
+        read_finish: mode_read_finish,
+        data_out   : mode_read_data  ,
+        busy       : 0               ,
     );
-    var modeSelectorEnable: logic = modeReadFinish && (modeReadData != 0);
-    inst modeSelector: ModeSelector (
-        CLK                     ,
-        RST                     ,
-        EN  : modeSelectorEnable,
-        data: modeReadData      ,
-        mode                    ,
-    );
-
-    var callbackReadRxEnable: logic<8> = modeReadFinish && (mode == ModePkg::Mode::callback);
-    var callbackReturnValue : int     ;
-    inst callbackReadRx: Rx (
-        CLK                              ,
-        RST                              ,
-        DATA_IN    : GPIO_0_1            ,
-        RE         : callbackReadRxEnable,
-        read_finish: 0                   ,
-        data_out   : callbackReturnValue ,
-        busy       : 0                   ,
+    var mode_selector_enable: logic = mode_read_finish && (mode_read_data != 0);
+    inst mode_selector: ModeSelector (
+        CLK                       ,
+        RST                       ,
+        EN  : mode_selector_enable,
+        data: mode_read_data      ,
+        mode                      ,
     );
 
-    var sequenceCountReadRxFinish: logic   ;
-    var sequenceCountReadRxEnable: logic    = (mode == ModePkg::Mode::sequence) && ~sequenceCountReadRxFinish;
-    var sequenceArgsCount        : logic<8>;
-    inst sequenceCountReadRx: Rx (
-        CLK                                   ,
-        RST                                   ,
-        DATA_IN    : GPIO_0_1                 ,
-        RE         : sequenceCountReadRxEnable,
-        read_finish: sequenceCountReadRxFinish,
-        data_out   : sequenceArgsCount        ,
-        busy       : 0                        ,
+    var callback_read_enable : logic<8> = mode_read_finish && (mode == ModePkg::Mode::callback);
+    var callback_return_value: int     ;
+    inst callback_read_rx: Rx (
+        CLK                               ,
+        RST                               ,
+        DATA_IN    : GPIO_0_1             ,
+        RE         : callback_read_enable ,
+        read_finish: 0                    ,
+        data_out   : callback_return_value,
+        busy       : 0                    ,
     );
 
-    var writeData: logic<8>;
-    assign writeData = if mode == ModePkg::Mode::callback {
-        callbackReturnValue
+    var sequence_count_read_rx_finish: logic   ;
+    var sequence_count_read_rx_enable: logic    = (mode == ModePkg::Mode::sequence) && ~sequence_count_read_rx_finish;
+    var sequence_args_count          : logic<8>;
+    inst sequence_count_read_rx: Rx (
+        CLK                                       ,
+        RST                                       ,
+        DATA_IN    : GPIO_0_1                     ,
+        RE         : sequence_count_read_rx_enable,
+        read_finish: sequence_count_read_rx_finish,
+        data_out   : sequence_args_count          ,
+        busy       : 0                            ,
+    );
+
+    var write_data: logic<8>;
+    assign write_data = if mode == ModePkg::Mode::callback {
+        callback_return_value
     } else {
         7'b0011010
     };
-    var cpuEnable: logic = mode != ModePkg::Mode::stop;
+    var cpu_enable: logic = mode != ModePkg::Mode::stop;
 
-    var targetAddr   : logic<16> = 16'h5;
-    var targetSection: logic<16>;
-    assign targetSection = CpuMemoryMapPkg::targetSection(targetAddr);
+    var target_addr   : logic<16> = 16'h5;
+    var target_section: logic<16>;
+    assign target_section = CpuMemoryMapPkg::targetSection(target_addr);
 
     var read_enable : logic;
-    assign read_enable  = cpuEnable && (~write_busy);
+    assign read_enable  = cpu_enable && (~write_busy);
     var write_enable: logic;
-    assign write_enable = cpuEnable && (~read_busy);
+    assign write_enable = cpu_enable && (~read_busy);
     var read_finish : logic   ;
     var read_busy   : logic   ;
     var write_busy  : logic   ;
@@ -99,7 +99,7 @@ module main (
         CLK                   ,
         RST                   ,
         WE      : write_enable,
-        DATA_IN : writeData   ,
+        DATA_IN : write_data  ,
         data_out: GPIO_0_0    ,
         busy    : write_busy  ,
     );
