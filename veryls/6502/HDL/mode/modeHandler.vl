@@ -1,22 +1,20 @@
 module ModeHandler (
-    CLK             : input  logic        ,
-    RST             : input  logic        ,
-    DATA_IN         : input  logic        ,
-    mode_read_finish: output logic        ,
-    mode            : output ModePkg::Mode,
+    CLK    : input  logic        ,
+    RST    : input  logic        ,
+    DATA_IN: input  logic        ,
+    mode   : output ModePkg::Mode,
 ) {
-    var mode_read_enable: logic = (~mode_read_finish) && mode == ModePkg::Mode::stop;
+    var mode_read_enable: logic = mode == ModePkg::Mode::stop;
     var mode_read_data  : int  ;
     inst mode_read_rx: uarty::Rx (
-        CLK                          ,
-        RST                          ,
-        DATA_IN                      ,
-        RE         : mode_read_enable,
-        read_finish: mode_read_finish,
-        data_out   : mode_read_data  ,
-        busy       : 0               ,
+        CLK                       ,
+        RST                       ,
+        DATA_IN                   ,
+        RE      : mode_read_enable,
+        data_out: mode_read_data  ,
+        busy    : 0               ,
     );
-    var mode_selector_enable: logic = mode_read_finish && (mode_read_data != 0);
+    var mode_selector_enable: logic = mode_read_data != 0;
     inst mode_selector: ModeSelector (
         CLK                       ,
         RST                       ,

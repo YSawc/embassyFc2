@@ -18,39 +18,35 @@ module main (
         cpu.cycle                       = 0;
     }
 
-    var mode            : ModePkg::Mode;
-    var mode_read_finish: logic        ;
-    inst modeReader: ModeHandler (
-        CLK                       ,
-        RST                       ,
-        DATA_IN         : GPIO_0_1,
-        mode_read_finish          ,
-        mode                      ,
+    var mode: ModePkg::Mode;
+    inst modeHandler: ModeHandler (
+        CLK              ,
+        RST              ,
+        DATA_IN: GPIO_0_1,
+        mode             ,
     );
 
-    var callback_read_enable : logic<8> = mode_read_finish && (mode == ModePkg::Mode::callback);
+    var callback_read_enable : logic<8> = mode == ModePkg::Mode::callback;
     var callback_return_value: int     ;
     inst callback_read_rx: uarty::Rx (
-        CLK                               ,
-        RST                               ,
-        DATA_IN    : GPIO_0_1             ,
-        RE         : callback_read_enable ,
-        read_finish: 0                    ,
-        data_out   : callback_return_value,
-        busy       : 0                    ,
+        CLK                            ,
+        RST                            ,
+        DATA_IN : GPIO_0_1             ,
+        RE      : callback_read_enable ,
+        data_out: callback_return_value,
+        busy    : 0                    ,
     );
 
     var sequence_count_read_rx_finish: logic   ;
     var sequence_count_read_rx_enable: logic    = (mode == ModePkg::Mode::sequence) && ~sequence_count_read_rx_finish;
     var sequence_args_count          : logic<8>;
     inst sequence_count_read_rx: uarty::Rx (
-        CLK                                       ,
-        RST                                       ,
-        DATA_IN    : GPIO_0_1                     ,
-        RE         : sequence_count_read_rx_enable,
-        read_finish: sequence_count_read_rx_finish,
-        data_out   : sequence_args_count          ,
-        busy       : 0                            ,
+        CLK                                    ,
+        RST                                    ,
+        DATA_IN : GPIO_0_1                     ,
+        RE      : sequence_count_read_rx_enable,
+        data_out: sequence_args_count          ,
+        busy    : 0                            ,
     );
 
     var write_data: logic<8>;
@@ -69,18 +65,16 @@ module main (
     assign read_enable  = cpu_enable && (~write_busy);
     var write_enable: logic;
     assign write_enable = cpu_enable && (~read_busy);
-    var read_finish : logic   ;
     var read_busy   : logic   ;
     var write_busy  : logic   ;
     var read_buffer : logic<8>;
     inst rx: uarty::Rx (
-        CLK                     ,
-        RST                     ,
-        DATA_IN    : GPIO_0_1   ,
-        RE         : read_enable,
-        read_finish: read_finish,
-        data_out   : read_buffer,
-        busy       : read_busy  ,
+        CLK                  ,
+        RST                  ,
+        DATA_IN : GPIO_0_1   ,
+        RE      : read_enable,
+        data_out: read_buffer,
+        busy    : read_busy  ,
     );
     inst tx: uarty::Tx (
         CLK                   ,
