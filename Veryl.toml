@@ -9,4 +9,4 @@ indent_width = 4
 "https://github.com/YSawc/uarty" = "0.1.1"
 
 [build]
-target        = {type = "directory", path = "veryls/6502/HDL"}
+target        = {type = "directory", path = "veryls/6502/HDL/sv"}
