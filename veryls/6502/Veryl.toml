@@ -2,5 +2,8 @@
 name = "cpu_6502"
 version = "0.1.0"
 
+[format]
+indent_width = 4
+
 [dependencies]
 "https://github.com/YSawc/uarty" = "0.1.0"

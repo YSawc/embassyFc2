@@ -2,7 +2,6 @@ module main (
     CLK     : input  logic   ,
     RST     : input  logic   ,
     KEY     : input  logic<3>,
-    HEX0    : output logic<7>,
     GPIO_0_0: output logic   ,
     GPIO_0_1: input  logic   ,
 ) {
@@ -20,24 +19,12 @@ module main (
     }
 
     var mode            : ModePkg::Mode;
-    var mode_read_enable: logic         = (~mode_read_finish) && mode == ModePkg::Mode::stop;
     var mode_read_finish: logic        ;
-    var mode_read_data  : int          ;
-    inst mode_read_rx: uarty::Rx (
-        CLK                          ,
-        RST                          ,
-        DATA_IN    : GPIO_0_1        ,
-        RE         : mode_read_enable,
-        read_finish: mode_read_finish,
-        data_out   : mode_read_data  ,
-        busy       : 0               ,
-    );
-    var mode_selector_enable: logic = mode_read_finish && (mode_read_data != 0);
-    inst mode_selector: ModeSelector (
+    inst modeReader: ModeHandler (
         CLK                       ,
         RST                       ,
-        EN  : mode_selector_enable,
-        data: mode_read_data      ,
+        DATA_IN         : GPIO_0_1,
+        mode_read_finish          ,
         mode                      ,
     );
 
