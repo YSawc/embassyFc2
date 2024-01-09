@@ -1,0 +1,124 @@
+module Debug (
+    CLK      : input  logic   ,
+    RST      : input  logic   ,
+    DATA_IN  : input  logic   ,
+    EN       : input  logic   ,
+    addr_low : output logic<8>,
+    addr_high: output logic<8>,
+    busy     : output logic   ,
+) {
+    var a: logic<8> = 8'h01;
+    // var x       : logic<8> = 8'h02;
+    // var y       : logic<8> = 8'h03;
+    // var imm_addr: logic<8> = 8'h04;
+    // var ll      : logic<8> = 8'h05;
+    // var hh      : logic<8> = 8'h06;
+
+    enum Status: logic<3> {
+        idle,
+        work,
+    }
+    var status            : Status   ;
+    var n_status          : Status   ;
+    var reference_busy    : logic    ;
+    var n_reference_busy  : logic    ;
+    var reference_finish  : logic    ;
+    var n_reference_finish: logic    ;
+    var n_addr_low_reg    : logic <8>;
+    var n_addr_high_reg   : logic <8>;
+    var addr_low_reg      : logic <8>;
+    var addr_high_reg     : logic <8>;
+
+    var raw_addressing_mode    : logic<8>;
+    var addressing_mode_rx_busy: logic   ;
+    inst addressing_mode_rx: uarty::Rx (
+        CLK                              ,
+        RST                              ,
+        DATA_IN                          ,
+        RE      : EN                     ,
+        data_out: raw_addressing_mode    ,
+        busy    : addressing_mode_rx_busy,
+    );
+    var casted_addressing_mode: OperatorsPkg::AddrMode;
+    assign casted_addressing_mode = raw_addressing_mode as OperatorsPkg::AddrMode;
+    assign busy                   = addressing_mode_rx_busy || reference_busy;
+
+    always_comb {
+        n_status           = status;
+        n_reference_busy   = reference_busy;
+        n_reference_finish = reference_finish;
+        n_addr_low_reg     = addr_low_reg;
+        n_addr_high_reg    = addr_low_reg;
+        if reference_finish {
+            addr_low  = addr_low_reg;
+            addr_high = addr_high_reg;
+        } else {
+            addr_low  = 0;
+            addr_high = 0;
+        }
+        case status {
+            Status::idle: {
+                if EN && ~reference_finish {
+                    n_reference_busy = 1;
+                    if casted_addressing_mode != OperatorsPkg::AddrMode::Stop {
+                        n_status = Status::work;
+                    }
+                }
+            }
+            Status::work: {
+                if casted_addressing_mode == OperatorsPkg::AddrMode::Acc {
+                    n_addr_low_reg  = a;
+                    n_addr_high_reg = 0;
+                    // } else if casted_addressing_mode == OperatorsPkg::AddrMode::Imm {
+                    //     //
+                    // } else if casted_addressing_mode == OperatorsPkg::AddrMode::Abs {
+                    //     //
+                    // } else if casted_addressing_mode == OperatorsPkg::AddrMode::AbsX {
+                    //     //
+                    // } else if casted_addressing_mode == OperatorsPkg::AddrMode::AbsY {
+                    //     //
+                    // } else if casted_addressing_mode == OperatorsPkg::AddrMode::Zp {
+                    //     //
+                    // } else if casted_addressing_mode == OperatorsPkg::AddrMode::ZpX {
+                    //     //
+                    // } else if casted_addressing_mode == OperatorsPkg::AddrMode::ZpY {
+                    //     //
+                    // } else if casted_addressing_mode == OperatorsPkg::AddrMode::Impl {
+                    //     //
+                    // } else if casted_addressing_mode == OperatorsPkg::AddrMode::Rel {
+                    //     //
+                    // } else if casted_addressing_mode == OperatorsPkg::AddrMode::IndX {
+                    //     //
+                    // } else if casted_addressing_mode == OperatorsPkg::AddrMode::IndY {
+                    //     //
+                    // } else if casted_addressing_mode == OperatorsPkg::AddrMode::Ind {
+                    //     //
+                    // } else if casted_addressing_mode == OperatorsPkg::AddrMode::Nop {
+                    //     //
+                } else {
+                    n_addr_low_reg  = 0;
+                    n_addr_high_reg = 0;
+                }
+                n_status           = Status::idle;
+                n_reference_busy   = 0;
+                n_reference_finish = 1;
+            }
+        }
+    }
+
+    always_ff (posedge CLK, async_high RST) {
+        if_reset {
+            status           = Status::idle;
+            reference_finish = 0;
+            reference_busy   = 0;
+            addr_low_reg     = 0;
+            addr_high_reg    = 0;
+        } else {
+            status           = n_status;
+            reference_finish = n_reference_finish;
+            reference_busy   = n_reference_busy;
+            addr_low_reg     = n_addr_low_reg;
+            addr_high_reg    = n_addr_high_reg;
+        }
+    }
+}

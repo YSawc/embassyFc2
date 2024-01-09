@@ -3,6 +3,7 @@ package ModePkg {
         stop,
         normal = 8'h2,
         callback = 8'h3, // [mode, callback value]
-        sequence = 8'h4, // [mode, args count]
+        sequence = 8'h4, // [mode, args]
+        debug = 8'h5, // [mode, subcommand]
     }
 }

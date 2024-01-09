@@ -40,19 +40,35 @@ module main (
 
     var sequence_count_read_rx_enable: logic    = mode == ModePkg::Mode::sequence && ~write_busy;
     var sequence_args_count          : logic<8>;
-    var sequence_count_read_rx_busy : logic;
+    var sequence_count_read_rx_busy  : logic   ;
     inst sequence_count_read_rx: uarty::Rx (
         CLK                                    ,
         RST                                    ,
         DATA_IN : GPIO_0_1                     ,
         RE      : sequence_count_read_rx_enable,
         data_out: sequence_args_count          ,
-        busy    : sequence_count_read_rx_busy ,
+        busy    : sequence_count_read_rx_busy  ,
+    );
+
+    var debug_enable: logic    = mode == ModePkg::Mode::debug && ~write_busy;
+    var debug_busy  : logic   ;
+    var addr_low    : logic<8>;
+    var addr_high   : logic<8>;
+    inst debug: Debug (
+        CLK                    ,
+        RST                    ,
+        DATA_IN  : GPIO_0_1    ,
+        EN       : debug_enable,
+        addr_low               ,
+        addr_high              ,
+        busy     : debug_busy  ,
     );
 
     var write_data: logic<8>;
     assign write_data = if mode == ModePkg::Mode::callback {
         callback_return_value
+    } else if mode == ModePkg::Mode::debug {
+        addr_low
     } else {
         7'b0011010
     };
@@ -63,8 +79,8 @@ module main (
     assign target_section = CpuMemoryMapPkg::targetSection(target_addr);
 
     var write_enable: logic;
-    assign write_enable = cpu_enable && ~callback_read_rx_busy && ~sequence_count_read_rx_busy;
-    var write_busy: logic;
+    assign write_enable = cpu_enable && ~callback_read_rx_busy && ~sequence_count_read_rx_busy && ~debug_busy;
+    var write_busy  : logic;
     inst tx: uarty::Tx (
         CLK                   ,
         RST                   ,
