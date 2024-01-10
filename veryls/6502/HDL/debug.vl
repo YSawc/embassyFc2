@@ -409,10 +409,31 @@ module Debug (
     var addr_low_reg      : logic <8>;
     var addr_high_reg     : logic <8>;
 
+    enum OpeMode: logic {
+        Inst,
+        Addr,
+    }
+    var raw_operator_mode      : logic<8>;
+    var operator_mode_rx_busy  : logic   ;
+    var operator_mode_rx_en    : logic   ;
+    assign operator_mode_rx_en     = EN && ~operator_mode_rx_finish;
+    var operator_mode_rx_finish: logic;
+    inst operator_mode_rx: uarty::Rx (
+        CLK                                 ,
+        RST                                 ,
+        DATA_IN                             ,
+        RE         : operator_mode_rx_en    ,
+        read_finish: operator_mode_rx_finish,
+        data_out   : raw_operator_mode      ,
+        busy       : operator_mode_rx_busy  ,
+    );
+    var casted_operator_mode: OpeMode;
+    assign casted_operator_mode = raw_operator_mode as OpeMode;
+
     var raw_addressing_mode      : logic<8>;
     var addressing_mode_rx_busy  : logic   ;
     var addressing_mode_rx_en    : logic   ;
-    assign addressing_mode_rx_en     = EN && ~addressing_mode_rx_finish;
+    assign addressing_mode_rx_en     = EN && (casted_operator_mode == OpeMode::Addr) && operator_mode_rx_finish && ~addressing_mode_rx_finish;
     var addressing_mode_rx_finish: logic;
     inst addressing_mode_rx: uarty::Rx (
         CLK                                   ,
@@ -440,8 +461,10 @@ module Debug (
         data_out   : imm_data       ,
         busy       : read_imm_busy  ,
     );
+    var reference_en: logic;
+    assign reference_en = EN && addressing_mode_rx_finish && ~reference_finish && ~read_imm_finish;
 
-    assign busy = addressing_mode_rx_busy || reference_busy || read_imm_busy;
+    assign busy = operator_mode_rx_busy || addressing_mode_rx_busy || reference_busy || read_imm_busy;
     always_comb {
         n_status           = status;
         n_reference_busy   = reference_busy;
@@ -464,11 +487,9 @@ module Debug (
         }
         case status {
             Status::idle: {
-                if EN && ~reference_finish && ~read_imm_finish {
+                if reference_en {
                     n_reference_busy = 1;
-                    if casted_addressing_mode != OperatorsPkg::AddrMode::Stop {
-                        n_status = Status::work;
-                    }
+                    n_status         = Status::work;
                 }
             }
             Status::work: {
@@ -481,7 +502,6 @@ module Debug (
                 } else if casted_addressing_mode == OperatorsPkg::AddrMode::Imm {
                     n_read_imm_en = 1;
                     n_status      = Status::idle;
-
                     //     //
                     // } else if casted_addressing_mode == OperatorsPkg::AddrMode::Abs {
                     //     //

@@ -5,7 +5,7 @@ module main (
     GPIO_0_0: output logic   ,
     GPIO_0_1: input  logic   ,
 ) {
-    var mode: ModePkg::Mode;
+    var mode: ModePkg::CpuMode;
     inst modeHandler: ModeHandler (
         CLK              ,
         RST              ,
@@ -13,7 +13,7 @@ module main (
         mode             ,
     );
 
-    var callback_read_enable : logic<8> = mode == ModePkg::Mode::callback && ~write_busy;
+    var callback_read_enable : logic<8> = mode == ModePkg::CpuMode::callback && ~write_busy;
     var callback_return_value: int     ;
     var callback_read_rx_busy: int     ;
     inst callback_read_rx: uarty::Rx (
@@ -26,7 +26,7 @@ module main (
         busy       : callback_read_rx_busy,
     );
 
-    var sequence_count_read_rx_enable: logic    = mode == ModePkg::Mode::sequence && ~write_busy;
+    var sequence_count_read_rx_enable: logic    = mode == ModePkg::CpuMode::sequence && ~write_busy;
     var sequence_args_count          : logic<8>;
     var sequence_count_read_rx_busy  : logic   ;
     inst sequence_count_read_rx: uarty::Rx (
@@ -39,7 +39,7 @@ module main (
         busy       : sequence_count_read_rx_busy  ,
     );
 
-    var debug_enable: logic    = mode == ModePkg::Mode::debug && ~write_busy;
+    var debug_enable: logic    = mode == ModePkg::CpuMode::debug && ~write_busy;
     var debug_busy  : logic   ;
     var addr_low    : logic<8>;
     var addr_high   : logic<8>;
@@ -54,14 +54,14 @@ module main (
     );
 
     var write_data: logic<8>;
-    assign write_data = if mode == ModePkg::Mode::callback {
+    assign write_data = if mode == ModePkg::CpuMode::callback {
         callback_return_value
-    } else if mode == ModePkg::Mode::debug {
+    } else if mode == ModePkg::CpuMode::debug {
         addr_low
     } else {
         7'b0011010
     };
-    var cpu_enable: logic = mode != ModePkg::Mode::nop;
+    var cpu_enable: logic = mode != ModePkg::CpuMode::nop;
 
     var target_addr   : logic<16> = 16'h5;
     var target_section: logic<16>;
