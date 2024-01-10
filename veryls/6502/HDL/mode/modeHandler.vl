@@ -4,7 +4,7 @@ module ModeHandler (
     DATA_IN: input  logic        ,
     mode   : output ModePkg::Mode,
 ) {
-    var mode_read_enable: logic = mode == ModePkg::Mode::stop;
+    var mode_read_enable: logic = mode == ModePkg::Mode::nop;
     var mode_read_data  : int  ;
     inst mode_read_rx: uarty::Rx (
         CLK                       ,

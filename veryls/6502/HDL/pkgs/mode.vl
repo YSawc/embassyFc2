@@ -1,6 +1,6 @@
 package ModePkg {
     enum Mode: logic<8> {
-        stop,
+        nop,
         normal = 8'h2,
         callback = 8'h3, // [mode, callback value]
         sequence = 8'h4, // [mode, args]

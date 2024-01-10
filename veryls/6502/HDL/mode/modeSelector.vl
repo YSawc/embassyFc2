@@ -13,14 +13,14 @@ module ModeSelector (
             if data >= 2 && data <= 8'hfe {
                 n_mode = data as ModePkg::Mode;
             } else {
-                n_mode = ModePkg::Mode::stop;
+                n_mode = ModePkg::Mode::nop;
             }
         }
     }
 
     always_ff (posedge CLK, async_high RST) {
         if_reset {
-            mode = ModePkg::Mode::stop;
+            mode = ModePkg::Mode::nop;
         } else {
             mode = n_mode;
         }

@@ -72,7 +72,7 @@ module main (
     } else {
         7'b0011010
     };
-    var cpu_enable: logic = mode != ModePkg::Mode::stop;
+    var cpu_enable: logic = mode != ModePkg::Mode::nop;
 
     var target_addr   : logic<16> = 16'h5;
     var target_section: logic<16>;
