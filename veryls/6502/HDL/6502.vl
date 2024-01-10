@@ -5,19 +5,6 @@ module main (
     GPIO_0_0: output logic   ,
     GPIO_0_1: input  logic   ,
 ) {
-    struct CPU {
-        register : RegisterPkg::Register        ,
-        operators: OperatorsPkg::Operator<8'hff>,
-        cycle    : logic                 <15>   ,
-    }
-    var cpu: CPU;
-
-    function init -> void {
-        RegisterPkg::init              ();
-        OperatorsPkg::prepare_operators();
-        cpu.cycle                       = 0;
-    }
-
     var mode: ModePkg::Mode;
     inst modeHandler: ModeHandler (
         CLK              ,
@@ -30,24 +17,26 @@ module main (
     var callback_return_value: int     ;
     var callback_read_rx_busy: int     ;
     inst callback_read_rx: uarty::Rx (
-        CLK                            ,
-        RST                            ,
-        DATA_IN : GPIO_0_1             ,
-        RE      : callback_read_enable ,
-        data_out: callback_return_value,
-        busy    : callback_read_rx_busy,
+        CLK                               ,
+        RST                               ,
+        DATA_IN    : GPIO_0_1             ,
+        RE         : callback_read_enable ,
+        read_finish: 0                    ,
+        data_out   : callback_return_value,
+        busy       : callback_read_rx_busy,
     );
 
     var sequence_count_read_rx_enable: logic    = mode == ModePkg::Mode::sequence && ~write_busy;
     var sequence_args_count          : logic<8>;
     var sequence_count_read_rx_busy  : logic   ;
     inst sequence_count_read_rx: uarty::Rx (
-        CLK                                    ,
-        RST                                    ,
-        DATA_IN : GPIO_0_1                     ,
-        RE      : sequence_count_read_rx_enable,
-        data_out: sequence_args_count          ,
-        busy    : sequence_count_read_rx_busy  ,
+        CLK                                       ,
+        RST                                       ,
+        DATA_IN    : GPIO_0_1                     ,
+        RE         : sequence_count_read_rx_enable,
+        read_finish: 0                            ,
+        data_out   : sequence_args_count          ,
+        busy       : sequence_count_read_rx_busy  ,
     );
 
     var debug_enable: logic    = mode == ModePkg::Mode::debug && ~write_busy;
