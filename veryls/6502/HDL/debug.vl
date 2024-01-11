@@ -321,8 +321,10 @@ module Debug (
         data_out   : raw_inst_mode      ,
         busy       : inst_mode_rx_busy  ,
     );
-    var casted_ope_kind: OperatorsPkg::OpeKind;
-    assign casted_ope_kind = operators[raw_inst_mode].ope_kind;
+    var inst_casted_ope_kind : OperatorsPkg::OpeKind;
+    assign inst_casted_ope_kind  = operators[raw_inst_mode].ope_kind;
+    var inst_casted_addr_mode: OperatorsPkg::AddrMode;
+    assign inst_casted_addr_mode = operators[raw_inst_mode].addr_mode;
 
     var raw_addressing_mode      : logic<8>;
     var addressing_mode_rx_busy  : logic   ;
@@ -340,6 +342,14 @@ module Debug (
     );
     var casted_addressing_mode: OperatorsPkg::AddrMode;
     assign casted_addressing_mode = raw_addressing_mode as OperatorsPkg::AddrMode;
+    var reference_addr_mode   : OperatorsPkg::AddrMode;
+    assign reference_addr_mode    = if inst_mode_rx_finish {
+        inst_casted_addr_mode
+    } else if addressing_mode_rx_finish {
+        casted_addressing_mode
+    } else {
+        OperatorsPkg::AddrMode::Acc
+    };
 
     var read_imm_en    : logic   ;
     var n_read_imm_en  : logic   ;
@@ -356,7 +366,7 @@ module Debug (
         busy       : read_imm_busy  ,
     );
     var reference_en: logic;
-    assign reference_en = EN && addressing_mode_rx_finish && ~reference_finish && ~read_imm_finish;
+    assign reference_en = EN && ~reference_finish && ~read_imm_finish && (inst_mode_rx_finish || addressing_mode_rx_finish);
 
     assign busy = operator_mode_rx_busy || inst_mode_rx_busy || addressing_mode_rx_busy || reference_busy || read_imm_busy;
     always_comb {
@@ -375,9 +385,9 @@ module Debug (
         } else if reference_finish {
             addr_low  = addr_low_reg;
             addr_high = addr_high_reg;
-        } else if inst_mode_rx_finish {
-            addr_low  = operators[raw_inst_mode].ope_kind; // casted_ope_kind;
-            addr_high = addr_high_reg;
+            // } else if inst_mode_rx_finish {
+            //     addr_low  = operators[raw_inst_mode].ope_kind; // casted_ope_kind;
+            //     addr_high = addr_high_reg;
         } else {
             addr_low  = 0;
             addr_high = 0;
@@ -390,13 +400,13 @@ module Debug (
                 }
             }
             Status::work: {
-                if casted_addressing_mode == OperatorsPkg::AddrMode::Acc {
+                if reference_addr_mode == OperatorsPkg::AddrMode::Acc {
                     n_addr_low_reg     = a;
                     n_addr_high_reg    = 0;
                     n_status           = Status::idle;
                     n_reference_busy   = 0;
                     n_reference_finish = 1;
-                } else if casted_addressing_mode == OperatorsPkg::AddrMode::Imm {
+                } else if reference_addr_mode == OperatorsPkg::AddrMode::Imm {
                     n_read_imm_en = 1;
                     n_status      = Status::idle;
                     //     //
