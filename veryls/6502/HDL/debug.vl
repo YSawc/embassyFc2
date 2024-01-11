@@ -116,7 +116,6 @@ module Debug (
     }
 
     enum AddrMode: logic<4> {
-        Stop,
         Acc,
         Imm,
         Abs,

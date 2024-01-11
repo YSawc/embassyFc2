@@ -1,5 +1,4 @@
 pub enum CpuMode {
-    Stop,
     Normal = 2,
     Callback = 3,
     Sequence = 4,
@@ -12,7 +11,6 @@ pub enum OpeMode {
 }
 
 pub enum AddrMode {
-    Stop,
     Acc,
     Imm,
     Abs,
