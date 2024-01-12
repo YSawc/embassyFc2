@@ -8,11 +8,8 @@ module Debug (
     busy     : output logic   ,
 ) {
     var a: logic<8>;
-    // var x       : logic<8> = 8'h02;
-    // var y       : logic<8> = 8'h03;
-    // var imm_addr: logic<8> = 8'h04;
-    // var ll      : logic<8> = 8'h05;
-    // var hh      : logic<8> = 8'h06;
+    var x: logic<8>;
+    var y: logic<8>;
 
     enum Status: logic<3> {
         idle,
@@ -384,6 +381,8 @@ module Debug (
     var ope_inst_debug_out_low : logic<8>;
     var ope_inst_debug_out_high: logic<8>;
     var ope_inst_a             : logic<8>;
+    var ope_inst_x             : logic<8>;
+    var ope_inst_y             : logic<8>;
     assign ope_inst_en             = EN && ~ope_inst_finish && addr_ref_finish && inst_read_finish;
     inst ope_inst: OpeInst (
         CLK                                    ,
@@ -393,6 +392,8 @@ module Debug (
         addr_low      : addr_ref_low           ,
         addr_high     : addr_ref_high          ,
         a             : ope_inst_a             ,
+        x             : ope_inst_x             ,
+        y             : ope_inst_y             ,
         busy          : ope_inst_busy          ,
         debug_out_low : ope_inst_debug_out_low ,
         debug_out_high: ope_inst_debug_out_high,
@@ -400,6 +401,16 @@ module Debug (
     );
     assign a = if ope_inst_finish {
         ope_inst_a
+    } else {
+        0
+    };
+    assign x = if ope_inst_finish {
+        ope_inst_x
+    } else {
+        0
+    };
+    assign y = if ope_inst_finish {
+        ope_inst_y
     } else {
         0
     };

@@ -20,15 +20,15 @@ fn main() -> ! {
     let mut buf = [0x0u8; 4];
     buf[0] = CpuMode::Debug as u8;
     buf[1] = OpeMode::Inst as u8;
-    buf[2] = 0xa9;
-    buf[3] = 0x34;
+    buf[2] = 0xa2;
+    buf[3] = 0x45;
     unwrap!(usart.blocking_write(&buf));
-    info!("wrote 0xa9 instruction and imm data.");
+    info!("wrote 0xa2 instruction and imm data.");
     loop {
         match usart.blocking_read(&mut buf) {
             Ok(_) => {
                 match buf.first().unwrap() {
-                    0x34 => info!("test passed!"),
+                    0x45 => info!("test passed!"),
                     v => info!("test failed. return value is {:?}", v),
                 }
                 info!("wait kill..");
