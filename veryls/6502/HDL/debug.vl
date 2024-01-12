@@ -7,7 +7,7 @@ module Debug (
     addr_high: output logic<8>,
     busy     : output logic   ,
 ) {
-    var a: logic<8> = 8'h01;
+    var a: logic<8>;
     // var x       : logic<8> = 8'h02;
     // var y       : logic<8> = 8'h03;
     // var imm_addr: logic<8> = 8'h04;
@@ -355,15 +355,16 @@ module Debug (
         busy       : read_imm_busy,
     );
 
-    var addr_ref_busy  : logic;
-    var addr_ref_finish: logic;
-    var addr_ref_en    : logic;
+    var addr_ref_busy  : logic   ;
+    var addr_ref_finish: logic   ;
+    var addr_ref_en    : logic   ;
+    var addr_ref_low   : logic<8>;
+    var addr_ref_high  : logic<8>;
     assign addr_ref_en     = EN && ~addr_ref_finish && ~imm_finish && (inst_read_finish || addr_read_finish);
 
     inst addr_ref: AddrRef (
         CLK                             ,
         RST                             ,
-        DATA_IN                         ,
         EN             : addr_ref_en    ,
         a                               ,
         addr_mode      : ref_addr_mode  ,
@@ -371,11 +372,52 @@ module Debug (
         imm_data                        ,
         ope_read_finish                 ,
         imm_en                          ,
-        addr_low                        ,
-        addr_high                       ,
+        addr_low       : addr_ref_low   ,
+        addr_high      : addr_ref_high  ,
         busy           : addr_ref_busy  ,
         finish         : addr_ref_finish,
     );
 
-    assign busy = ope_read_busy || inst_read_busy || addr_read_busy || addr_ref_busy || read_imm_busy;
+    var ope_inst_busy          : logic   ;
+    var ope_inst_finish        : logic   ;
+    var ope_inst_en            : logic   ;
+    var ope_inst_debug_out_low : logic<8>;
+    var ope_inst_debug_out_high: logic<8>;
+    var ope_inst_a             : logic<8>;
+    assign ope_inst_en             = EN && ~ope_inst_finish && addr_ref_finish && inst_read_finish;
+    inst ope_inst: OpeInst (
+        CLK                                    ,
+        RST                                    ,
+        EN            : ope_inst_en            ,
+        ope_kind      : inst_casted_ope_kind   ,
+        addr_low      : addr_ref_low           ,
+        addr_high     : addr_ref_high          ,
+        a             : ope_inst_a             ,
+        busy          : ope_inst_busy          ,
+        debug_out_low : ope_inst_debug_out_low ,
+        debug_out_high: ope_inst_debug_out_high,
+        finish        : ope_inst_finish        ,
+    );
+    assign a = if ope_inst_finish {
+        ope_inst_a
+    } else {
+        0
+    };
+
+    assign addr_low = if inst_read_finish {
+        ope_inst_debug_out_low
+    } else if addr_read_finish {
+        addr_ref_low
+    } else {
+        0
+    };
+    assign addr_high = if inst_read_finish {
+        ope_inst_debug_out_high
+    } else if addr_read_finish {
+        addr_ref_high
+    } else {
+        0
+    };
+
+    assign busy = ope_read_busy || inst_read_busy || addr_read_busy || addr_ref_busy || read_imm_busy || ope_inst_busy;
 }

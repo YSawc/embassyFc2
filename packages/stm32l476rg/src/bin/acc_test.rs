@@ -27,7 +27,7 @@ fn main() -> ! {
         match usart.blocking_read(&mut buf) {
             Ok(_) => {
                 match buf.first().unwrap() {
-                    0x01 => info!("test passed!"),
+                    0x00 => info!("test passed!"),
                     v => info!(
                         "callback received but not expected value returned! return value is {:?}",
                         v

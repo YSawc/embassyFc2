@@ -1,7 +1,6 @@
 module AddrRef (
     CLK            : input  logic                    ,
     RST            : input  logic                    ,
-    DATA_IN        : input  logic                    ,
     EN             : input  logic                    ,
     a              : input  logic                 <8>,
     addr_mode      : input  OperatorsPkg::AddrMode   ,
@@ -125,7 +124,6 @@ module AddrRef (
             addr_high_reg = n_addr_high_reg;
             imm_en        = n_imm_en;
             ope_en        = n_ope_en;
-            finish        = n_finish;
         }
     }
 }
