@@ -19,444 +19,363 @@ module Debug (
         work,
     }
 
-    var operators         : OperatorsPkg::Operator [8'hff];
-    assign operators[0]       = {OperatorsPkg::OpeKind::Brk, OperatorsPkg::AddrMode::Impl}; // 0x00
-    assign operators[1]       = {OperatorsPkg::OpeKind::Ora, OperatorsPkg::AddrMode::IndX}; // 0x01
-    assign operators[2]       = {OperatorsPkg::OpeKind::Kil, OperatorsPkg::AddrMode::Impl}; // 0x02
-    assign operators[3]       = {OperatorsPkg::OpeKind::Slo, OperatorsPkg::AddrMode::IndX}; // 0x03
-    assign operators[4]       = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::Zp}; // 0x04
-    assign operators[5]       = {OperatorsPkg::OpeKind::Ora, OperatorsPkg::AddrMode::Zp}; // 0x05
-    assign operators[6]       = {OperatorsPkg::OpeKind::Asl, OperatorsPkg::AddrMode::Zp}; // 0x06
-    assign operators[7]       = {OperatorsPkg::OpeKind::Slo, OperatorsPkg::AddrMode::Zp}; // 0x07
-    assign operators[8]       = {OperatorsPkg::OpeKind::Php, OperatorsPkg::AddrMode::Impl}; // 0x08
-    assign operators[9]       = {OperatorsPkg::OpeKind::Ora, OperatorsPkg::AddrMode::Imm}; // 0x09
-    assign operators[10]      = {OperatorsPkg::OpeKind::Asl, OperatorsPkg::AddrMode::Acc}; // 0x0a
-    assign operators[11]      = {OperatorsPkg::OpeKind::Aac, OperatorsPkg::AddrMode::Imm}; // 0x0b
-    assign operators[12]      = {OperatorsPkg::OpeKind::Top, OperatorsPkg::AddrMode::Abs}; // 0x0c
-    assign operators[13]      = {OperatorsPkg::OpeKind::Ora, OperatorsPkg::AddrMode::Abs}; // 0x0d
-    assign operators[14]      = {OperatorsPkg::OpeKind::Asl, OperatorsPkg::AddrMode::Abs}; // 0x0e
-    assign operators[15]      = {OperatorsPkg::OpeKind::Slo, OperatorsPkg::AddrMode::Abs}; // 0x0f
-    assign operators[16]      = {OperatorsPkg::OpeKind::Bpl, OperatorsPkg::AddrMode::Rel}; // 0x10
-    assign operators[17]      = {OperatorsPkg::OpeKind::Ora, OperatorsPkg::AddrMode::IndY}; // 0x11
-    assign operators[18]      = {OperatorsPkg::OpeKind::Kil, OperatorsPkg::AddrMode::Impl}; // 0x12
-    assign operators[19]      = {OperatorsPkg::OpeKind::Slo, OperatorsPkg::AddrMode::IndY}; // 0x13
-    assign operators[20]      = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::ZpX}; // 0x14
-    assign operators[21]      = {OperatorsPkg::OpeKind::Ora, OperatorsPkg::AddrMode::ZpX}; // 0x15
-    assign operators[22]      = {OperatorsPkg::OpeKind::Asl, OperatorsPkg::AddrMode::ZpX}; // 0x16
-    assign operators[23]      = {OperatorsPkg::OpeKind::Slo, OperatorsPkg::AddrMode::ZpX}; // 0x17
-    assign operators[24]      = {OperatorsPkg::OpeKind::Clc, OperatorsPkg::AddrMode::Impl}; // 0x18
-    assign operators[25]      = {OperatorsPkg::OpeKind::Ora, OperatorsPkg::AddrMode::AbsY}; // 0x19
-    assign operators[26]      = {OperatorsPkg::OpeKind::Nop, OperatorsPkg::AddrMode::Nop}; // 0x1a
-    assign operators[27]      = {OperatorsPkg::OpeKind::Slo, OperatorsPkg::AddrMode::AbsY}; // 0x1b
-    assign operators[28]      = {OperatorsPkg::OpeKind::Top, OperatorsPkg::AddrMode::AbsX}; // 0x1c
-    assign operators[29]      = {OperatorsPkg::OpeKind::Ora, OperatorsPkg::AddrMode::AbsX}; // 0x1d
-    assign operators[30]      = {OperatorsPkg::OpeKind::Asl, OperatorsPkg::AddrMode::AbsX}; // 0x1e
-    assign operators[31]      = {OperatorsPkg::OpeKind::Slo, OperatorsPkg::AddrMode::AbsX}; // 0x1f
-    assign operators[32]      = {OperatorsPkg::OpeKind::Jsr, OperatorsPkg::AddrMode::Abs}; // 0x20
-    assign operators[33]      = {OperatorsPkg::OpeKind::And, OperatorsPkg::AddrMode::IndX}; // 0x21
-    assign operators[34]      = {OperatorsPkg::OpeKind::Kil, OperatorsPkg::AddrMode::Impl}; // 0x22
-    assign operators[35]      = {OperatorsPkg::OpeKind::Rla, OperatorsPkg::AddrMode::IndX}; // 0x23
-    assign operators[36]      = {OperatorsPkg::OpeKind::Bit, OperatorsPkg::AddrMode::Zp}; // 0x24
-    assign operators[37]      = {OperatorsPkg::OpeKind::And, OperatorsPkg::AddrMode::Zp}; // 0x25
-    assign operators[38]      = {OperatorsPkg::OpeKind::Rol, OperatorsPkg::AddrMode::Zp}; // 0x26
-    assign operators[39]      = {OperatorsPkg::OpeKind::Rla, OperatorsPkg::AddrMode::Zp}; // 0x27
-    assign operators[40]      = {OperatorsPkg::OpeKind::Plp, OperatorsPkg::AddrMode::Impl}; // 0x28
-    assign operators[41]      = {OperatorsPkg::OpeKind::And, OperatorsPkg::AddrMode::Imm}; // 0x29
-    assign operators[42]      = {OperatorsPkg::OpeKind::Rol, OperatorsPkg::AddrMode::Acc}; // 0x2a
-    assign operators[43]      = {OperatorsPkg::OpeKind::Aac, OperatorsPkg::AddrMode::Imm}; // 0x2b
-    assign operators[44]      = {OperatorsPkg::OpeKind::Bit, OperatorsPkg::AddrMode::Abs}; // 0x2c
-    assign operators[45]      = {OperatorsPkg::OpeKind::And, OperatorsPkg::AddrMode::Abs}; // 0x2d
-    assign operators[46]      = {OperatorsPkg::OpeKind::Rol, OperatorsPkg::AddrMode::Abs}; // 0x2e
-    assign operators[47]      = {OperatorsPkg::OpeKind::Rla, OperatorsPkg::AddrMode::Abs}; // 0x2f
-    assign operators[48]      = {OperatorsPkg::OpeKind::Bmi, OperatorsPkg::AddrMode::Rel}; // 0x30
-    assign operators[49]      = {OperatorsPkg::OpeKind::And, OperatorsPkg::AddrMode::IndY}; // 0x31
-    assign operators[50]      = {OperatorsPkg::OpeKind::Kil, OperatorsPkg::AddrMode::Impl}; // 0x32
-    assign operators[51]      = {OperatorsPkg::OpeKind::Rla, OperatorsPkg::AddrMode::IndY}; // 0x33
-    assign operators[52]      = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::ZpX}; // 0x34
-    assign operators[53]      = {OperatorsPkg::OpeKind::And, OperatorsPkg::AddrMode::ZpX}; // 0x35
-    assign operators[54]      = {OperatorsPkg::OpeKind::Rol, OperatorsPkg::AddrMode::ZpX}; // 0x36
-    assign operators[55]      = {OperatorsPkg::OpeKind::Rla, OperatorsPkg::AddrMode::ZpX}; // 0x37
-    assign operators[56]      = {OperatorsPkg::OpeKind::Sec, OperatorsPkg::AddrMode::Impl}; // 0x38
-    assign operators[57]      = {OperatorsPkg::OpeKind::And, OperatorsPkg::AddrMode::AbsY}; // 0x39
-    assign operators[58]      = {OperatorsPkg::OpeKind::Nop, OperatorsPkg::AddrMode::Nop}; // 0x3a
-    assign operators[59]      = {OperatorsPkg::OpeKind::Rla, OperatorsPkg::AddrMode::AbsY}; // 0x3b
-    assign operators[60]      = {OperatorsPkg::OpeKind::Top, OperatorsPkg::AddrMode::AbsX}; // 0x3c
-    assign operators[61]      = {OperatorsPkg::OpeKind::And, OperatorsPkg::AddrMode::AbsX}; // 0x3d
-    assign operators[62]      = {OperatorsPkg::OpeKind::Rol, OperatorsPkg::AddrMode::AbsX}; // 0x3e
-    assign operators[63]      = {OperatorsPkg::OpeKind::Rla, OperatorsPkg::AddrMode::AbsX}; // 0x3f
-    assign operators[64]      = {OperatorsPkg::OpeKind::Rti, OperatorsPkg::AddrMode::Impl}; // 0x40
-    assign operators[65]      = {OperatorsPkg::OpeKind::Eor, OperatorsPkg::AddrMode::IndX}; // 0x41
-    assign operators[66]      = {OperatorsPkg::OpeKind::Kil, OperatorsPkg::AddrMode::Impl}; // 0x42
-    assign operators[67]      = {OperatorsPkg::OpeKind::Sre, OperatorsPkg::AddrMode::IndX}; // 0x43
-    assign operators[68]      = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::Zp}; // 0x44
-    assign operators[69]      = {OperatorsPkg::OpeKind::Eor, OperatorsPkg::AddrMode::Zp}; // 0x45
-    assign operators[70]      = {OperatorsPkg::OpeKind::Lsr, OperatorsPkg::AddrMode::Zp}; // 0x46
-    assign operators[71]      = {OperatorsPkg::OpeKind::Sre, OperatorsPkg::AddrMode::Zp}; // 0x47
-    assign operators[72]      = {OperatorsPkg::OpeKind::Pha, OperatorsPkg::AddrMode::Impl}; // 0x48
-    assign operators[73]      = {OperatorsPkg::OpeKind::Eor, OperatorsPkg::AddrMode::Imm}; // 0x49
-    assign operators[74]      = {OperatorsPkg::OpeKind::Lsr, OperatorsPkg::AddrMode::Acc}; // 0x4a
-    assign operators[75]      = {OperatorsPkg::OpeKind::Asr, OperatorsPkg::AddrMode::Imm}; // 0x4b
-    assign operators[76]      = {OperatorsPkg::OpeKind::Jmp, OperatorsPkg::AddrMode::Abs}; // 0x4c
-    assign operators[77]      = {OperatorsPkg::OpeKind::Eor, OperatorsPkg::AddrMode::Abs}; // 0x4d
-    assign operators[78]      = {OperatorsPkg::OpeKind::Lsr, OperatorsPkg::AddrMode::Abs}; // 0x4e
-    assign operators[79]      = {OperatorsPkg::OpeKind::Sre, OperatorsPkg::AddrMode::Abs}; // 0x4f
-    assign operators[80]      = {OperatorsPkg::OpeKind::Bvc, OperatorsPkg::AddrMode::Rel}; // 0x50
-    assign operators[81]      = {OperatorsPkg::OpeKind::Eor, OperatorsPkg::AddrMode::IndY}; // 0x51
-    assign operators[82]      = {OperatorsPkg::OpeKind::Kil, OperatorsPkg::AddrMode::Impl}; // 0x52
-    assign operators[83]      = {OperatorsPkg::OpeKind::Sre, OperatorsPkg::AddrMode::IndY}; // 0x53
-    assign operators[84]      = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::ZpX}; // 0x54
-    assign operators[85]      = {OperatorsPkg::OpeKind::Eor, OperatorsPkg::AddrMode::ZpX}; // 0x55
-    assign operators[86]      = {OperatorsPkg::OpeKind::Lsr, OperatorsPkg::AddrMode::ZpX}; // 0x56
-    assign operators[87]      = {OperatorsPkg::OpeKind::Sre, OperatorsPkg::AddrMode::ZpX}; // 0x57
-    assign operators[88]      = {OperatorsPkg::OpeKind::Cli, OperatorsPkg::AddrMode::Impl}; // 0x58
-    assign operators[89]      = {OperatorsPkg::OpeKind::Eor, OperatorsPkg::AddrMode::AbsY}; // 0x59
-    assign operators[90]      = {OperatorsPkg::OpeKind::Nop, OperatorsPkg::AddrMode::Nop}; // 0x5a
-    assign operators[91]      = {OperatorsPkg::OpeKind::Sre, OperatorsPkg::AddrMode::AbsY}; // 0x5b
-    assign operators[92]      = {OperatorsPkg::OpeKind::Top, OperatorsPkg::AddrMode::AbsX}; // 0x5c
-    assign operators[93]      = {OperatorsPkg::OpeKind::Eor, OperatorsPkg::AddrMode::AbsX}; // 0x5d
-    assign operators[94]      = {OperatorsPkg::OpeKind::Lsr, OperatorsPkg::AddrMode::AbsX}; // 0x5e
-    assign operators[95]      = {OperatorsPkg::OpeKind::Sre, OperatorsPkg::AddrMode::AbsX}; // 0x5f
-    assign operators[96]      = {OperatorsPkg::OpeKind::Rts, OperatorsPkg::AddrMode::Impl}; // 0x60
-    assign operators[97]      = {OperatorsPkg::OpeKind::Adc, OperatorsPkg::AddrMode::IndX}; // 0x61
-    assign operators[98]      = {OperatorsPkg::OpeKind::Kil, OperatorsPkg::AddrMode::Impl}; // 0x62
-    assign operators[99]      = {OperatorsPkg::OpeKind::Rra, OperatorsPkg::AddrMode::IndX}; // 0x63
-    assign operators[100]     = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::Zp}; // 0x64
-    assign operators[101]     = {OperatorsPkg::OpeKind::Adc, OperatorsPkg::AddrMode::Zp}; // 0x65
-    assign operators[102]     = {OperatorsPkg::OpeKind::Ror, OperatorsPkg::AddrMode::Zp}; // 0x66
-    assign operators[103]     = {OperatorsPkg::OpeKind::Rra, OperatorsPkg::AddrMode::Zp}; // 0x67
-    assign operators[104]     = {OperatorsPkg::OpeKind::Pla, OperatorsPkg::AddrMode::Impl}; // 0x68
-    assign operators[105]     = {OperatorsPkg::OpeKind::Adc, OperatorsPkg::AddrMode::Imm}; // 0x69
-    assign operators[106]     = {OperatorsPkg::OpeKind::Ror, OperatorsPkg::AddrMode::Acc}; // 0x6a
-    assign operators[107]     = {OperatorsPkg::OpeKind::Arr, OperatorsPkg::AddrMode::Imm}; // 0x6b
-    assign operators[108]     = {OperatorsPkg::OpeKind::Jmp, OperatorsPkg::AddrMode::Ind}; // 0x6c
-    assign operators[109]     = {OperatorsPkg::OpeKind::Adc, OperatorsPkg::AddrMode::Abs}; // 0x6d
-    assign operators[110]     = {OperatorsPkg::OpeKind::Ror, OperatorsPkg::AddrMode::Abs}; // 0x6e
-    assign operators[111]     = {OperatorsPkg::OpeKind::Rra, OperatorsPkg::AddrMode::Abs}; // 0x6f
-    assign operators[112]     = {OperatorsPkg::OpeKind::Bvs, OperatorsPkg::AddrMode::Rel}; // 0x70
-    assign operators[113]     = {OperatorsPkg::OpeKind::Adc, OperatorsPkg::AddrMode::IndY}; // 0x71
-    assign operators[114]     = {OperatorsPkg::OpeKind::Kil, OperatorsPkg::AddrMode::Impl}; // 0x72
-    assign operators[115]     = {OperatorsPkg::OpeKind::Rra, OperatorsPkg::AddrMode::IndY}; // 0x73
-    assign operators[116]     = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::ZpX}; // 0x74
-    assign operators[117]     = {OperatorsPkg::OpeKind::Adc, OperatorsPkg::AddrMode::ZpX}; // 0x75
-    assign operators[118]     = {OperatorsPkg::OpeKind::Ror, OperatorsPkg::AddrMode::ZpX}; // 0x76
-    assign operators[119]     = {OperatorsPkg::OpeKind::Rra, OperatorsPkg::AddrMode::ZpX}; // 0x77
-    assign operators[120]     = {OperatorsPkg::OpeKind::Sei, OperatorsPkg::AddrMode::Impl}; // 0x78
-    assign operators[121]     = {OperatorsPkg::OpeKind::Adc, OperatorsPkg::AddrMode::AbsY}; // 0x79
-    assign operators[122]     = {OperatorsPkg::OpeKind::Nop, OperatorsPkg::AddrMode::Nop}; // 0x7a
-    assign operators[123]     = {OperatorsPkg::OpeKind::Rra, OperatorsPkg::AddrMode::AbsY}; // 0x7b
-    assign operators[124]     = {OperatorsPkg::OpeKind::Top, OperatorsPkg::AddrMode::AbsX}; // 0x7c
-    assign operators[125]     = {OperatorsPkg::OpeKind::Adc, OperatorsPkg::AddrMode::AbsX}; // 0x7d
-    assign operators[126]     = {OperatorsPkg::OpeKind::Ror, OperatorsPkg::AddrMode::AbsX}; // 0x7e
-    assign operators[127]     = {OperatorsPkg::OpeKind::Rra, OperatorsPkg::AddrMode::AbsX}; // 0x7f
-    assign operators[128]     = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::Imm}; // 0x80
-    assign operators[129]     = {OperatorsPkg::OpeKind::Sta, OperatorsPkg::AddrMode::IndX}; // 0x81
-    assign operators[130]     = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::Imm}; // 0x82
-    assign operators[131]     = {OperatorsPkg::OpeKind::Sax, OperatorsPkg::AddrMode::IndX}; // 0x83
-    assign operators[132]     = {OperatorsPkg::OpeKind::Sty, OperatorsPkg::AddrMode::Zp}; // 0x84
-    assign operators[133]     = {OperatorsPkg::OpeKind::Sta, OperatorsPkg::AddrMode::Zp}; // 0x85
-    assign operators[134]     = {OperatorsPkg::OpeKind::Stx, OperatorsPkg::AddrMode::Zp}; // 0x86
-    assign operators[135]     = {OperatorsPkg::OpeKind::Sax, OperatorsPkg::AddrMode::Zp}; // 0x87
-    assign operators[136]     = {OperatorsPkg::OpeKind::Dey, OperatorsPkg::AddrMode::Impl}; // 0x88
-    assign operators[137]     = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::Imm}; // 0x89
-    assign operators[138]     = {OperatorsPkg::OpeKind::Txa, OperatorsPkg::AddrMode::Impl}; // 0x8a
-    assign operators[139]     = {OperatorsPkg::OpeKind::Xaa, OperatorsPkg::AddrMode::Imm}; // 0x8b
-    assign operators[140]     = {OperatorsPkg::OpeKind::Sty, OperatorsPkg::AddrMode::Abs}; // 0x8c
-    assign operators[141]     = {OperatorsPkg::OpeKind::Sta, OperatorsPkg::AddrMode::Abs}; // 0x8d
-    assign operators[142]     = {OperatorsPkg::OpeKind::Stx, OperatorsPkg::AddrMode::Abs}; // 0x8e
-    assign operators[143]     = {OperatorsPkg::OpeKind::Sax, OperatorsPkg::AddrMode::Abs}; // 0x8f
-    assign operators[144]     = {OperatorsPkg::OpeKind::Bcc, OperatorsPkg::AddrMode::Rel}; // 0x90
-    assign operators[145]     = {OperatorsPkg::OpeKind::Sta, OperatorsPkg::AddrMode::IndY}; // 0x91
-    assign operators[146]     = {OperatorsPkg::OpeKind::Kil, OperatorsPkg::AddrMode::Impl}; // 0x92
-    assign operators[147]     = {OperatorsPkg::OpeKind::Axa, OperatorsPkg::AddrMode::ZpY}; // 0x93
-    assign operators[148]     = {OperatorsPkg::OpeKind::Sty, OperatorsPkg::AddrMode::ZpX}; // 0x94
-    assign operators[149]     = {OperatorsPkg::OpeKind::Sta, OperatorsPkg::AddrMode::ZpX}; // 0x95
-    assign operators[150]     = {OperatorsPkg::OpeKind::Stx, OperatorsPkg::AddrMode::ZpY}; // 0x96
-    assign operators[151]     = {OperatorsPkg::OpeKind::Sax, OperatorsPkg::AddrMode::ZpY}; // 0x97
-    assign operators[152]     = {OperatorsPkg::OpeKind::Tya, OperatorsPkg::AddrMode::Impl}; // 0x98
-    assign operators[153]     = {OperatorsPkg::OpeKind::Sta, OperatorsPkg::AddrMode::AbsY}; // 0x99
-    assign operators[154]     = {OperatorsPkg::OpeKind::Txs, OperatorsPkg::AddrMode::Impl}; // 0x9a
-    assign operators[155]     = {OperatorsPkg::OpeKind::Xas, OperatorsPkg::AddrMode::AbsY}; // 0x9b
-    assign operators[156]     = {OperatorsPkg::OpeKind::Sya, OperatorsPkg::AddrMode::AbsX}; // 0x9c
-    assign operators[157]     = {OperatorsPkg::OpeKind::Sta, OperatorsPkg::AddrMode::AbsX}; // 0x9d
-    assign operators[158]     = {OperatorsPkg::OpeKind::Sxa, OperatorsPkg::AddrMode::AbsX}; // 0x9e
-    assign operators[159]     = {OperatorsPkg::OpeKind::Axa, OperatorsPkg::AddrMode::AbsY}; // 0x9f
-    assign operators[160]     = {OperatorsPkg::OpeKind::Ldy, OperatorsPkg::AddrMode::Imm}; // 0xa0
-    assign operators[161]     = {OperatorsPkg::OpeKind::Lda, OperatorsPkg::AddrMode::IndX}; // 0xa1
-    assign operators[162]     = {OperatorsPkg::OpeKind::Ldx, OperatorsPkg::AddrMode::Imm}; // 0xa2
-    assign operators[163]     = {OperatorsPkg::OpeKind::Lax, OperatorsPkg::AddrMode::IndX}; // 0xa3
-    assign operators[164]     = {OperatorsPkg::OpeKind::Ldy, OperatorsPkg::AddrMode::Zp}; // 0xa4
-    assign operators[165]     = {OperatorsPkg::OpeKind::Lda, OperatorsPkg::AddrMode::Zp}; // 0xa5
-    assign operators[166]     = {OperatorsPkg::OpeKind::Ldx, OperatorsPkg::AddrMode::Zp}; // 0xa6
-    assign operators[167]     = {OperatorsPkg::OpeKind::Lax, OperatorsPkg::AddrMode::Zp}; // 0xa7
-    assign operators[168]     = {OperatorsPkg::OpeKind::Tay, OperatorsPkg::AddrMode::Impl}; // 0xa8
-    assign operators[169]     = {OperatorsPkg::OpeKind::Lda, OperatorsPkg::AddrMode::Imm}; // 0xa9
-    assign operators[170]     = {OperatorsPkg::OpeKind::Tax, OperatorsPkg::AddrMode::Impl}; // 0xaa
-    assign operators[171]     = {OperatorsPkg::OpeKind::Lxa, OperatorsPkg::AddrMode::Imm}; // 0xab
-    assign operators[172]     = {OperatorsPkg::OpeKind::Ldy, OperatorsPkg::AddrMode::Abs}; // 0xac
-    assign operators[173]     = {OperatorsPkg::OpeKind::Lda, OperatorsPkg::AddrMode::Abs}; // 0xad
-    assign operators[174]     = {OperatorsPkg::OpeKind::Ldx, OperatorsPkg::AddrMode::Abs}; // 0xae
-    assign operators[175]     = {OperatorsPkg::OpeKind::Lax, OperatorsPkg::AddrMode::Abs}; // 0xaf
-    assign operators[176]     = {OperatorsPkg::OpeKind::Bcs, OperatorsPkg::AddrMode::Rel}; // 0xb0
-    assign operators[177]     = {OperatorsPkg::OpeKind::Lda, OperatorsPkg::AddrMode::IndY}; // 0xb1
-    assign operators[178]     = {OperatorsPkg::OpeKind::Kil, OperatorsPkg::AddrMode::Impl}; // 0xb2
-    assign operators[179]     = {OperatorsPkg::OpeKind::Lax, OperatorsPkg::AddrMode::IndY}; // 0xb3
-    assign operators[180]     = {OperatorsPkg::OpeKind::Ldy, OperatorsPkg::AddrMode::ZpX}; // 0xb4
-    assign operators[181]     = {OperatorsPkg::OpeKind::Lda, OperatorsPkg::AddrMode::ZpX}; // 0xb5
-    assign operators[182]     = {OperatorsPkg::OpeKind::Ldx, OperatorsPkg::AddrMode::ZpY}; // 0xb6
-    assign operators[183]     = {OperatorsPkg::OpeKind::Lax, OperatorsPkg::AddrMode::ZpY}; // 0xb7
-    assign operators[184]     = {OperatorsPkg::OpeKind::Clv, OperatorsPkg::AddrMode::Impl}; // 0xb8
-    assign operators[185]     = {OperatorsPkg::OpeKind::Lda, OperatorsPkg::AddrMode::AbsY}; // 0xb9
-    assign operators[186]     = {OperatorsPkg::OpeKind::Tsx, OperatorsPkg::AddrMode::Impl}; // 0xba
-    assign operators[187]     = {OperatorsPkg::OpeKind::Las, OperatorsPkg::AddrMode::AbsY}; // 0xbb
-    assign operators[188]     = {OperatorsPkg::OpeKind::Ldy, OperatorsPkg::AddrMode::AbsX}; // 0xbc
-    assign operators[189]     = {OperatorsPkg::OpeKind::Lda, OperatorsPkg::AddrMode::AbsX}; // 0xbd
-    assign operators[190]     = {OperatorsPkg::OpeKind::Ldx, OperatorsPkg::AddrMode::AbsY}; // 0xbe
-    assign operators[191]     = {OperatorsPkg::OpeKind::Lax, OperatorsPkg::AddrMode::AbsY}; // 0xbf
-    assign operators[192]     = {OperatorsPkg::OpeKind::Cpy, OperatorsPkg::AddrMode::Imm}; // 0xc0
-    assign operators[193]     = {OperatorsPkg::OpeKind::Cmp, OperatorsPkg::AddrMode::IndX}; // 0xc1
-    assign operators[194]     = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::Imm}; // 0xc2
-    assign operators[195]     = {OperatorsPkg::OpeKind::Dcp, OperatorsPkg::AddrMode::IndX}; // 0xc3
-    assign operators[196]     = {OperatorsPkg::OpeKind::Cpy, OperatorsPkg::AddrMode::Zp}; // 0xc4
-    assign operators[197]     = {OperatorsPkg::OpeKind::Cmp, OperatorsPkg::AddrMode::Zp}; // 0xc5
-    assign operators[198]     = {OperatorsPkg::OpeKind::Dec, OperatorsPkg::AddrMode::Zp}; // 0xc6
-    assign operators[199]     = {OperatorsPkg::OpeKind::Dcp, OperatorsPkg::AddrMode::Zp}; // 0xc7
-    assign operators[200]     = {OperatorsPkg::OpeKind::Iny, OperatorsPkg::AddrMode::Impl}; // 0xc8
-    assign operators[201]     = {OperatorsPkg::OpeKind::Cmp, OperatorsPkg::AddrMode::Imm}; // 0xc9
-    assign operators[202]     = {OperatorsPkg::OpeKind::Dex, OperatorsPkg::AddrMode::Impl}; // 0xca
-    assign operators[203]     = {OperatorsPkg::OpeKind::Axs, OperatorsPkg::AddrMode::Imm}; // 0xcb
-    assign operators[204]     = {OperatorsPkg::OpeKind::Cpy, OperatorsPkg::AddrMode::Abs}; // 0xcc
-    assign operators[205]     = {OperatorsPkg::OpeKind::Cmp, OperatorsPkg::AddrMode::Abs}; // 0xcd
-    assign operators[206]     = {OperatorsPkg::OpeKind::Dec, OperatorsPkg::AddrMode::Abs}; // 0xce
-    assign operators[207]     = {OperatorsPkg::OpeKind::Dcp, OperatorsPkg::AddrMode::Abs}; // 0xcf
-    assign operators[208]     = {OperatorsPkg::OpeKind::Bne, OperatorsPkg::AddrMode::Rel}; // 0xd0
-    assign operators[209]     = {OperatorsPkg::OpeKind::Cmp, OperatorsPkg::AddrMode::IndY}; // 0xd1
-    assign operators[210]     = {OperatorsPkg::OpeKind::Kil, OperatorsPkg::AddrMode::Impl}; // 0xd2
-    assign operators[211]     = {OperatorsPkg::OpeKind::Dcp, OperatorsPkg::AddrMode::IndY}; // 0xd3
-    assign operators[212]     = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::ZpX}; // 0xd4
-    assign operators[213]     = {OperatorsPkg::OpeKind::Cmp, OperatorsPkg::AddrMode::ZpX}; // 0xd5
-    assign operators[214]     = {OperatorsPkg::OpeKind::Dec, OperatorsPkg::AddrMode::ZpX}; // 0xd6
-    assign operators[215]     = {OperatorsPkg::OpeKind::Dcp, OperatorsPkg::AddrMode::ZpX}; // 0xd7
-    assign operators[216]     = {OperatorsPkg::OpeKind::Cld, OperatorsPkg::AddrMode::Impl}; // 0xd8
-    assign operators[217]     = {OperatorsPkg::OpeKind::Cmp, OperatorsPkg::AddrMode::AbsY}; // 0xd9
-    assign operators[218]     = {OperatorsPkg::OpeKind::Nop, OperatorsPkg::AddrMode::Nop}; // 0xda
-    assign operators[219]     = {OperatorsPkg::OpeKind::Dcp, OperatorsPkg::AddrMode::AbsY}; // 0xdb
-    assign operators[220]     = {OperatorsPkg::OpeKind::Top, OperatorsPkg::AddrMode::AbsX}; // 0xdc
-    assign operators[221]     = {OperatorsPkg::OpeKind::Cmp, OperatorsPkg::AddrMode::AbsX}; // 0xdd
-    assign operators[222]     = {OperatorsPkg::OpeKind::Dec, OperatorsPkg::AddrMode::AbsX}; // 0xde
-    assign operators[223]     = {OperatorsPkg::OpeKind::Dcp, OperatorsPkg::AddrMode::AbsX}; // 0xdf
-    assign operators[224]     = {OperatorsPkg::OpeKind::Cpx, OperatorsPkg::AddrMode::Imm}; // 0xe0
-    assign operators[225]     = {OperatorsPkg::OpeKind::Sbc, OperatorsPkg::AddrMode::IndX}; // 0xe1
-    assign operators[226]     = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::Imm}; // 0xe2
-    assign operators[227]     = {OperatorsPkg::OpeKind::Isb, OperatorsPkg::AddrMode::IndX}; // 0xe3
-    assign operators[228]     = {OperatorsPkg::OpeKind::Cpx, OperatorsPkg::AddrMode::Zp}; // 0xe4
-    assign operators[229]     = {OperatorsPkg::OpeKind::Sbc, OperatorsPkg::AddrMode::Zp}; // 0xe5
-    assign operators[230]     = {OperatorsPkg::OpeKind::Inc, OperatorsPkg::AddrMode::Zp}; // 0xe6
-    assign operators[231]     = {OperatorsPkg::OpeKind::Isb, OperatorsPkg::AddrMode::Zp}; // 0xe7
-    assign operators[232]     = {OperatorsPkg::OpeKind::Inx, OperatorsPkg::AddrMode::Impl}; // 0xe8
-    assign operators[233]     = {OperatorsPkg::OpeKind::Sbc, OperatorsPkg::AddrMode::Imm}; // 0xe9
-    assign operators[234]     = {OperatorsPkg::OpeKind::Nop, OperatorsPkg::AddrMode::Impl}; // 0xea
-    assign operators[235]     = {OperatorsPkg::OpeKind::Sbc, OperatorsPkg::AddrMode::Imm}; // 0xeb
-    assign operators[236]     = {OperatorsPkg::OpeKind::Cpx, OperatorsPkg::AddrMode::Abs}; // 0xec
-    assign operators[237]     = {OperatorsPkg::OpeKind::Sbc, OperatorsPkg::AddrMode::Abs}; // 0xed
-    assign operators[238]     = {OperatorsPkg::OpeKind::Inc, OperatorsPkg::AddrMode::Abs}; // 0xee
-    assign operators[239]     = {OperatorsPkg::OpeKind::Isb, OperatorsPkg::AddrMode::Abs}; // 0xef
-    assign operators[240]     = {OperatorsPkg::OpeKind::Beq, OperatorsPkg::AddrMode::Rel}; // 0xf0
-    assign operators[241]     = {OperatorsPkg::OpeKind::Sbc, OperatorsPkg::AddrMode::IndY}; // 0xf1
-    assign operators[242]     = {OperatorsPkg::OpeKind::Kil, OperatorsPkg::AddrMode::Impl}; // 0xf2
-    assign operators[243]     = {OperatorsPkg::OpeKind::Isb, OperatorsPkg::AddrMode::IndY}; // 0xf3
-    assign operators[244]     = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::ZpX}; // 0xf4
-    assign operators[245]     = {OperatorsPkg::OpeKind::Sbc, OperatorsPkg::AddrMode::ZpX}; // 0xf5
-    assign operators[246]     = {OperatorsPkg::OpeKind::Inc, OperatorsPkg::AddrMode::ZpX}; // 0xf6
-    assign operators[247]     = {OperatorsPkg::OpeKind::Isb, OperatorsPkg::AddrMode::ZpX}; // 0xf7
-    assign operators[248]     = {OperatorsPkg::OpeKind::Sed, OperatorsPkg::AddrMode::Impl}; // 0xf8
-    assign operators[249]     = {OperatorsPkg::OpeKind::Sbc, OperatorsPkg::AddrMode::AbsY}; // 0xf9
-    assign operators[250]     = {OperatorsPkg::OpeKind::Nop, OperatorsPkg::AddrMode::Nop}; // 0xfa
-    assign operators[251]     = {OperatorsPkg::OpeKind::Isb, OperatorsPkg::AddrMode::AbsY}; // 0xfb
-    assign operators[252]     = {OperatorsPkg::OpeKind::Top, OperatorsPkg::AddrMode::AbsX}; // 0xfc
-    assign operators[253]     = {OperatorsPkg::OpeKind::Sbc, OperatorsPkg::AddrMode::AbsX}; // 0xfd
-    assign operators[254]     = {OperatorsPkg::OpeKind::Inc, OperatorsPkg::AddrMode::AbsX}; // 0xfe
-    var status            : Status   ;
-    var n_status          : Status   ;
-    var reference_busy    : logic    ;
-    var n_reference_busy  : logic    ;
-    var reference_finish  : logic    ;
-    var n_reference_finish: logic    ;
-    var n_addr_low_reg    : logic <8>;
-    var n_addr_high_reg   : logic <8>;
-    var addr_low_reg      : logic <8>;
-    var addr_high_reg     : logic <8>;
-
+    var operators     : OperatorsPkg::Operator [8'hff];
+    assign operators[0]   = {OperatorsPkg::OpeKind::Brk, OperatorsPkg::AddrMode::Impl}; // 0x00
+    assign operators[1]   = {OperatorsPkg::OpeKind::Ora, OperatorsPkg::AddrMode::IndX}; // 0x01
+    assign operators[2]   = {OperatorsPkg::OpeKind::Kil, OperatorsPkg::AddrMode::Impl}; // 0x02
+    assign operators[3]   = {OperatorsPkg::OpeKind::Slo, OperatorsPkg::AddrMode::IndX}; // 0x03
+    assign operators[4]   = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::Zp}; // 0x04
+    assign operators[5]   = {OperatorsPkg::OpeKind::Ora, OperatorsPkg::AddrMode::Zp}; // 0x05
+    assign operators[6]   = {OperatorsPkg::OpeKind::Asl, OperatorsPkg::AddrMode::Zp}; // 0x06
+    assign operators[7]   = {OperatorsPkg::OpeKind::Slo, OperatorsPkg::AddrMode::Zp}; // 0x07
+    assign operators[8]   = {OperatorsPkg::OpeKind::Php, OperatorsPkg::AddrMode::Impl}; // 0x08
+    assign operators[9]   = {OperatorsPkg::OpeKind::Ora, OperatorsPkg::AddrMode::Imm}; // 0x09
+    assign operators[10]  = {OperatorsPkg::OpeKind::Asl, OperatorsPkg::AddrMode::Acc}; // 0x0a
+    assign operators[11]  = {OperatorsPkg::OpeKind::Aac, OperatorsPkg::AddrMode::Imm}; // 0x0b
+    assign operators[12]  = {OperatorsPkg::OpeKind::Top, OperatorsPkg::AddrMode::Abs}; // 0x0c
+    assign operators[13]  = {OperatorsPkg::OpeKind::Ora, OperatorsPkg::AddrMode::Abs}; // 0x0d
+    assign operators[14]  = {OperatorsPkg::OpeKind::Asl, OperatorsPkg::AddrMode::Abs}; // 0x0e
+    assign operators[15]  = {OperatorsPkg::OpeKind::Slo, OperatorsPkg::AddrMode::Abs}; // 0x0f
+    assign operators[16]  = {OperatorsPkg::OpeKind::Bpl, OperatorsPkg::AddrMode::Rel}; // 0x10
+    assign operators[17]  = {OperatorsPkg::OpeKind::Ora, OperatorsPkg::AddrMode::IndY}; // 0x11
+    assign operators[18]  = {OperatorsPkg::OpeKind::Kil, OperatorsPkg::AddrMode::Impl}; // 0x12
+    assign operators[19]  = {OperatorsPkg::OpeKind::Slo, OperatorsPkg::AddrMode::IndY}; // 0x13
+    assign operators[20]  = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::ZpX}; // 0x14
+    assign operators[21]  = {OperatorsPkg::OpeKind::Ora, OperatorsPkg::AddrMode::ZpX}; // 0x15
+    assign operators[22]  = {OperatorsPkg::OpeKind::Asl, OperatorsPkg::AddrMode::ZpX}; // 0x16
+    assign operators[23]  = {OperatorsPkg::OpeKind::Slo, OperatorsPkg::AddrMode::ZpX}; // 0x17
+    assign operators[24]  = {OperatorsPkg::OpeKind::Clc, OperatorsPkg::AddrMode::Impl}; // 0x18
+    assign operators[25]  = {OperatorsPkg::OpeKind::Ora, OperatorsPkg::AddrMode::AbsY}; // 0x19
+    assign operators[26]  = {OperatorsPkg::OpeKind::Nop, OperatorsPkg::AddrMode::Nop}; // 0x1a
+    assign operators[27]  = {OperatorsPkg::OpeKind::Slo, OperatorsPkg::AddrMode::AbsY}; // 0x1b
+    assign operators[28]  = {OperatorsPkg::OpeKind::Top, OperatorsPkg::AddrMode::AbsX}; // 0x1c
+    assign operators[29]  = {OperatorsPkg::OpeKind::Ora, OperatorsPkg::AddrMode::AbsX}; // 0x1d
+    assign operators[30]  = {OperatorsPkg::OpeKind::Asl, OperatorsPkg::AddrMode::AbsX}; // 0x1e
+    assign operators[31]  = {OperatorsPkg::OpeKind::Slo, OperatorsPkg::AddrMode::AbsX}; // 0x1f
+    assign operators[32]  = {OperatorsPkg::OpeKind::Jsr, OperatorsPkg::AddrMode::Abs}; // 0x20
+    assign operators[33]  = {OperatorsPkg::OpeKind::And, OperatorsPkg::AddrMode::IndX}; // 0x21
+    assign operators[34]  = {OperatorsPkg::OpeKind::Kil, OperatorsPkg::AddrMode::Impl}; // 0x22
+    assign operators[35]  = {OperatorsPkg::OpeKind::Rla, OperatorsPkg::AddrMode::IndX}; // 0x23
+    assign operators[36]  = {OperatorsPkg::OpeKind::Bit, OperatorsPkg::AddrMode::Zp}; // 0x24
+    assign operators[37]  = {OperatorsPkg::OpeKind::And, OperatorsPkg::AddrMode::Zp}; // 0x25
+    assign operators[38]  = {OperatorsPkg::OpeKind::Rol, OperatorsPkg::AddrMode::Zp}; // 0x26
+    assign operators[39]  = {OperatorsPkg::OpeKind::Rla, OperatorsPkg::AddrMode::Zp}; // 0x27
+    assign operators[40]  = {OperatorsPkg::OpeKind::Plp, OperatorsPkg::AddrMode::Impl}; // 0x28
+    assign operators[41]  = {OperatorsPkg::OpeKind::And, OperatorsPkg::AddrMode::Imm}; // 0x29
+    assign operators[42]  = {OperatorsPkg::OpeKind::Rol, OperatorsPkg::AddrMode::Acc}; // 0x2a
+    assign operators[43]  = {OperatorsPkg::OpeKind::Aac, OperatorsPkg::AddrMode::Imm}; // 0x2b
+    assign operators[44]  = {OperatorsPkg::OpeKind::Bit, OperatorsPkg::AddrMode::Abs}; // 0x2c
+    assign operators[45]  = {OperatorsPkg::OpeKind::And, OperatorsPkg::AddrMode::Abs}; // 0x2d
+    assign operators[46]  = {OperatorsPkg::OpeKind::Rol, OperatorsPkg::AddrMode::Abs}; // 0x2e
+    assign operators[47]  = {OperatorsPkg::OpeKind::Rla, OperatorsPkg::AddrMode::Abs}; // 0x2f
+    assign operators[48]  = {OperatorsPkg::OpeKind::Bmi, OperatorsPkg::AddrMode::Rel}; // 0x30
+    assign operators[49]  = {OperatorsPkg::OpeKind::And, OperatorsPkg::AddrMode::IndY}; // 0x31
+    assign operators[50]  = {OperatorsPkg::OpeKind::Kil, OperatorsPkg::AddrMode::Impl}; // 0x32
+    assign operators[51]  = {OperatorsPkg::OpeKind::Rla, OperatorsPkg::AddrMode::IndY}; // 0x33
+    assign operators[52]  = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::ZpX}; // 0x34
+    assign operators[53]  = {OperatorsPkg::OpeKind::And, OperatorsPkg::AddrMode::ZpX}; // 0x35
+    assign operators[54]  = {OperatorsPkg::OpeKind::Rol, OperatorsPkg::AddrMode::ZpX}; // 0x36
+    assign operators[55]  = {OperatorsPkg::OpeKind::Rla, OperatorsPkg::AddrMode::ZpX}; // 0x37
+    assign operators[56]  = {OperatorsPkg::OpeKind::Sec, OperatorsPkg::AddrMode::Impl}; // 0x38
+    assign operators[57]  = {OperatorsPkg::OpeKind::And, OperatorsPkg::AddrMode::AbsY}; // 0x39
+    assign operators[58]  = {OperatorsPkg::OpeKind::Nop, OperatorsPkg::AddrMode::Nop}; // 0x3a
+    assign operators[59]  = {OperatorsPkg::OpeKind::Rla, OperatorsPkg::AddrMode::AbsY}; // 0x3b
+    assign operators[60]  = {OperatorsPkg::OpeKind::Top, OperatorsPkg::AddrMode::AbsX}; // 0x3c
+    assign operators[61]  = {OperatorsPkg::OpeKind::And, OperatorsPkg::AddrMode::AbsX}; // 0x3d
+    assign operators[62]  = {OperatorsPkg::OpeKind::Rol, OperatorsPkg::AddrMode::AbsX}; // 0x3e
+    assign operators[63]  = {OperatorsPkg::OpeKind::Rla, OperatorsPkg::AddrMode::AbsX}; // 0x3f
+    assign operators[64]  = {OperatorsPkg::OpeKind::Rti, OperatorsPkg::AddrMode::Impl}; // 0x40
+    assign operators[65]  = {OperatorsPkg::OpeKind::Eor, OperatorsPkg::AddrMode::IndX}; // 0x41
+    assign operators[66]  = {OperatorsPkg::OpeKind::Kil, OperatorsPkg::AddrMode::Impl}; // 0x42
+    assign operators[67]  = {OperatorsPkg::OpeKind::Sre, OperatorsPkg::AddrMode::IndX}; // 0x43
+    assign operators[68]  = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::Zp}; // 0x44
+    assign operators[69]  = {OperatorsPkg::OpeKind::Eor, OperatorsPkg::AddrMode::Zp}; // 0x45
+    assign operators[70]  = {OperatorsPkg::OpeKind::Lsr, OperatorsPkg::AddrMode::Zp}; // 0x46
+    assign operators[71]  = {OperatorsPkg::OpeKind::Sre, OperatorsPkg::AddrMode::Zp}; // 0x47
+    assign operators[72]  = {OperatorsPkg::OpeKind::Pha, OperatorsPkg::AddrMode::Impl}; // 0x48
+    assign operators[73]  = {OperatorsPkg::OpeKind::Eor, OperatorsPkg::AddrMode::Imm}; // 0x49
+    assign operators[74]  = {OperatorsPkg::OpeKind::Lsr, OperatorsPkg::AddrMode::Acc}; // 0x4a
+    assign operators[75]  = {OperatorsPkg::OpeKind::Asr, OperatorsPkg::AddrMode::Imm}; // 0x4b
+    assign operators[76]  = {OperatorsPkg::OpeKind::Jmp, OperatorsPkg::AddrMode::Abs}; // 0x4c
+    assign operators[77]  = {OperatorsPkg::OpeKind::Eor, OperatorsPkg::AddrMode::Abs}; // 0x4d
+    assign operators[78]  = {OperatorsPkg::OpeKind::Lsr, OperatorsPkg::AddrMode::Abs}; // 0x4e
+    assign operators[79]  = {OperatorsPkg::OpeKind::Sre, OperatorsPkg::AddrMode::Abs}; // 0x4f
+    assign operators[80]  = {OperatorsPkg::OpeKind::Bvc, OperatorsPkg::AddrMode::Rel}; // 0x50
+    assign operators[81]  = {OperatorsPkg::OpeKind::Eor, OperatorsPkg::AddrMode::IndY}; // 0x51
+    assign operators[82]  = {OperatorsPkg::OpeKind::Kil, OperatorsPkg::AddrMode::Impl}; // 0x52
+    assign operators[83]  = {OperatorsPkg::OpeKind::Sre, OperatorsPkg::AddrMode::IndY}; // 0x53
+    assign operators[84]  = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::ZpX}; // 0x54
+    assign operators[85]  = {OperatorsPkg::OpeKind::Eor, OperatorsPkg::AddrMode::ZpX}; // 0x55
+    assign operators[86]  = {OperatorsPkg::OpeKind::Lsr, OperatorsPkg::AddrMode::ZpX}; // 0x56
+    assign operators[87]  = {OperatorsPkg::OpeKind::Sre, OperatorsPkg::AddrMode::ZpX}; // 0x57
+    assign operators[88]  = {OperatorsPkg::OpeKind::Cli, OperatorsPkg::AddrMode::Impl}; // 0x58
+    assign operators[89]  = {OperatorsPkg::OpeKind::Eor, OperatorsPkg::AddrMode::AbsY}; // 0x59
+    assign operators[90]  = {OperatorsPkg::OpeKind::Nop, OperatorsPkg::AddrMode::Nop}; // 0x5a
+    assign operators[91]  = {OperatorsPkg::OpeKind::Sre, OperatorsPkg::AddrMode::AbsY}; // 0x5b
+    assign operators[92]  = {OperatorsPkg::OpeKind::Top, OperatorsPkg::AddrMode::AbsX}; // 0x5c
+    assign operators[93]  = {OperatorsPkg::OpeKind::Eor, OperatorsPkg::AddrMode::AbsX}; // 0x5d
+    assign operators[94]  = {OperatorsPkg::OpeKind::Lsr, OperatorsPkg::AddrMode::AbsX}; // 0x5e
+    assign operators[95]  = {OperatorsPkg::OpeKind::Sre, OperatorsPkg::AddrMode::AbsX}; // 0x5f
+    assign operators[96]  = {OperatorsPkg::OpeKind::Rts, OperatorsPkg::AddrMode::Impl}; // 0x60
+    assign operators[97]  = {OperatorsPkg::OpeKind::Adc, OperatorsPkg::AddrMode::IndX}; // 0x61
+    assign operators[98]  = {OperatorsPkg::OpeKind::Kil, OperatorsPkg::AddrMode::Impl}; // 0x62
+    assign operators[99]  = {OperatorsPkg::OpeKind::Rra, OperatorsPkg::AddrMode::IndX}; // 0x63
+    assign operators[100] = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::Zp}; // 0x64
+    assign operators[101] = {OperatorsPkg::OpeKind::Adc, OperatorsPkg::AddrMode::Zp}; // 0x65
+    assign operators[102] = {OperatorsPkg::OpeKind::Ror, OperatorsPkg::AddrMode::Zp}; // 0x66
+    assign operators[103] = {OperatorsPkg::OpeKind::Rra, OperatorsPkg::AddrMode::Zp}; // 0x67
+    assign operators[104] = {OperatorsPkg::OpeKind::Pla, OperatorsPkg::AddrMode::Impl}; // 0x68
+    assign operators[105] = {OperatorsPkg::OpeKind::Adc, OperatorsPkg::AddrMode::Imm}; // 0x69
+    assign operators[106] = {OperatorsPkg::OpeKind::Ror, OperatorsPkg::AddrMode::Acc}; // 0x6a
+    assign operators[107] = {OperatorsPkg::OpeKind::Arr, OperatorsPkg::AddrMode::Imm}; // 0x6b
+    assign operators[108] = {OperatorsPkg::OpeKind::Jmp, OperatorsPkg::AddrMode::Ind}; // 0x6c
+    assign operators[109] = {OperatorsPkg::OpeKind::Adc, OperatorsPkg::AddrMode::Abs}; // 0x6d
+    assign operators[110] = {OperatorsPkg::OpeKind::Ror, OperatorsPkg::AddrMode::Abs}; // 0x6e
+    assign operators[111] = {OperatorsPkg::OpeKind::Rra, OperatorsPkg::AddrMode::Abs}; // 0x6f
+    assign operators[112] = {OperatorsPkg::OpeKind::Bvs, OperatorsPkg::AddrMode::Rel}; // 0x70
+    assign operators[113] = {OperatorsPkg::OpeKind::Adc, OperatorsPkg::AddrMode::IndY}; // 0x71
+    assign operators[114] = {OperatorsPkg::OpeKind::Kil, OperatorsPkg::AddrMode::Impl}; // 0x72
+    assign operators[115] = {OperatorsPkg::OpeKind::Rra, OperatorsPkg::AddrMode::IndY}; // 0x73
+    assign operators[116] = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::ZpX}; // 0x74
+    assign operators[117] = {OperatorsPkg::OpeKind::Adc, OperatorsPkg::AddrMode::ZpX}; // 0x75
+    assign operators[118] = {OperatorsPkg::OpeKind::Ror, OperatorsPkg::AddrMode::ZpX}; // 0x76
+    assign operators[119] = {OperatorsPkg::OpeKind::Rra, OperatorsPkg::AddrMode::ZpX}; // 0x77
+    assign operators[120] = {OperatorsPkg::OpeKind::Sei, OperatorsPkg::AddrMode::Impl}; // 0x78
+    assign operators[121] = {OperatorsPkg::OpeKind::Adc, OperatorsPkg::AddrMode::AbsY}; // 0x79
+    assign operators[122] = {OperatorsPkg::OpeKind::Nop, OperatorsPkg::AddrMode::Nop}; // 0x7a
+    assign operators[123] = {OperatorsPkg::OpeKind::Rra, OperatorsPkg::AddrMode::AbsY}; // 0x7b
+    assign operators[124] = {OperatorsPkg::OpeKind::Top, OperatorsPkg::AddrMode::AbsX}; // 0x7c
+    assign operators[125] = {OperatorsPkg::OpeKind::Adc, OperatorsPkg::AddrMode::AbsX}; // 0x7d
+    assign operators[126] = {OperatorsPkg::OpeKind::Ror, OperatorsPkg::AddrMode::AbsX}; // 0x7e
+    assign operators[127] = {OperatorsPkg::OpeKind::Rra, OperatorsPkg::AddrMode::AbsX}; // 0x7f
+    assign operators[128] = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::Imm}; // 0x80
+    assign operators[129] = {OperatorsPkg::OpeKind::Sta, OperatorsPkg::AddrMode::IndX}; // 0x81
+    assign operators[130] = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::Imm}; // 0x82
+    assign operators[131] = {OperatorsPkg::OpeKind::Sax, OperatorsPkg::AddrMode::IndX}; // 0x83
+    assign operators[132] = {OperatorsPkg::OpeKind::Sty, OperatorsPkg::AddrMode::Zp}; // 0x84
+    assign operators[133] = {OperatorsPkg::OpeKind::Sta, OperatorsPkg::AddrMode::Zp}; // 0x85
+    assign operators[134] = {OperatorsPkg::OpeKind::Stx, OperatorsPkg::AddrMode::Zp}; // 0x86
+    assign operators[135] = {OperatorsPkg::OpeKind::Sax, OperatorsPkg::AddrMode::Zp}; // 0x87
+    assign operators[136] = {OperatorsPkg::OpeKind::Dey, OperatorsPkg::AddrMode::Impl}; // 0x88
+    assign operators[137] = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::Imm}; // 0x89
+    assign operators[138] = {OperatorsPkg::OpeKind::Txa, OperatorsPkg::AddrMode::Impl}; // 0x8a
+    assign operators[139] = {OperatorsPkg::OpeKind::Xaa, OperatorsPkg::AddrMode::Imm}; // 0x8b
+    assign operators[140] = {OperatorsPkg::OpeKind::Sty, OperatorsPkg::AddrMode::Abs}; // 0x8c
+    assign operators[141] = {OperatorsPkg::OpeKind::Sta, OperatorsPkg::AddrMode::Abs}; // 0x8d
+    assign operators[142] = {OperatorsPkg::OpeKind::Stx, OperatorsPkg::AddrMode::Abs}; // 0x8e
+    assign operators[143] = {OperatorsPkg::OpeKind::Sax, OperatorsPkg::AddrMode::Abs}; // 0x8f
+    assign operators[144] = {OperatorsPkg::OpeKind::Bcc, OperatorsPkg::AddrMode::Rel}; // 0x90
+    assign operators[145] = {OperatorsPkg::OpeKind::Sta, OperatorsPkg::AddrMode::IndY}; // 0x91
+    assign operators[146] = {OperatorsPkg::OpeKind::Kil, OperatorsPkg::AddrMode::Impl}; // 0x92
+    assign operators[147] = {OperatorsPkg::OpeKind::Axa, OperatorsPkg::AddrMode::ZpY}; // 0x93
+    assign operators[148] = {OperatorsPkg::OpeKind::Sty, OperatorsPkg::AddrMode::ZpX}; // 0x94
+    assign operators[149] = {OperatorsPkg::OpeKind::Sta, OperatorsPkg::AddrMode::ZpX}; // 0x95
+    assign operators[150] = {OperatorsPkg::OpeKind::Stx, OperatorsPkg::AddrMode::ZpY}; // 0x96
+    assign operators[151] = {OperatorsPkg::OpeKind::Sax, OperatorsPkg::AddrMode::ZpY}; // 0x97
+    assign operators[152] = {OperatorsPkg::OpeKind::Tya, OperatorsPkg::AddrMode::Impl}; // 0x98
+    assign operators[153] = {OperatorsPkg::OpeKind::Sta, OperatorsPkg::AddrMode::AbsY}; // 0x99
+    assign operators[154] = {OperatorsPkg::OpeKind::Txs, OperatorsPkg::AddrMode::Impl}; // 0x9a
+    assign operators[155] = {OperatorsPkg::OpeKind::Xas, OperatorsPkg::AddrMode::AbsY}; // 0x9b
+    assign operators[156] = {OperatorsPkg::OpeKind::Sya, OperatorsPkg::AddrMode::AbsX}; // 0x9c
+    assign operators[157] = {OperatorsPkg::OpeKind::Sta, OperatorsPkg::AddrMode::AbsX}; // 0x9d
+    assign operators[158] = {OperatorsPkg::OpeKind::Sxa, OperatorsPkg::AddrMode::AbsX}; // 0x9e
+    assign operators[159] = {OperatorsPkg::OpeKind::Axa, OperatorsPkg::AddrMode::AbsY}; // 0x9f
+    assign operators[160] = {OperatorsPkg::OpeKind::Ldy, OperatorsPkg::AddrMode::Imm}; // 0xa0
+    assign operators[161] = {OperatorsPkg::OpeKind::Lda, OperatorsPkg::AddrMode::IndX}; // 0xa1
+    assign operators[162] = {OperatorsPkg::OpeKind::Ldx, OperatorsPkg::AddrMode::Imm}; // 0xa2
+    assign operators[163] = {OperatorsPkg::OpeKind::Lax, OperatorsPkg::AddrMode::IndX}; // 0xa3
+    assign operators[164] = {OperatorsPkg::OpeKind::Ldy, OperatorsPkg::AddrMode::Zp}; // 0xa4
+    assign operators[165] = {OperatorsPkg::OpeKind::Lda, OperatorsPkg::AddrMode::Zp}; // 0xa5
+    assign operators[166] = {OperatorsPkg::OpeKind::Ldx, OperatorsPkg::AddrMode::Zp}; // 0xa6
+    assign operators[167] = {OperatorsPkg::OpeKind::Lax, OperatorsPkg::AddrMode::Zp}; // 0xa7
+    assign operators[168] = {OperatorsPkg::OpeKind::Tay, OperatorsPkg::AddrMode::Impl}; // 0xa8
+    assign operators[169] = {OperatorsPkg::OpeKind::Lda, OperatorsPkg::AddrMode::Imm}; // 0xa9
+    assign operators[170] = {OperatorsPkg::OpeKind::Tax, OperatorsPkg::AddrMode::Impl}; // 0xaa
+    assign operators[171] = {OperatorsPkg::OpeKind::Lxa, OperatorsPkg::AddrMode::Imm}; // 0xab
+    assign operators[172] = {OperatorsPkg::OpeKind::Ldy, OperatorsPkg::AddrMode::Abs}; // 0xac
+    assign operators[173] = {OperatorsPkg::OpeKind::Lda, OperatorsPkg::AddrMode::Abs}; // 0xad
+    assign operators[174] = {OperatorsPkg::OpeKind::Ldx, OperatorsPkg::AddrMode::Abs}; // 0xae
+    assign operators[175] = {OperatorsPkg::OpeKind::Lax, OperatorsPkg::AddrMode::Abs}; // 0xaf
+    assign operators[176] = {OperatorsPkg::OpeKind::Bcs, OperatorsPkg::AddrMode::Rel}; // 0xb0
+    assign operators[177] = {OperatorsPkg::OpeKind::Lda, OperatorsPkg::AddrMode::IndY}; // 0xb1
+    assign operators[178] = {OperatorsPkg::OpeKind::Kil, OperatorsPkg::AddrMode::Impl}; // 0xb2
+    assign operators[179] = {OperatorsPkg::OpeKind::Lax, OperatorsPkg::AddrMode::IndY}; // 0xb3
+    assign operators[180] = {OperatorsPkg::OpeKind::Ldy, OperatorsPkg::AddrMode::ZpX}; // 0xb4
+    assign operators[181] = {OperatorsPkg::OpeKind::Lda, OperatorsPkg::AddrMode::ZpX}; // 0xb5
+    assign operators[182] = {OperatorsPkg::OpeKind::Ldx, OperatorsPkg::AddrMode::ZpY}; // 0xb6
+    assign operators[183] = {OperatorsPkg::OpeKind::Lax, OperatorsPkg::AddrMode::ZpY}; // 0xb7
+    assign operators[184] = {OperatorsPkg::OpeKind::Clv, OperatorsPkg::AddrMode::Impl}; // 0xb8
+    assign operators[185] = {OperatorsPkg::OpeKind::Lda, OperatorsPkg::AddrMode::AbsY}; // 0xb9
+    assign operators[186] = {OperatorsPkg::OpeKind::Tsx, OperatorsPkg::AddrMode::Impl}; // 0xba
+    assign operators[187] = {OperatorsPkg::OpeKind::Las, OperatorsPkg::AddrMode::AbsY}; // 0xbb
+    assign operators[188] = {OperatorsPkg::OpeKind::Ldy, OperatorsPkg::AddrMode::AbsX}; // 0xbc
+    assign operators[189] = {OperatorsPkg::OpeKind::Lda, OperatorsPkg::AddrMode::AbsX}; // 0xbd
+    assign operators[190] = {OperatorsPkg::OpeKind::Ldx, OperatorsPkg::AddrMode::AbsY}; // 0xbe
+    assign operators[191] = {OperatorsPkg::OpeKind::Lax, OperatorsPkg::AddrMode::AbsY}; // 0xbf
+    assign operators[192] = {OperatorsPkg::OpeKind::Cpy, OperatorsPkg::AddrMode::Imm}; // 0xc0
+    assign operators[193] = {OperatorsPkg::OpeKind::Cmp, OperatorsPkg::AddrMode::IndX}; // 0xc1
+    assign operators[194] = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::Imm}; // 0xc2
+    assign operators[195] = {OperatorsPkg::OpeKind::Dcp, OperatorsPkg::AddrMode::IndX}; // 0xc3
+    assign operators[196] = {OperatorsPkg::OpeKind::Cpy, OperatorsPkg::AddrMode::Zp}; // 0xc4
+    assign operators[197] = {OperatorsPkg::OpeKind::Cmp, OperatorsPkg::AddrMode::Zp}; // 0xc5
+    assign operators[198] = {OperatorsPkg::OpeKind::Dec, OperatorsPkg::AddrMode::Zp}; // 0xc6
+    assign operators[199] = {OperatorsPkg::OpeKind::Dcp, OperatorsPkg::AddrMode::Zp}; // 0xc7
+    assign operators[200] = {OperatorsPkg::OpeKind::Iny, OperatorsPkg::AddrMode::Impl}; // 0xc8
+    assign operators[201] = {OperatorsPkg::OpeKind::Cmp, OperatorsPkg::AddrMode::Imm}; // 0xc9
+    assign operators[202] = {OperatorsPkg::OpeKind::Dex, OperatorsPkg::AddrMode::Impl}; // 0xca
+    assign operators[203] = {OperatorsPkg::OpeKind::Axs, OperatorsPkg::AddrMode::Imm}; // 0xcb
+    assign operators[204] = {OperatorsPkg::OpeKind::Cpy, OperatorsPkg::AddrMode::Abs}; // 0xcc
+    assign operators[205] = {OperatorsPkg::OpeKind::Cmp, OperatorsPkg::AddrMode::Abs}; // 0xcd
+    assign operators[206] = {OperatorsPkg::OpeKind::Dec, OperatorsPkg::AddrMode::Abs}; // 0xce
+    assign operators[207] = {OperatorsPkg::OpeKind::Dcp, OperatorsPkg::AddrMode::Abs}; // 0xcf
+    assign operators[208] = {OperatorsPkg::OpeKind::Bne, OperatorsPkg::AddrMode::Rel}; // 0xd0
+    assign operators[209] = {OperatorsPkg::OpeKind::Cmp, OperatorsPkg::AddrMode::IndY}; // 0xd1
+    assign operators[210] = {OperatorsPkg::OpeKind::Kil, OperatorsPkg::AddrMode::Impl}; // 0xd2
+    assign operators[211] = {OperatorsPkg::OpeKind::Dcp, OperatorsPkg::AddrMode::IndY}; // 0xd3
+    assign operators[212] = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::ZpX}; // 0xd4
+    assign operators[213] = {OperatorsPkg::OpeKind::Cmp, OperatorsPkg::AddrMode::ZpX}; // 0xd5
+    assign operators[214] = {OperatorsPkg::OpeKind::Dec, OperatorsPkg::AddrMode::ZpX}; // 0xd6
+    assign operators[215] = {OperatorsPkg::OpeKind::Dcp, OperatorsPkg::AddrMode::ZpX}; // 0xd7
+    assign operators[216] = {OperatorsPkg::OpeKind::Cld, OperatorsPkg::AddrMode::Impl}; // 0xd8
+    assign operators[217] = {OperatorsPkg::OpeKind::Cmp, OperatorsPkg::AddrMode::AbsY}; // 0xd9
+    assign operators[218] = {OperatorsPkg::OpeKind::Nop, OperatorsPkg::AddrMode::Nop}; // 0xda
+    assign operators[219] = {OperatorsPkg::OpeKind::Dcp, OperatorsPkg::AddrMode::AbsY}; // 0xdb
+    assign operators[220] = {OperatorsPkg::OpeKind::Top, OperatorsPkg::AddrMode::AbsX}; // 0xdc
+    assign operators[221] = {OperatorsPkg::OpeKind::Cmp, OperatorsPkg::AddrMode::AbsX}; // 0xdd
+    assign operators[222] = {OperatorsPkg::OpeKind::Dec, OperatorsPkg::AddrMode::AbsX}; // 0xde
+    assign operators[223] = {OperatorsPkg::OpeKind::Dcp, OperatorsPkg::AddrMode::AbsX}; // 0xdf
+    assign operators[224] = {OperatorsPkg::OpeKind::Cpx, OperatorsPkg::AddrMode::Imm}; // 0xe0
+    assign operators[225] = {OperatorsPkg::OpeKind::Sbc, OperatorsPkg::AddrMode::IndX}; // 0xe1
+    assign operators[226] = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::Imm}; // 0xe2
+    assign operators[227] = {OperatorsPkg::OpeKind::Isb, OperatorsPkg::AddrMode::IndX}; // 0xe3
+    assign operators[228] = {OperatorsPkg::OpeKind::Cpx, OperatorsPkg::AddrMode::Zp}; // 0xe4
+    assign operators[229] = {OperatorsPkg::OpeKind::Sbc, OperatorsPkg::AddrMode::Zp}; // 0xe5
+    assign operators[230] = {OperatorsPkg::OpeKind::Inc, OperatorsPkg::AddrMode::Zp}; // 0xe6
+    assign operators[231] = {OperatorsPkg::OpeKind::Isb, OperatorsPkg::AddrMode::Zp}; // 0xe7
+    assign operators[232] = {OperatorsPkg::OpeKind::Inx, OperatorsPkg::AddrMode::Impl}; // 0xe8
+    assign operators[233] = {OperatorsPkg::OpeKind::Sbc, OperatorsPkg::AddrMode::Imm}; // 0xe9
+    assign operators[234] = {OperatorsPkg::OpeKind::Nop, OperatorsPkg::AddrMode::Impl}; // 0xea
+    assign operators[235] = {OperatorsPkg::OpeKind::Sbc, OperatorsPkg::AddrMode::Imm}; // 0xeb
+    assign operators[236] = {OperatorsPkg::OpeKind::Cpx, OperatorsPkg::AddrMode::Abs}; // 0xec
+    assign operators[237] = {OperatorsPkg::OpeKind::Sbc, OperatorsPkg::AddrMode::Abs}; // 0xed
+    assign operators[238] = {OperatorsPkg::OpeKind::Inc, OperatorsPkg::AddrMode::Abs}; // 0xee
+    assign operators[239] = {OperatorsPkg::OpeKind::Isb, OperatorsPkg::AddrMode::Abs}; // 0xef
+    assign operators[240] = {OperatorsPkg::OpeKind::Beq, OperatorsPkg::AddrMode::Rel}; // 0xf0
+    assign operators[241] = {OperatorsPkg::OpeKind::Sbc, OperatorsPkg::AddrMode::IndY}; // 0xf1
+    assign operators[242] = {OperatorsPkg::OpeKind::Kil, OperatorsPkg::AddrMode::Impl}; // 0xf2
+    assign operators[243] = {OperatorsPkg::OpeKind::Isb, OperatorsPkg::AddrMode::IndY}; // 0xf3
+    assign operators[244] = {OperatorsPkg::OpeKind::Dop, OperatorsPkg::AddrMode::ZpX}; // 0xf4
+    assign operators[245] = {OperatorsPkg::OpeKind::Sbc, OperatorsPkg::AddrMode::ZpX}; // 0xf5
+    assign operators[246] = {OperatorsPkg::OpeKind::Inc, OperatorsPkg::AddrMode::ZpX}; // 0xf6
+    assign operators[247] = {OperatorsPkg::OpeKind::Isb, OperatorsPkg::AddrMode::ZpX}; // 0xf7
+    assign operators[248] = {OperatorsPkg::OpeKind::Sed, OperatorsPkg::AddrMode::Impl}; // 0xf8
+    assign operators[249] = {OperatorsPkg::OpeKind::Sbc, OperatorsPkg::AddrMode::AbsY}; // 0xf9
+    assign operators[250] = {OperatorsPkg::OpeKind::Nop, OperatorsPkg::AddrMode::Nop}; // 0xfa
+    assign operators[251] = {OperatorsPkg::OpeKind::Isb, OperatorsPkg::AddrMode::AbsY}; // 0xfb
+    assign operators[252] = {OperatorsPkg::OpeKind::Top, OperatorsPkg::AddrMode::AbsX}; // 0xfc
+    assign operators[253] = {OperatorsPkg::OpeKind::Sbc, OperatorsPkg::AddrMode::AbsX}; // 0xfd
+    assign operators[254] = {OperatorsPkg::OpeKind::Inc, OperatorsPkg::AddrMode::AbsX}; // 0xfe
     enum OpeMode: logic {
         Inst,
         Addr,
     }
-    var raw_operator_mode      : logic<8>;
-    var operator_mode_rx_busy  : logic   ;
-    var operator_mode_rx_en    : logic   ;
-    assign operator_mode_rx_en     = EN && ~operator_mode_rx_finish;
-    var operator_mode_rx_finish: logic;
-    inst operator_mode_rx: uarty::Rx (
-        CLK                                 ,
-        RST                                 ,
-        DATA_IN                             ,
-        RE         : operator_mode_rx_en    ,
-        read_finish: operator_mode_rx_finish,
-        data_out   : raw_operator_mode      ,
-        busy       : operator_mode_rx_busy  ,
+    var raw_operator_mode: logic<8>;
+    var ope_read_busy    : logic   ;
+    var ope_read_en      : logic   ;
+    assign ope_read_en       = EN && ~ope_read_finish;
+    var ope_read_finish  : logic;
+    inst ope_mode_rx: uarty::Rx (
+        CLK                           ,
+        RST                           ,
+        DATA_IN                       ,
+        RE         : ope_read_en      ,
+        read_finish: ope_read_finish  ,
+        data_out   : raw_operator_mode,
+        busy       : ope_read_busy    ,
     );
-    var casted_operator_mode: OpeMode;
-    assign casted_operator_mode = raw_operator_mode as OpeMode;
+    var casted_ope_mode: OpeMode;
+    assign casted_ope_mode = raw_operator_mode as OpeMode;
 
-    var raw_inst_mode      : logic<8>;
-    var inst_mode_rx_busy  : logic   ;
-    var inst_mode_rx_en    : logic   ;
-    assign inst_mode_rx_en     = EN && (casted_operator_mode == OpeMode::Inst) && operator_mode_rx_finish && ~inst_mode_rx_finish;
-    var inst_mode_rx_finish: logic;
+    var raw_inst_mode   : logic<8>;
+    var inst_read_busy  : logic   ;
+    var inst_read_en    : logic   ;
+    assign inst_read_en     = EN && (casted_ope_mode == OpeMode::Inst) && ope_read_finish && ~inst_read_finish;
+    var inst_read_finish: logic;
     inst inst_mode_rx: uarty::Rx (
-        CLK                             ,
-        RST                             ,
-        DATA_IN                         ,
-        RE         : inst_mode_rx_en    ,
-        read_finish: inst_mode_rx_finish,
-        data_out   : raw_inst_mode      ,
-        busy       : inst_mode_rx_busy  ,
+        CLK                          ,
+        RST                          ,
+        DATA_IN                      ,
+        RE         : inst_read_en    ,
+        read_finish: inst_read_finish,
+        data_out   : raw_inst_mode   ,
+        busy       : inst_read_busy  ,
     );
     var inst_casted_ope_kind : OperatorsPkg::OpeKind;
     assign inst_casted_ope_kind  = operators[raw_inst_mode].ope_kind;
     var inst_casted_addr_mode: OperatorsPkg::AddrMode;
     assign inst_casted_addr_mode = operators[raw_inst_mode].addr_mode;
 
-    var raw_addressing_mode      : logic<8>;
-    var addressing_mode_rx_busy  : logic   ;
-    var addressing_mode_rx_en    : logic   ;
-    assign addressing_mode_rx_en     = EN && (casted_operator_mode == OpeMode::Addr) && operator_mode_rx_finish && ~addressing_mode_rx_finish;
-    var addressing_mode_rx_finish: logic;
-    inst addressing_mode_rx: uarty::Rx (
-        CLK                                   ,
-        RST                                   ,
-        DATA_IN                               ,
-        RE         : addressing_mode_rx_en    ,
-        read_finish: addressing_mode_rx_finish,
-        data_out   : raw_addressing_mode      ,
-        busy       : addressing_mode_rx_busy  ,
+    var raw_addr_mode   : logic<8>;
+    var addr_read_busy  : logic   ;
+    var addr_read_en    : logic   ;
+    assign addr_read_en     = EN && (casted_ope_mode == OpeMode::Addr) && ope_read_finish && ~addr_read_finish;
+    var addr_read_finish: logic;
+    inst addr_mode_rx: uarty::Rx (
+        CLK                          ,
+        RST                          ,
+        DATA_IN                      ,
+        RE         : addr_read_en    ,
+        read_finish: addr_read_finish,
+        data_out   : raw_addr_mode   ,
+        busy       : addr_read_busy  ,
     );
-    var casted_addressing_mode: OperatorsPkg::AddrMode;
-    assign casted_addressing_mode = raw_addressing_mode as OperatorsPkg::AddrMode;
-    var reference_addr_mode   : OperatorsPkg::AddrMode;
-    assign reference_addr_mode    = if inst_mode_rx_finish {
+    var casted_addr_mode: OperatorsPkg::AddrMode;
+    assign casted_addr_mode = raw_addr_mode as OperatorsPkg::AddrMode;
+    var ref_addr_mode   : OperatorsPkg::AddrMode;
+
+    assign ref_addr_mode = if inst_read_finish {
         inst_casted_addr_mode
-    } else if addressing_mode_rx_finish {
-        casted_addressing_mode
+    } else if addr_read_finish {
+        casted_addr_mode
     } else {
         OperatorsPkg::AddrMode::Acc
     };
 
-    var read_imm_en    : logic   ;
-    var n_read_imm_en  : logic   ;
-    var read_imm_finish: logic   ;
-    var imm_data       : logic<8>;
-    var read_imm_busy  : logic   ;
+    var imm_en       : logic   ;
+    var imm_finish   : logic   ;
+    var imm_data     : logic<8>;
+    var read_imm_busy: logic   ;
     inst read_imm_rx: uarty::Rx (
-        CLK                         ,
-        RST                         ,
-        DATA_IN                     ,
-        RE         : read_imm_en    ,
-        read_finish: read_imm_finish,
-        data_out   : imm_data       ,
-        busy       : read_imm_busy  ,
+        CLK                       ,
+        RST                       ,
+        DATA_IN                   ,
+        RE         : imm_en       ,
+        read_finish: imm_finish   ,
+        data_out   : imm_data     ,
+        busy       : read_imm_busy,
     );
-    var reference_en: logic;
-    assign reference_en = EN && ~reference_finish && ~read_imm_finish && (inst_mode_rx_finish || addressing_mode_rx_finish);
 
-    assign busy = operator_mode_rx_busy || inst_mode_rx_busy || addressing_mode_rx_busy || reference_busy || read_imm_busy;
-    always_comb {
-        n_status           = status;
-        n_reference_busy   = reference_busy;
-        n_reference_finish = reference_finish;
-        n_addr_low_reg     = addr_low_reg;
-        n_addr_high_reg    = addr_low_reg;
-        n_read_imm_en      = read_imm_en;
-        if read_imm_finish {
-            addr_low           = imm_data;
-            addr_high          = 0;
-            n_status           = Status::idle;
-            n_reference_busy   = 0;
-            n_reference_finish = 1;
-        } else if reference_finish {
-            addr_low  = addr_low_reg;
-            addr_high = addr_high_reg;
-            // } else if inst_mode_rx_finish {
-            //     addr_low  = operators[raw_inst_mode].ope_kind; // casted_ope_kind;
-            //     addr_high = addr_high_reg;
-        } else {
-            addr_low  = 0;
-            addr_high = 0;
-        }
-        case status {
-            Status::idle: {
-                if reference_en {
-                    n_reference_busy = 1;
-                    n_status         = Status::work;
-                }
-            }
-            Status::work: {
-                if reference_addr_mode == OperatorsPkg::AddrMode::Acc {
-                    n_addr_low_reg     = a;
-                    n_addr_high_reg    = 0;
-                    n_status           = Status::idle;
-                    n_reference_busy   = 0;
-                    n_reference_finish = 1;
-                } else if reference_addr_mode == OperatorsPkg::AddrMode::Imm {
-                    n_read_imm_en = 1;
-                    n_status      = Status::idle;
-                    //     //
-                    // } else if casted_addressing_mode == OperatorsPkg::OperatorsPkg::AddrMode::Abs {
-                    //     //
-                    // } else if casted_addressing_mode == OperatorsPkg::OperatorsPkg::AddrMode::AbsX {
-                    //     //
-                    // } else if casted_addressing_mode == OperatorsPkg::OperatorsPkg::AddrMode::AbsY {
-                    //     //
-                    // } else if casted_addressing_mode == OperatorsPkg::OperatorsPkg::AddrMode::Zp {
-                    //     //
-                    // } else if casted_addressing_mode == OperatorsPkg::OperatorsPkg::AddrMode::ZpX {
-                    //     //
-                    // } else if casted_addressing_mode == OperatorsPkg::OperatorsPkg::AddrMode::ZpY {
-                    //     //
-                    // } else if casted_addressing_mode == OperatorsPkg::OperatorsPkg::AddrMode::Impl {
-                    //     //
-                    // } else if casted_addressing_mode == OperatorsPkg::OperatorsPkg::AddrMode::Rel {
-                    //     //
-                    // } else if casted_addressing_mode == OperatorsPkg::OperatorsPkg::AddrMode::IndX {
-                    //     //
-                    // } else if casted_addressing_mode == OperatorsPkg::OperatorsPkg::AddrMode::IndY {
-                    //     //
-                    // } else if casted_addressing_mode == OperatorsPkg::OperatorsPkg::AddrMode::Ind {
-                    //     //
-                    // } else if casted_addressing_mode == OperatorsPkg::OperatorsPkg::AddrMode::Nop {
-                    //     //
-                } else {
-                    n_addr_low_reg  = 0;
-                    n_addr_high_reg = 0;
-                }
-            }
-        }
-    }
+    var addr_ref_busy  : logic;
+    var addr_ref_finish: logic;
+    var addr_ref_en    : logic;
+    assign addr_ref_en     = EN && ~addr_ref_finish && ~imm_finish && (inst_read_finish || addr_read_finish);
 
-    always_ff (posedge CLK, async_high RST) {
-        if_reset {
-            status           = Status::idle;
-            reference_finish = 0;
-            reference_busy   = 0;
-            addr_low_reg     = 0;
-            addr_high_reg    = 0;
-            read_imm_en      = 0;
-        } else {
-            status           = n_status;
-            reference_finish = n_reference_finish;
-            reference_busy   = n_reference_busy;
-            addr_low_reg     = n_addr_low_reg;
-            addr_high_reg    = n_addr_high_reg;
-            read_imm_en      = n_read_imm_en;
-        }
-    }
+    inst addr_ref: AddrRef (
+        CLK                             ,
+        RST                             ,
+        DATA_IN                         ,
+        EN             : addr_ref_en    ,
+        a                               ,
+        addr_mode      : ref_addr_mode  ,
+        imm_finish                      ,
+        imm_data                        ,
+        ope_read_finish                 ,
+        imm_en                          ,
+        addr_low                        ,
+        addr_high                       ,
+        busy           : addr_ref_busy  ,
+        finish         : addr_ref_finish,
+    );
+
+    assign busy = ope_read_busy || inst_read_busy || addr_read_busy || addr_ref_busy || read_imm_busy;
 }
