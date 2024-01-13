@@ -17,26 +17,26 @@ module main (
     var callback_return_value: int     ;
     var callback_read_rx_busy: int     ;
     inst callback_read_rx: uarty::Rx (
-        CLK                               ,
-        RST                               ,
-        DATA_IN    : GPIO_0_1             ,
-        RE         : callback_read_enable ,
-        read_finish: 0                    ,
-        data_out   : callback_return_value,
-        busy       : callback_read_rx_busy,
+        CLK                            ,
+        RST                            ,
+        DATA_IN : GPIO_0_1             ,
+        RE      : callback_read_enable ,
+        data_out: callback_return_value,
+        busy    : callback_read_rx_busy,
+        finish  : 0                    ,
     );
 
     var sequence_count_read_rx_enable: logic    = mode == ModePkg::CpuMode::sequence && ~write_busy;
     var sequence_args_count          : logic<8>;
     var sequence_count_read_rx_busy  : logic   ;
     inst sequence_count_read_rx: uarty::Rx (
-        CLK                                       ,
-        RST                                       ,
-        DATA_IN    : GPIO_0_1                     ,
-        RE         : sequence_count_read_rx_enable,
-        read_finish: 0                            ,
-        data_out   : sequence_args_count          ,
-        busy       : sequence_count_read_rx_busy  ,
+        CLK                                    ,
+        RST                                    ,
+        DATA_IN : GPIO_0_1                     ,
+        RE      : sequence_count_read_rx_enable,
+        data_out: sequence_args_count          ,
+        busy    : sequence_count_read_rx_busy  ,
+        finish  : 0                            ,
     );
 
     var debug_enable: logic    = mode == ModePkg::CpuMode::debug && ~write_busy;
@@ -70,6 +70,7 @@ module main (
     var write_enable: logic;
     assign write_enable = cpu_enable && ~callback_read_rx_busy && ~sequence_count_read_rx_busy && ~debug_busy;
     var write_busy  : logic;
+    var write_finish: logic;
     inst tx: uarty::Tx (
         CLK                   ,
         RST                   ,
@@ -77,5 +78,6 @@ module main (
         DATA_IN : write_data  ,
         data_out: GPIO_0_0    ,
         busy    : write_busy  ,
+        finish  : write_finish,
     );
 }

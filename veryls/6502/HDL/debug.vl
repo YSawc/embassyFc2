@@ -282,13 +282,13 @@ module Debug (
     assign ope_read_en       = EN && ~ope_read_finish;
     var ope_read_finish  : logic;
     inst ope_mode_rx: uarty::Rx (
-        CLK                           ,
-        RST                           ,
-        DATA_IN                       ,
-        RE         : ope_read_en      ,
-        read_finish: ope_read_finish  ,
-        data_out   : raw_operator_mode,
-        busy       : ope_read_busy    ,
+        CLK                        ,
+        RST                        ,
+        DATA_IN                    ,
+        RE      : ope_read_en      ,
+        data_out: raw_operator_mode,
+        busy    : ope_read_busy    ,
+        finish  : ope_read_finish  ,
     );
     var casted_ope_mode: OpeMode;
     assign casted_ope_mode = raw_operator_mode as OpeMode;
@@ -299,13 +299,13 @@ module Debug (
     assign inst_read_en     = EN && (casted_ope_mode == OpeMode::Inst) && ope_read_finish && ~inst_read_finish;
     var inst_read_finish: logic;
     inst inst_mode_rx: uarty::Rx (
-        CLK                          ,
-        RST                          ,
-        DATA_IN                      ,
-        RE         : inst_read_en    ,
-        read_finish: inst_read_finish,
-        data_out   : raw_inst_mode   ,
-        busy       : inst_read_busy  ,
+        CLK                       ,
+        RST                       ,
+        DATA_IN                   ,
+        RE      : inst_read_en    ,
+        data_out: raw_inst_mode   ,
+        busy    : inst_read_busy  ,
+        finish  : inst_read_finish,
     );
     var inst_casted_ope_kind : OperatorsPkg::OpeKind;
     assign inst_casted_ope_kind  = operators[raw_inst_mode].ope_kind;
@@ -318,13 +318,13 @@ module Debug (
     assign addr_read_en     = EN && (casted_ope_mode == OpeMode::Addr) && ope_read_finish && ~addr_read_finish;
     var addr_read_finish: logic;
     inst addr_mode_rx: uarty::Rx (
-        CLK                          ,
-        RST                          ,
-        DATA_IN                      ,
-        RE         : addr_read_en    ,
-        read_finish: addr_read_finish,
-        data_out   : raw_addr_mode   ,
-        busy       : addr_read_busy  ,
+        CLK                       ,
+        RST                       ,
+        DATA_IN                   ,
+        RE      : addr_read_en    ,
+        data_out: raw_addr_mode   ,
+        busy    : addr_read_busy  ,
+        finish  : addr_read_finish,
     );
     var casted_addr_mode: OperatorsPkg::AddrMode;
     assign casted_addr_mode = raw_addr_mode as OperatorsPkg::AddrMode;
@@ -343,13 +343,13 @@ module Debug (
     var imm_data     : logic<8>;
     var read_imm_busy: logic   ;
     inst read_imm_rx: uarty::Rx (
-        CLK                       ,
-        RST                       ,
-        DATA_IN                   ,
-        RE         : imm_en       ,
-        read_finish: imm_finish   ,
-        data_out   : imm_data     ,
-        busy       : read_imm_busy,
+        CLK                    ,
+        RST                    ,
+        DATA_IN                ,
+        RE      : imm_en       ,
+        data_out: imm_data     ,
+        busy    : read_imm_busy,
+        finish  : imm_finish   ,
     );
 
     var addr_ref_busy  : logic   ;

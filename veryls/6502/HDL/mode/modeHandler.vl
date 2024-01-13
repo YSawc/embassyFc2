@@ -7,13 +7,13 @@ module ModeHandler (
     var mode_read_enable: logic = mode == ModePkg::CpuMode::nop;
     var mode_read_data  : int  ;
     inst mode_read_rx: uarty::Rx (
-        CLK                          ,
-        RST                          ,
-        DATA_IN                      ,
-        RE         : mode_read_enable,
-        read_finish: 0               ,
-        data_out   : mode_read_data  ,
-        busy       : 0               ,
+        CLK                       ,
+        RST                       ,
+        DATA_IN                   ,
+        RE      : mode_read_enable,
+        data_out: mode_read_data  ,
+        busy    : 0               ,
+        finish  : 0               ,
     );
     var mode_selector_enable: logic = mode_read_data != 0;
     inst mode_selector: ModeSelector (
