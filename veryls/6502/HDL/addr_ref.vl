@@ -1,17 +1,20 @@
 module AddrRef (
-    CLK            : input  logic                    ,
-    RST            : input  logic                    ,
-    EN             : input  logic                    ,
-    a              : input  logic                 <8>,
-    addr_mode      : input  OperatorsPkg::AddrMode   ,
-    imm_finish     : input  logic                    ,
-    imm_data       : input  logic                 <8>,
-    ope_read_finish: input  logic                 <8>,
-    imm_en         : output logic                    ,
-    addr_low       : output logic                 <8>,
-    addr_high      : output logic                 <8>,
-    busy           : output logic                    ,
-    finish         : output logic                    ,
+    CLK            : input  logic                     ,
+    RST            : input  logic                     ,
+    EN             : input  logic                     ,
+    a              : input  logic                 <8> ,
+    addr_mode      : input  OperatorsPkg::AddrMode    ,
+    imm_finish     : input  logic                     ,
+    abs_finish     : input  logic                     ,
+    imm_data       : input  logic                 <8> ,
+    abs_data       : input  logic                 <16>,
+    ope_read_finish: input  logic                 <8> ,
+    imm_en         : output logic                     ,
+    abs_en         : output logic                     ,
+    addr_low       : output logic                 <8> ,
+    addr_high      : output logic                 <8> ,
+    busy           : output logic                     ,
+    finish         : output logic                     ,
 ) {
     enum Status: logic<3> {
         idle,
@@ -27,6 +30,7 @@ module AddrRef (
     var addr_low_reg   : logic <8>;
     var addr_high_reg  : logic <8>;
     var n_imm_en       : logic    ;
+    var n_abs_en       : logic    ;
 
     var ope_en  : logic;
     var n_ope_en: logic;
@@ -37,22 +41,24 @@ module AddrRef (
         n_addr_low_reg  = addr_low_reg;
         n_addr_high_reg = addr_low_reg;
         n_imm_en        = imm_en;
+        n_abs_en        = abs_en;
         n_ope_en        = ope_en;
         if imm_finish {
             addr_low  = imm_data;
             addr_high = 0;
-            n_status  = Status::idle;
             n_busy    = 0;
             n_finish  = 1;
             if ope_read_finish {
                 n_ope_en = 1;
             }
+        } else if abs_finish {
+            addr_low  = abs_data && 8'hff;
+            addr_high = (addr_high_reg && 16'hff00) >> 8;
+            n_busy    = 0;
+            n_finish  = 1;
         } else if finish {
             addr_low  = addr_low_reg;
             addr_high = addr_high_reg;
-            // } else if inst_read_finish {
-            //     addr_low  = operators[raw_inst_mode].ope_kind; // casted_ope_kind;
-            //     addr_high = addr_high_reg;
         } else {
             addr_low  = 0;
             addr_high = 0;
@@ -68,41 +74,40 @@ module AddrRef (
                 if addr_mode == OperatorsPkg::AddrMode::Acc {
                     n_addr_low_reg  = a;
                     n_addr_high_reg = 0;
-                    n_status        = Status::idle;
                     n_busy          = 0;
                     n_finish        = 1;
                 } else if addr_mode == OperatorsPkg::AddrMode::Imm {
                     n_imm_en = 1;
-                    n_status = Status::idle;
-                    //     //
-                    // } else if casted_addr_mode == OperatorsPkg::OperatorsPkg::AddrMode::Abs {
-                    //     //
-                    // } else if casted_addr_mode == OperatorsPkg::OperatorsPkg::AddrMode::AbsX {
-                    //     //
-                    // } else if casted_addr_mode == OperatorsPkg::OperatorsPkg::AddrMode::AbsY {
-                    //     //
-                    // } else if casted_addr_mode == OperatorsPkg::OperatorsPkg::AddrMode::Zp {
-                    //     //
-                    // } else if casted_addr_mode == OperatorsPkg::OperatorsPkg::AddrMode::ZpX {
-                    //     //
-                    // } else if casted_addr_mode == OperatorsPkg::OperatorsPkg::AddrMode::ZpY {
-                    //     //
-                    // } else if casted_addr_mode == OperatorsPkg::OperatorsPkg::AddrMode::Impl {
-                    //     //
-                    // } else if casted_addr_mode == OperatorsPkg::OperatorsPkg::AddrMode::Rel {
-                    //     //
-                    // } else if casted_addr_mode == OperatorsPkg::OperatorsPkg::AddrMode::IndX {
-                    //     //
-                    // } else if casted_addr_mode == OperatorsPkg::OperatorsPkg::AddrMode::IndY {
-                    //     //
-                    // } else if casted_addr_mode == OperatorsPkg::OperatorsPkg::AddrMode::Ind {
-                    //     //
-                    // } else if casted_addr_mode == OperatorsPkg::OperatorsPkg::AddrMode::Nop {
-                    //     //
+                } else if addr_mode == OperatorsPkg::AddrMode::Abs {
+                    n_abs_en = 1;
+                    //
+                    // } else if addr_mode == OperatorsPkg::AddrMode::AbsX {
+                    //
+                    // } else if addr_mode == OperatorsPkg::AddrMode::AbsY {
+                    //
+                    // } else if addr_mode == OperatorsPkg::AddrMode::Zp {
+                    //
+                    // } else if addr_mode == OperatorsPkg::AddrMode::ZpX {
+                    //
+                    // } else if addr_mode == OperatorsPkg::AddrMode::ZpY {
+                    //
+                    // } else if addr_mode == OperatorsPkg::AddrMode::Impl {
+                    //
+                    // } else if addr_mode == OperatorsPkg::AddrMode::Rel {
+                    //
+                    // } else if addr_mode == OperatorsPkg::AddrMode::IndX {
+                    //
+                    // } else if addr_mode == OperatorsPkg::AddrMode::IndY {
+                    //
+                    // } else if addr_mode == OperatorsPkg::AddrMode::Ind {
+                    //
+                    // } else if addr_mode == OperatorsPkg::AddrMode::Nop {
+                    //
                 } else {
                     n_addr_low_reg  = 0;
                     n_addr_high_reg = 0;
                 }
+                n_status = Status::idle;
             }
         }
     }
@@ -115,6 +120,7 @@ module AddrRef (
             addr_low_reg  = 0;
             addr_high_reg = 0;
             imm_en        = 0;
+            abs_en        = 0;
             ope_en        = 0;
         } else {
             status        = n_status;
@@ -123,6 +129,7 @@ module AddrRef (
             addr_low_reg  = n_addr_low_reg;
             addr_high_reg = n_addr_high_reg;
             imm_en        = n_imm_en;
+            abs_en        = n_abs_en;
             ope_en        = n_ope_en;
         }
     }
