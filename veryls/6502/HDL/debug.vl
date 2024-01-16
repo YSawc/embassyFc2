@@ -1,16 +1,17 @@
 module Debug (
-    CLK             : input  logic   ,
-    RST             : input  logic   ,
-    DATA_IN         : input  logic   ,
-    EN              : input  logic   ,
-    memory_data     : input  logic<8>,
-    tx_finish       : input  logic   ,
-    addr_low        : output logic<8>,
-    addr_high       : output logic<8>,
-    busy            : output logic   ,
-    WE              : output logic   ,
-    memory_addr_low : output logic<8>,
-    memory_addr_high: output logic<8>,
+    CLK               : input  logic    ,
+    RST               : input  logic    ,
+    DATA_IN           : input  logic    ,
+    EN                : input  logic    ,
+    memory_data       : input  logic<16>,
+    memory_read_finish: input  logic    ,
+    tx_finish         : input  logic    ,
+    addr_low          : output logic<8> ,
+    addr_high         : output logic<8> ,
+    busy              : output logic    ,
+    WE                : output logic    ,
+    memory_addr_low   : output logic<8> ,
+    memory_addr_high  : output logic<8> ,
 ) {
     var a : logic<8> ;
     var x : logic<8> ;
@@ -387,8 +388,39 @@ module Debug (
         busy    : read_abs_high_busy,
         finish  : abs_high_finish   ,
     );
-    var abs_target_finish: logic = abs_low_finish && abs_high_finish;
-    assign WE                = abs_target_finish && ~tx_finish;
+
+    var ind_low_en       : logic   ;
+    var ind_low_finish   : logic   ;
+    var ind_low_data     : logic<8>;
+    var read_ind_low_busy: logic   ;
+    assign ind_low_en        = abs_en && ~ind_low_finish;
+    inst read_ind_low_rx: uarty::Rx (
+        CLK                        ,
+        RST                        ,
+        DATA_IN                    ,
+        RE      : ind_low_en       ,
+        data_out: ind_low_data     ,
+        busy    : read_ind_low_busy,
+        finish  : ind_low_finish   ,
+    );
+
+    var ind_high_en       : logic;
+    var ind_high_finish   : logic;
+    assign ind_high_en        = ind_en && ind_low_finish;
+    var ind_high_data     : logic<8>;
+    var read_ind_high_busy: logic   ;
+    inst read_ind_high_rx: uarty::Rx (
+        CLK                         ,
+        RST                         ,
+        DATA_IN                     ,
+        RE      : ind_high_en       ,
+        data_out: ind_high_data     ,
+        busy    : read_ind_high_busy,
+        finish  : ind_high_finish   ,
+    );
+    var ind_target_finish: logic = ind_low_finish && ind_high_finish;
+
+    assign WE = ind_target_finish && ~tx_finish;
 
     var addr_ref_busy  : logic   ;
     var addr_ref_finish: logic   ;
@@ -397,6 +429,11 @@ module Debug (
     var addr_ref_high  : logic<8>;
     assign addr_ref_en     = EN && ~addr_ref_finish && ~imm_finish && (inst_read_finish || addr_read_finish);
     var abs_en         : logic;
+    var ind_en         : logic;
+
+    var abs_read_finish: logic = abs_high_finish;
+
+    var abs_data: logic<16> = (abs_high_data << 8) + abs_low_data;
 
     inst addr_ref: AddrRef (
         CLK                             ,
@@ -405,12 +442,15 @@ module Debug (
         a                               ,
         addr_mode      : ref_addr_mode  ,
         imm_finish                      ,
-        abs_finish                      ,
+        abs_finish     : abs_read_finish,
+        ind_finish     : abs_read_finish,
         imm_data                        ,
         abs_data                        ,
+        memory_data                     ,
         ope_read_finish                 ,
         imm_en                          ,
         abs_en                          ,
+        ind_en                          ,
         addr_low       : addr_ref_low   ,
         addr_high      : addr_ref_high  ,
         busy           : addr_ref_busy  ,
@@ -465,12 +505,12 @@ module Debug (
     };
 
     assign addr_low = if casted_ope_mode == OpeMode::Inst {
-        if inst_read_finish {
-            ope_inst_debug_out_low
-        } else if abs_low_finish {
+        if abs_low_finish {
             abs_low_data
         } else if addr_read_finish {
             addr_ref_low
+        } else if inst_read_finish {
+            ope_inst_debug_out_low
         } else {
             0
         }
@@ -479,23 +519,31 @@ module Debug (
     } else {
         1
     };
-
-    assign addr_high = if abs_high_finish {
-        abs_high_data
-    } else if inst_read_finish {
-        ope_inst_debug_out_high
-    } else if addr_read_finish {
+    assign addr_high = if casted_ope_mode == OpeMode::Inst {
+        if abs_high_finish {
+            abs_high_data
+        } else if addr_read_finish {
+            addr_ref_low
+        } else if inst_read_finish {
+            ope_inst_debug_out_low
+        } else {
+            0
+        }
+    } else if casted_ope_mode == OpeMode::Addr {
         addr_ref_high
     } else {
-        0
+        1
     };
 
     assign busy = if casted_ope_mode == OpeMode::Inst {
-        ~ope_inst_finish
+        if abs_high_finish {
+            0
+        } else {
+            ~ope_inst_finish
+        }
     } else if (casted_ope_mode == OpeMode::Addr) {
         ~addr_ref_finish
     } else {
         1
     };
-    // assign busy = ope_read_busy || inst_read_busy || addr_read_busy || addr_ref_busy || read_imm_busy || ope_inst_busy;
 }
