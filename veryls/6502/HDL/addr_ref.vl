@@ -57,13 +57,13 @@ module AddrRef (
                 n_ope_en = 1;
             }
         } else if abs_finish {
-            addr_low  = abs_data && 8'hff;
-            addr_high = (abs_data && 16'hff00) >> 8;
+            addr_low  = (abs_data & 16'hff00) >> 8;
+            addr_high = abs_data & 8'hff;
             n_busy    = 0;
             n_finish  = 1;
         } else if ind_finish {
-            addr_low  = memory_data && 8'hff;
-            addr_high = (memory_data && 16'hff00) >> 8;
+            addr_low  = (memory_data & 16'hff00) >> 8;
+            addr_high = memory_data & 8'hff;
             n_busy    = 0;
             n_finish  = 1;
         } else if finish {

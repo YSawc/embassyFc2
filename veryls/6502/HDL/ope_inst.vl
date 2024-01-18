@@ -65,11 +65,12 @@ module OpeInst (
                 } else if ope_kind == OperatorsPkg::OpeKind::Jmp {
                     n_pc            = (addr_high << 8) + addr_low;
                     n_addr_low_reg  = addr_low;
-                    n_addr_high_reg = (addr_high << 8);
+                    n_addr_high_reg = addr_high;
                 } else {
                     n_a            = 0;
                     n_x            = 0;
                     n_y            = 0;
+                    n_pc           = 0;
                     n_addr_low_reg = 0;
                 }
                 n_addr_high_reg = 0;

@@ -23,8 +23,6 @@ fn main() -> ! {
     write_buf1[2] = 0x4c;
     write_buf1[3] = 0xf5;
     write_buf1[4] = 0xc5;
-    let mut mock_memory = [0x0u8; 0xffff];
-    mock_memory[0xc5f5] = 0x6e;
     unwrap!(usart.blocking_write(&write_buf1));
     let mut read_buf = [0x0u8; 2];
     info!("wrote 0xa9 instruction and imm data.");
