@@ -29,8 +29,8 @@ module main (
         finish : mode_handler_finish,
     );
 
-    var callback_read_enable : logic<8> = (mode == ModePkg::CpuMode::callback) && ~callback_tx_busy && ~callback_finish;
-    var callback_finish      : logic   ;
+    var callback_read_enable : logic<8> = (mode == ModePkg::CpuMode::callback) && ~callback_read_finish;
+    var callback_read_finish : logic   ;
     var callback_return_value: int     ;
     var callback_read_rx_busy: int     ;
     inst callback_read_rx: uarty::Rx (
@@ -40,9 +40,23 @@ module main (
         RE      : callback_read_enable ,
         data_out: callback_return_value,
         busy    : callback_read_rx_busy,
-        finish  : callback_finish      ,
+        finish  : callback_read_finish ,
     );
-    var callback_tx_enable: logic = (mode == ModePkg::CpuMode::callback) && ~callback_read_rx_busy && ~callback_tx_finish;
+
+    var callback_read_rts_en      : logic = callback_read_enable && ~callback_read_rts_finish;
+    var callback_read_rts_data_out: logic;
+    var callback_read_rts_busy    : logic;
+    var callback_read_rts_finish  : logic;
+    inst callback_read_rts: uarty::Rts (
+        CLK                                 ,
+        RST                                 ,
+        EN      : callback_read_rts_en      ,
+        data_out: callback_read_rts_data_out,
+        busy    : callback_read_rts_busy    ,
+        finish  : callback_read_rts_finish  ,
+    );
+
+    var callback_tx_enable: logic = (mode == ModePkg::CpuMode::callback) && callback_read_finish && ~callback_tx_finish && ~CTS;
     var callback_tx_out   : logic;
     var callback_tx_busy  : logic;
     var callback_tx_finish: logic;
@@ -56,18 +70,31 @@ module main (
         finish  : callback_tx_finish   ,
     );
 
-    var sequence_count_read_rx_enable: logic    = mode == ModePkg::CpuMode::sequence && ~write_busy;
-    var sequence_args_count          : logic<8>;
-    var sequence_count_read_rx_busy  : logic   ;
-    var sequence_finish              : logic   ;
+    var sequence_count_read_rx_en  : logic    = mode == ModePkg::CpuMode::sequence && ~write_busy;
+    var sequence_args_count        : logic<8>;
+    var sequence_count_read_rx_busy: logic   ;
+    var sequence_finish            : logic   ;
     inst sequence_count_read_rx: uarty::Rx (
-        CLK                                    ,
-        RST                                    ,
-        DATA_IN : GPIO_0_1                     ,
-        RE      : sequence_count_read_rx_enable,
-        data_out: sequence_args_count          ,
-        busy    : sequence_count_read_rx_busy  ,
-        finish  : sequence_finish              ,
+        CLK                                  ,
+        RST                                  ,
+        DATA_IN : GPIO_0_1                   ,
+        RE      : sequence_count_read_rx_en  ,
+        data_out: sequence_args_count        ,
+        busy    : sequence_count_read_rx_busy,
+        finish  : sequence_finish            ,
+    );
+
+    var sequence_count_read_rts_en      : logic = sequence_count_read_rx_en && ~sequence_finish;
+    var sequence_count_read_rts_data_out: logic;
+    var sequence_count_read_rts_busy    : logic;
+    var sequence_count_read_rts_finish  : logic;
+    inst sequence_count_read_rts: uarty::Rts (
+        CLK                                       ,
+        RST                                       ,
+        EN      : sequence_count_read_rts_en      ,
+        data_out: sequence_count_read_rts_data_out,
+        busy    : sequence_count_read_rts_busy    ,
+        finish  : sequence_count_read_rts_finish  ,
     );
 
     var debug_enable    : logic    = (mode == ModePkg::CpuMode::debug) && ~write_busy;
@@ -191,6 +218,8 @@ module main (
 
     assign GPIO_0_2 = if mode_handler_busy {
         mode_handler_rts
+    } else if callback_read_rts_en {
+        callback_read_rts_data_out
     } else if debug_busy {
         debug_rts
     } else {

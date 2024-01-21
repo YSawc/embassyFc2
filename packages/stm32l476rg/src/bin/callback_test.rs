@@ -9,19 +9,39 @@ use embassy_stm32::{bind_interrupts, peripherals, usart};
 use {defmt_rtt as _, panic_probe as _};
 
 bind_interrupts!(struct Irqs {
-    UART4 => usart::InterruptHandler<peripherals::UART4>;
+    USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
 #[cortex_m_rt::entry]
 fn main() -> ! {
     let p = embassy_stm32::init(Default::default());
     let config = Config::default();
-    let mut usart = Uart::new(p.UART4, p.PA1, p.PA0, Irqs, NoDma, NoDma, config).unwrap();
-    let mut buf = [0x0u8; 2];
+    let mut usart = Uart::new_with_rtscts(
+        p.USART1, p.PA10, p.PA9, Irqs, p.PA12, p.PA11, NoDma, NoDma, config,
+    )
+    .unwrap();
+    let mut buf = [0x0u8; 1];
     buf[0] = CpuMode::Callback as u8;
-    buf[1] = 0xba;
-    unwrap!(usart.blocking_write(&buf));
-    info!("wrote mode and additional data.");
+    'blocking_write_cpu_mode: loop {
+        match usart.blocking_write(&buf) {
+            Ok(_) => {
+                info!("write cpu operation mode.");
+                break 'blocking_write_cpu_mode;
+            }
+            Err(e) => info!("error while writing: {}", e),
+        }
+    }
+    buf[0] = 0xba;
+    'blocking_write_callback_value: loop {
+        match usart.blocking_write(&buf) {
+            Ok(_) => {
+                info!("write callback value.");
+                break 'blocking_write_callback_value;
+            }
+            Err(e) => info!("error while writing: {}", e),
+        }
+    }
+
     loop {
         match usart.blocking_read(&mut buf) {
             Ok(_) => {

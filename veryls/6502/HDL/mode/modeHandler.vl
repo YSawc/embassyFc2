@@ -22,21 +22,21 @@ module ModeHandler (
         finish  : mode_read_finish,
     );
 
-    var mode_read_cts_en      : logic = EN && ~mode_read_finish;
-    var mode_read_cts_data_out: logic;
-    var mode_read_cts_busy    : logic;
-    var mode_read_cts_finish  : logic;
-    inst mode_read_cts: uarty::Rts (
+    var mode_read_rts_en      : logic = EN && ~mode_read_finish;
+    var mode_read_rts_data_out: logic;
+    var mode_read_rts_busy    : logic;
+    var mode_read_rts_finish  : logic;
+    inst mode_read_rts: uarty::Rts (
         CLK                             ,
         RST                             ,
-        EN      : mode_read_cts_en      ,
-        data_out: mode_read_cts_data_out,
-        busy    : mode_read_cts_busy    ,
-        finish  : mode_read_cts_finish  ,
+        EN      : mode_read_rts_en      ,
+        data_out: mode_read_rts_data_out,
+        busy    : mode_read_rts_busy    ,
+        finish  : mode_read_rts_finish  ,
     );
 
-    assign RTS = if mode_read_cts_en && ~mode_read_cts_finish {
-        mode_read_cts_data_out
+    assign RTS = if mode_read_rts_en && ~mode_read_rts_finish {
+        mode_read_rts_data_out
     } else {
         1
     };

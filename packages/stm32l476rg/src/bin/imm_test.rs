@@ -22,41 +22,41 @@ fn main() -> ! {
     .unwrap();
     let mut buf = [0x0u8; 1];
     buf[0] = CpuMode::Debug as u8;
-    'blocking_cpu_mode_write: loop {
+    'blocking_write_cpu_mode: loop {
         match usart.blocking_write(&buf) {
             Ok(_) => {
                 info!("write cpu operation mode.");
-                break 'blocking_cpu_mode_write;
+                break 'blocking_write_cpu_mode;
             }
             Err(e) => info!("error while writing: {}", e),
         }
     }
     buf[0] = OpeMode::Addr as u8;
-    'blocking_operation_write: loop {
+    'blocking_write_operation: loop {
         match usart.blocking_write(&buf) {
             Ok(_) => {
                 info!("write operation mode.");
-                break 'blocking_operation_write;
+                break 'blocking_write_operation;
             }
             Err(e) => info!("error while writing: {}", e),
         }
     }
     buf[0] = AddrMode::Imm as u8;
-    'blocking_addressing_mode_write: loop {
+    'blocking_write_addressing_mode: loop {
         match usart.blocking_write(&buf) {
             Ok(_) => {
                 info!("write addressing mode.");
-                break 'blocking_addressing_mode_write;
+                break 'blocking_write_addressing_mode;
             }
             Err(e) => info!("error while writing: {}", e),
         }
     }
     buf[0] = 0xaa;
-    'blocking_imm_data_write: loop {
+    'blocking_write_imm_data: loop {
         match usart.blocking_write(&buf) {
             Ok(_) => {
                 info!("write imm data.");
-                break 'blocking_imm_data_write;
+                break 'blocking_write_imm_data;
             }
             Err(e) => info!("error while writing: {}", e),
         }
