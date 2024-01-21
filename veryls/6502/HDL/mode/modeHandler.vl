@@ -1,26 +1,53 @@
 module ModeHandler (
     CLK    : input  logic           ,
     RST    : input  logic           ,
+    EN     : input  logic           ,
     DATA_IN: input  logic           ,
+    RTS    : output logic           ,
     mode   : output ModePkg::CpuMode,
+    finish : output logic           ,
 ) {
-    var mode_read_enable: logic = mode == ModePkg::CpuMode::nop;
+    var mode_read_enable: logic = (mode == ModePkg::CpuMode::nop);
     var mode_read_data  : int  ;
+    var mode_read_busy  : logic;
+    var mode_read_finish: logic;
     inst mode_read_rx: uarty::Rx (
         CLK                       ,
         RST                       ,
         DATA_IN                   ,
         RE      : mode_read_enable,
         data_out: mode_read_data  ,
-        busy    : 0               ,
-        finish  : 0               ,
+        busy    : mode_read_busy  ,
+        finish  : mode_read_finish,
     );
+
+    var mode_read_cts_en      : logic = EN && ~mode_read_finish;
+    var mode_read_cts_data_out: logic;
+    var mode_read_cts_finish  : logic;
+    inst mode_read_cts: uarty::Rts (
+        CLK                             ,
+        RST                             ,
+        EN      : mode_read_cts_en      ,
+        data_out: mode_read_cts_data_out,
+        finish  : mode_read_cts_finish  ,
+    );
+
+    assign RTS = if mode_read_cts_en && ~mode_read_cts_finish {
+        mode_read_cts_data_out
+    } else {
+        1
+    };
+
     var mode_selector_enable: logic = mode_read_data != 0;
+    var mode_selector_finish: logic;
     inst mode_selector: ModeSelector (
-        CLK                       ,
-        RST                       ,
-        EN  : mode_selector_enable,
-        data: mode_read_data      ,
-        mode                      ,
+        CLK                         ,
+        RST                         ,
+        EN    : mode_selector_enable,
+        data  : mode_read_data      ,
+        mode                        ,
+        finish: mode_selector_finish,
     );
+
+    assign finish = mode_selector_finish;
 }

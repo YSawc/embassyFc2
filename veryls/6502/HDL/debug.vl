@@ -9,6 +9,7 @@ module Debug (
     addr_high         : output logic<8> ,
     busy              : output logic    ,
     WE                : output logic    ,
+    RTS               : output logic    ,
     memory_addr_low   : output logic<8> ,
     memory_addr_high  : output logic<8> ,
     a                 : output logic<8> ,
@@ -284,8 +285,8 @@ module Debug (
     var raw_operator_mode: logic<8>;
     var ope_read_busy    : logic   ;
     var ope_read_en      : logic   ;
-    assign ope_read_en       = EN && ~ope_read_finish;
-    var ope_read_finish  : logic;
+    assign ope_read_en       = EN && ~ope_mode_finish;
+    var ope_mode_finish  : logic;
     inst ope_mode_rx: uarty::Rx (
         CLK                        ,
         RST                        ,
@@ -293,7 +294,17 @@ module Debug (
         RE      : ope_read_en      ,
         data_out: raw_operator_mode,
         busy    : ope_read_busy    ,
-        finish  : ope_read_finish  ,
+        finish  : ope_mode_finish  ,
+    );
+    var ope_read_cts_en      : logic = ope_read_en && ~ope_mode_finish;
+    var ope_read_cts_data_out: logic;
+    var ope_read_cts_finish  : logic;
+    inst ope_mode_cts: uarty::Rts (
+        CLK                            ,
+        RST                            ,
+        EN      : ope_read_cts_en      ,
+        data_out: ope_read_cts_data_out,
+        finish  : ope_read_cts_finish  ,
     );
     var casted_ope_mode: OpeMode;
     assign casted_ope_mode = raw_operator_mode as OpeMode;
@@ -301,7 +312,7 @@ module Debug (
     var raw_inst_mode   : logic<8>;
     var inst_read_busy  : logic   ;
     var inst_read_en    : logic   ;
-    assign inst_read_en     = EN && (casted_ope_mode == OpeMode::Inst) && ope_read_finish && ~inst_read_finish;
+    assign inst_read_en     = EN && (casted_ope_mode == OpeMode::Inst) && ope_mode_finish && ~inst_read_finish;
     var inst_read_finish: logic;
     inst inst_mode_rx: uarty::Rx (
         CLK                       ,
@@ -320,7 +331,7 @@ module Debug (
     var raw_addr_mode   : logic<8>;
     var addr_read_busy  : logic   ;
     var addr_read_en    : logic   ;
-    assign addr_read_en     = EN && (casted_ope_mode == OpeMode::Addr) && ope_read_finish && ~addr_read_finish;
+    assign addr_read_en     = EN && (casted_ope_mode == OpeMode::Addr) && ope_mode_finish && ~addr_read_finish;
     var addr_read_finish: logic;
     inst addr_mode_rx: uarty::Rx (
         CLK                       ,
@@ -334,27 +345,37 @@ module Debug (
     var casted_addr_mode: OperatorsPkg::AddrMode;
     assign casted_addr_mode = raw_addr_mode as OperatorsPkg::AddrMode;
     var ref_addr_mode   : OperatorsPkg::AddrMode;
-
-    assign ref_addr_mode = if inst_read_finish {
+    assign ref_addr_mode    = if inst_read_finish {
         inst_casted_addr_mode
     } else if addr_read_finish {
         casted_addr_mode
     } else {
         OperatorsPkg::AddrMode::Acc
     };
+    var addr_mode_cts_en      : logic = addr_read_en && ~addr_read_finish;
+    var addr_mode_cts_data_out: logic;
+    var addr_mode_cts_finish  : logic;
+    inst addr_mode_cts: uarty::Rts (
+        CLK                             ,
+        RST                             ,
+        EN      : addr_mode_cts_en      ,
+        data_out: addr_mode_cts_data_out,
+        finish  : addr_mode_cts_finish  ,
+    );
 
-    var imm_en       : logic   ;
-    var imm_finish   : logic   ;
-    var imm_data     : logic<8>;
-    var read_imm_busy: logic   ;
+    var imm_en        : logic   ;
+    var read_imm_rx_en: logic    = imm_en;
+    var imm_finish    : logic   ;
+    var imm_data      : logic<8>;
+    var read_imm_busy : logic   ;
     inst read_imm_rx: uarty::Rx (
-        CLK                    ,
-        RST                    ,
-        DATA_IN                ,
-        RE      : imm_en       ,
-        data_out: imm_data     ,
-        busy    : read_imm_busy,
-        finish  : imm_finish   ,
+        CLK                     ,
+        RST                     ,
+        DATA_IN                 ,
+        RE      : read_imm_rx_en,
+        data_out: imm_data      ,
+        busy    : read_imm_busy ,
+        finish  : imm_finish    ,
     );
 
     var abs_low_en       : logic   ;
@@ -486,7 +507,7 @@ module Debug (
         imm_data                                ,
         abs_data                                ,
         memory_data                             ,
-        ope_read_finish                         ,
+        ope_mode_finish                         ,
         imm_en                                  ,
         abs_en                                  ,
         ind_en                                  ,
@@ -562,6 +583,14 @@ module Debug (
         }
     } else if (casted_ope_mode == OpeMode::Addr) {
         ~addr_ref_finish
+    } else {
+        1
+    };
+
+    assign RTS = if ope_read_cts_en {
+        ope_read_cts_data_out
+    } else if addr_mode_cts_en {
+        addr_mode_cts_data_out
     } else {
         1
     };

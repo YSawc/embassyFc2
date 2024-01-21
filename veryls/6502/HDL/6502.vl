@@ -2,23 +2,33 @@ module main (
     CLK     : input  logic   ,
     RST     : input  logic   ,
     KEY     : input  logic<3>,
-    GPIO_0_0: output logic   ,
-    GPIO_0_1: input  logic   ,
+    GPIO_0_1: input  logic   , // RX
+    GPIO_0_3: input  logic   , // CTS
+    GPIO_0_0: output logic   , // TX
+    GPIO_0_2: output logic   , // RTS
 ) {
-    var a : logic<8> ;
-    var x : logic<8> ;
-    var y : logic<8> ;
-    var pc: logic<16>;
+    var CTS: logic     = GPIO_0_3;
+    var a  : logic<8> ;
+    var x  : logic<8> ;
+    var y  : logic<8> ;
+    var pc : logic<16>;
 
-    var mode: ModePkg::CpuMode;
-    inst modeHandler: ModeHandler (
-        CLK              ,
-        RST              ,
-        DATA_IN: GPIO_0_1,
-        mode             ,
+    var mode               : ModePkg::CpuMode;
+    var mode_handler_en    : logic            = (mode == ModePkg::CpuMode::nop);
+    var mode_handler_rts   : logic           ;
+    var mode_handler_finish: logic           ;
+    inst mode_handler: ModeHandler (
+        CLK                         ,
+        RST                         ,
+        EN     : mode_handler_en    ,
+        DATA_IN: GPIO_0_1           ,
+        mode                        ,
+        RTS    : mode_handler_rts   ,
+        finish : mode_handler_finish,
     );
 
-    var callback_read_enable : logic<8> = (mode == ModePkg::CpuMode::callback) && ~callback_tx_busy;
+    var callback_read_enable : logic<8> = (mode == ModePkg::CpuMode::callback) && ~callback_tx_busy && ~callback_finish;
+    var callback_finish      : logic   ;
     var callback_return_value: int     ;
     var callback_read_rx_busy: int     ;
     inst callback_read_rx: uarty::Rx (
@@ -28,9 +38,9 @@ module main (
         RE      : callback_read_enable ,
         data_out: callback_return_value,
         busy    : callback_read_rx_busy,
-        finish  : 0                    ,
+        finish  : callback_finish      ,
     );
-    var callback_tx_enable: logic = (mode == ModePkg::CpuMode::callback) && ~callback_read_rx_busy;
+    var callback_tx_enable: logic = (mode == ModePkg::CpuMode::callback) && ~callback_read_rx_busy && ~callback_tx_finish;
     var callback_tx_out   : logic;
     var callback_tx_busy  : logic;
     var callback_tx_finish: logic;
@@ -47,6 +57,7 @@ module main (
     var sequence_count_read_rx_enable: logic    = mode == ModePkg::CpuMode::sequence && ~write_busy;
     var sequence_args_count          : logic<8>;
     var sequence_count_read_rx_busy  : logic   ;
+    var sequence_finish              : logic   ;
     inst sequence_count_read_rx: uarty::Rx (
         CLK                                    ,
         RST                                    ,
@@ -54,7 +65,7 @@ module main (
         RE      : sequence_count_read_rx_enable,
         data_out: sequence_args_count          ,
         busy    : sequence_count_read_rx_busy  ,
-        finish  : 0                            ,
+        finish  : sequence_finish              ,
     );
 
     var debug_enable    : logic    = (mode == ModePkg::CpuMode::debug) && ~write_busy;
@@ -64,6 +75,7 @@ module main (
     var debug_tx_en     : logic   ;
     var memory_addr_low : logic<8>;
     var memory_addr_high: logic<8>;
+    var debug_rts       : logic   ;
     inst debug: Debug (
         CLK                                           ,
         RST                                           ,
@@ -75,6 +87,7 @@ module main (
         addr_high                                     ,
         busy              : debug_busy                ,
         WE                : debug_tx_en               ,
+        RTS               : debug_rts                 ,
         memory_addr_low                               ,
         memory_addr_high                              ,
         a                                             ,
@@ -86,7 +99,7 @@ module main (
     var addr_low_tx_out   : logic;
     var addr_low_tx_busy  : logic;
     var addr_low_tx_finish: logic;
-    var addr_low_tx_enable: logic = if ~debug_busy && ~addr_low_tx_finish {
+    var addr_low_tx_enable: logic = if ~debug_busy && ~addr_low_tx_finish && ~CTS {
         1
     } else {
         0
@@ -104,7 +117,7 @@ module main (
     var addr_high_tx_out   : logic;
     var addr_high_tx_busy  : logic;
     var addr_high_tx_finish: logic;
-    var addr_high_tx_enable: logic = if ~debug_busy && addr_low_tx_finish {
+    var addr_high_tx_enable: logic = if ~debug_busy && addr_low_tx_finish && ~addr_high_tx_finish && ~CTS {
         1
     } else {
         0
@@ -122,7 +135,7 @@ module main (
     var memory_addr_low_tx_out   : logic;
     var memory_addr_low_tx_busy  : logic;
     var memory_addr_low_tx_finish: logic;
-    var memory_addr_low_tx_enable: logic = if debug_tx_en && ~memory_addr_low_tx_finish {
+    var memory_addr_low_tx_enable: logic = if debug_tx_en && ~memory_addr_low_tx_finish && ~CTS {
         1
     } else {
         0
@@ -140,7 +153,7 @@ module main (
     var memory_addr_high_tx_out   : logic;
     var memory_addr_high_tx_busy  : logic;
     var memory_addr_high_tx_finish: logic;
-    var memory_addr_high_tx_enable: logic = if debug_tx_en && memory_addr_low_tx_finish && ~memory_addr_high_tx_finish {
+    var memory_addr_high_tx_enable: logic = if debug_tx_en && memory_addr_low_tx_finish && ~memory_addr_high_tx_finish && ~CTS {
         1
     } else {
         0
@@ -170,6 +183,14 @@ module main (
         } else {
             1
         }
+    } else {
+        1
+    };
+
+    assign GPIO_0_2 = if ~mode_handler_finish {
+        mode_handler_rts
+    } else if debug_busy {
+        debug_rts
     } else {
         1
     };

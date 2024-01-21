@@ -1,28 +1,34 @@
 module ModeSelector (
-    CLK : input  logic              ,
-    RST : input  logic              ,
-    EN  : input  logic              ,
-    data: input  logic           <8>,
-    mode: output ModePkg::CpuMode   ,
+    CLK   : input  logic              ,
+    RST   : input  logic              ,
+    EN    : input  logic              ,
+    data  : input  logic           <8>,
+    mode  : output ModePkg::CpuMode   ,
+    finish: output logic              ,
 ) {
-    var n_mode: ModePkg::CpuMode;
+    var n_mode  : ModePkg::CpuMode;
+    var n_finish: logic           ;
 
     always_comb {
-        n_mode = mode;
+        n_mode   = mode;
+        n_finish = finish;
         if EN {
             if data >= 2 && data <= 8'hfe {
                 n_mode = data as ModePkg::CpuMode;
             } else {
                 n_mode = ModePkg::CpuMode::nop;
             }
+            n_finish = 1;
         }
     }
 
     always_ff (posedge CLK, async_high RST) {
         if_reset {
-            mode = ModePkg::CpuMode::nop;
+            mode   = ModePkg::CpuMode::nop;
+            finish = 0;
         } else {
-            mode = n_mode;
+            mode   = n_mode;
+            finish = n_finish;
         }
     }
 }
