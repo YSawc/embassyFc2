@@ -377,6 +377,16 @@ module Debug (
         busy    : read_imm_busy ,
         finish  : imm_finish    ,
     );
+    var read_imm_cts_en      : logic = imm_en && ~imm_finish;
+    var read_imm_cts_data_out: logic;
+    var read_imm_cts_finish  : logic;
+    inst read_imm_cts: uarty::Rts (
+        CLK                            ,
+        RST                            ,
+        EN      : read_imm_cts_en      ,
+        data_out: read_imm_cts_data_out,
+        finish  : read_imm_cts_finish  ,
+    );
 
     var abs_low_en       : logic   ;
     var abs_low_finish   : logic   ;
@@ -591,6 +601,8 @@ module Debug (
         ope_read_cts_data_out
     } else if addr_mode_cts_en {
         addr_mode_cts_data_out
+    } else if read_imm_cts_en {
+        read_imm_cts_data_out
     } else {
         1
     };

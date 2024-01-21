@@ -9,21 +9,59 @@ use embassy_stm32::{bind_interrupts, peripherals, usart};
 use {defmt_rtt as _, panic_probe as _};
 
 bind_interrupts!(struct Irqs {
-    UART4 => usart::InterruptHandler<peripherals::UART4>;
+    USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
 #[cortex_m_rt::entry]
 fn main() -> ! {
     let p = embassy_stm32::init(Default::default());
     let config = Config::default();
-    let mut usart = Uart::new(p.UART4, p.PA1, p.PA0, Irqs, NoDma, NoDma, config).unwrap();
-    let mut buf = [0x0u8; 4];
+    let mut usart = Uart::new_with_rtscts(
+        p.USART1, p.PA10, p.PA9, Irqs, p.PA12, p.PA11, NoDma, NoDma, config,
+    )
+    .unwrap();
+    let mut buf = [0x0u8; 1];
     buf[0] = CpuMode::Debug as u8;
-    buf[1] = OpeMode::Addr as u8;
-    buf[2] = AddrMode::Imm as u8;
-    buf[3] = 0xaa;
-    unwrap!(usart.blocking_write(&buf));
-    info!("wrote mode and additional data.");
+    'blocking_cpu_mode_write: loop {
+        match usart.blocking_write(&buf) {
+            Ok(_) => {
+                info!("write cpu operation mode.");
+                break 'blocking_cpu_mode_write;
+            }
+            Err(e) => info!("error while writing: {}", e),
+        }
+    }
+    buf[0] = OpeMode::Addr as u8;
+    'blocking_operation_write: loop {
+        match usart.blocking_write(&buf) {
+            Ok(_) => {
+                info!("write operation mode.");
+                break 'blocking_operation_write;
+            }
+            Err(e) => info!("error while writing: {}", e),
+        }
+    }
+    buf[0] = AddrMode::Imm as u8;
+    'blocking_addressing_mode_write: loop {
+        match usart.blocking_write(&buf) {
+            Ok(_) => {
+                info!("write addressing mode.");
+                break 'blocking_addressing_mode_write;
+            }
+            Err(e) => info!("error while writing: {}", e),
+        }
+    }
+    buf[0] = 0xaa;
+    'blocking_imm_data_write: loop {
+        match usart.blocking_write(&buf) {
+            Ok(_) => {
+                info!("write imm data.");
+                break 'blocking_imm_data_write;
+            }
+            Err(e) => info!("error while writing: {}", e),
+        }
+    }
+
     loop {
         match usart.blocking_read(&mut buf) {
             Ok(_) => {
