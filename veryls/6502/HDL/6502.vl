@@ -16,6 +16,7 @@ module main (
     var mode               : ModePkg::CpuMode;
     var mode_handler_en    : logic            = (mode == ModePkg::CpuMode::nop);
     var mode_handler_rts   : logic           ;
+    var mode_handler_busy  : logic           ;
     var mode_handler_finish: logic           ;
     inst mode_handler: ModeHandler (
         CLK                         ,
@@ -24,6 +25,7 @@ module main (
         DATA_IN: GPIO_0_1           ,
         mode                        ,
         RTS    : mode_handler_rts   ,
+        busy   : mode_handler_busy  ,
         finish : mode_handler_finish,
     );
 
@@ -187,7 +189,7 @@ module main (
         1
     };
 
-    assign GPIO_0_2 = if ~mode_handler_finish {
+    assign GPIO_0_2 = if mode_handler_busy {
         mode_handler_rts
     } else if debug_busy {
         debug_rts

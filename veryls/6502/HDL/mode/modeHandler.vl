@@ -5,6 +5,7 @@ module ModeHandler (
     DATA_IN: input  logic           ,
     RTS    : output logic           ,
     mode   : output ModePkg::CpuMode,
+    busy   : output logic           ,
     finish : output logic           ,
 ) {
     var mode_read_enable: logic = (mode == ModePkg::CpuMode::nop);
@@ -23,12 +24,14 @@ module ModeHandler (
 
     var mode_read_cts_en      : logic = EN && ~mode_read_finish;
     var mode_read_cts_data_out: logic;
+    var mode_read_cts_busy    : logic;
     var mode_read_cts_finish  : logic;
     inst mode_read_cts: uarty::Rts (
         CLK                             ,
         RST                             ,
         EN      : mode_read_cts_en      ,
         data_out: mode_read_cts_data_out,
+        busy    : mode_read_cts_busy    ,
         finish  : mode_read_cts_finish  ,
     );
 
@@ -49,5 +52,6 @@ module ModeHandler (
         finish: mode_selector_finish,
     );
 
+    assign busy   = ~mode_selector_finish;
     assign finish = mode_selector_finish;
 }

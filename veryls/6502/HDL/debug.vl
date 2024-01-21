@@ -298,12 +298,14 @@ module Debug (
     );
     var ope_read_cts_en      : logic = ope_read_en && ~ope_mode_finish;
     var ope_read_cts_data_out: logic;
+    var ope_read_cts_busy    : logic;
     var ope_read_cts_finish  : logic;
     inst ope_mode_cts: uarty::Rts (
         CLK                            ,
         RST                            ,
         EN      : ope_read_cts_en      ,
         data_out: ope_read_cts_data_out,
+        busy    : ope_read_cts_busy    ,
         finish  : ope_read_cts_finish  ,
     );
     var casted_ope_mode: OpeMode;
@@ -354,12 +356,14 @@ module Debug (
     };
     var addr_mode_cts_en      : logic = addr_read_en && ~addr_read_finish;
     var addr_mode_cts_data_out: logic;
+    var addr_mode_cts_busy    : logic;
     var addr_mode_cts_finish  : logic;
     inst addr_mode_cts: uarty::Rts (
         CLK                             ,
         RST                             ,
         EN      : addr_mode_cts_en      ,
         data_out: addr_mode_cts_data_out,
+        busy    : addr_mode_cts_busy    ,
         finish  : addr_mode_cts_finish  ,
     );
 
@@ -379,12 +383,14 @@ module Debug (
     );
     var read_imm_cts_en      : logic = imm_en && ~imm_finish;
     var read_imm_cts_data_out: logic;
+    var read_imm_cts_busy    : logic;
     var read_imm_cts_finish  : logic;
     inst read_imm_cts: uarty::Rts (
         CLK                            ,
         RST                            ,
         EN      : read_imm_cts_en      ,
         data_out: read_imm_cts_data_out,
+        busy    : read_imm_cts_busy    ,
         finish  : read_imm_cts_finish  ,
     );
 
