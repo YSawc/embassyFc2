@@ -330,6 +330,20 @@ module Debug (
     var inst_casted_addr_mode: OperatorsPkg::AddrMode;
     assign inst_casted_addr_mode = operators[raw_inst_mode].addr_mode;
 
+    var inst_read_rts_en      : logic<8>;
+    var inst_read_rts_data_out: logic   ;
+    var inst_read_rts_busy    : logic   ;
+    var inst_read_rts_finish  : logic   ;
+    assign inst_read_rts_en       = inst_read_en && ~inst_read_finish;
+    inst inst_read_rts: uarty::Rts (
+        CLK                             ,
+        RST                             ,
+        EN      : inst_read_rts_en      ,
+        data_out: inst_read_rts_data_out,
+        busy    : inst_read_rts_busy    ,
+        finish  : inst_read_rts_finish  ,
+    );
+
     var raw_addr_mode   : logic<8>;
     var addr_read_busy  : logic   ;
     var addr_read_en    : logic   ;
@@ -408,10 +422,22 @@ module Debug (
         busy    : read_abs_low_busy,
         finish  : abs_low_finish   ,
     );
+    var abs_low_rts_en      : logic = abs_low_en && ~abs_low_finish;
+    var abs_low_rts_data_out: logic;
+    var abs_low_rts_busy    : logic;
+    var abs_low_rts_finish  : logic;
+    inst abs_low_rts: uarty::Rts (
+        CLK                           ,
+        RST                           ,
+        EN      : abs_low_rts_en      ,
+        data_out: abs_low_rts_data_out,
+        busy    : abs_low_rts_busy    ,
+        finish  : abs_low_rts_finish  ,
+    );
 
     var abs_high_en       : logic;
     var abs_high_finish   : logic;
-    assign abs_high_en        = abs_en && abs_low_finish && ~abs_high_en;
+    assign abs_high_en        = abs_en && abs_low_finish && ~abs_high_finish;
     var abs_high_data     : logic<8>;
     var read_abs_high_busy: logic   ;
     inst read_abs_high_rx: uarty::Rx (
@@ -422,6 +448,18 @@ module Debug (
         data_out: abs_high_data     ,
         busy    : read_abs_high_busy,
         finish  : abs_high_finish   ,
+    );
+    var abs_high_rts_en      : logic = abs_high_en && ~abs_high_finish;
+    var abs_high_rts_data_out: logic;
+    var abs_high_rts_busy    : logic;
+    var abs_high_rts_finish  : logic;
+    inst abs_high_rts: uarty::Rts (
+        CLK                            ,
+        RST                            ,
+        EN      : abs_high_rts_en      ,
+        data_out: abs_high_rts_data_out,
+        busy    : abs_high_rts_busy    ,
+        finish  : abs_high_rts_finish  ,
     );
 
     var ind_low_en       : logic   ;
@@ -609,6 +647,12 @@ module Debug (
         addr_mode_rts_data_out
     } else if read_imm_rts_en {
         read_imm_rts_data_out
+    } else if inst_read_rts_en {
+        inst_read_rts_data_out
+    } else if abs_low_rts_en {
+        abs_low_rts_data_out
+    } else if abs_high_rts_en {
+        abs_high_rts_data_out
     } else {
         1
     };
