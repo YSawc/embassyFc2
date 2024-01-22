@@ -478,9 +478,22 @@ module Debug (
     );
     assign memory_addr_low = ind_low_data;
 
+    var read_ind_low_rts_en      : logic = ind_low_en && ~ind_low_finish;
+    var read_ind_low_rts_data_out: logic;
+    var read_ind_low_rts_busy    : logic;
+    var read_ind_low_rts_finish  : logic;
+    inst read_ind_log_rts: uarty::Rts (
+        CLK                                ,
+        RST                                ,
+        EN      : read_ind_low_rts_en      ,
+        data_out: read_ind_low_rts_data_out,
+        busy    : read_ind_low_rts_busy    ,
+        finish  : read_ind_low_rts_finish  ,
+    );
+
     var ind_high_en       : logic;
     var ind_high_finish   : logic;
-    assign ind_high_en        = ind_en && ind_low_finish;
+    assign ind_high_en        = ind_low_finish;
     var ind_high_data     : logic<8>;
     var read_ind_high_busy: logic   ;
     inst read_ind_high_rx: uarty::Rx (
@@ -497,37 +510,55 @@ module Debug (
 
     assign WE = ind_target_finish && ~memory_read_finish;
 
-    var memory_data_low_rx_busy  : logic;
-    var memory_data_low_rx_finish: logic;
-    var memory_data_low_rx_enable: logic = if memory_read_finish {
-        1
-    } else {
-        0
-    };
-    var memory_data_low: logic<8>;
+    var read_ind_high_rts_en      : logic = ind_high_en && ~ind_high_finish;
+    var read_ind_high_rts_data_out: logic;
+    var read_ind_high_rts_busy    : logic;
+    var read_ind_high_rts_finish  : logic;
+    inst read_ind_high_rts: uarty::Rts (
+        CLK                                 ,
+        RST                                 ,
+        EN      : read_ind_high_rts_en      ,
+        data_out: read_ind_high_rts_data_out,
+        busy    : read_ind_high_rts_busy    ,
+        finish  : read_ind_high_rts_finish  ,
+    );
+
+    var memory_data_low_rx_busy  : logic   ;
+    var memory_data_low_rx_finish: logic   ;
+    var memory_data_low_rx_en    : logic    = memory_read_finish;
+    var memory_data_low          : logic<8>;
     inst memory_data_low_rx: uarty::Rx (
         CLK                                ,
         RST                                ,
         DATA_IN                            ,
-        RE      : memory_data_low_rx_enable,
+        RE      : memory_data_low_rx_en    ,
         data_out: memory_data_low          ,
         busy    : memory_data_low_rx_busy  ,
         finish  : memory_data_low_rx_finish,
     );
 
-    var memory_data_high_rx_busy  : logic;
-    var memory_data_high_rx_finish: logic;
-    var memory_data_high_rx_enable: logic = if memory_data_low_rx_finish {
-        1
-    } else {
-        0
-    };
-    var memory_data_high: logic<8>;
+    var memory_data_low_rts_en      : logic = memory_data_low_rx_en && ~memory_data_low_rx_finish;
+    var memory_data_low_rts_data_out: logic;
+    var memory_data_low_rts_busy    : logic;
+    var memory_data_low_rts_finish  : logic;
+    inst memory_data_low_rts: uarty::Rts (
+        CLK                                   ,
+        RST                                   ,
+        EN      : memory_data_low_rts_en      ,
+        data_out: memory_data_low_rts_data_out,
+        busy    : memory_data_low_rts_busy    ,
+        finish  : memory_data_low_rts_finish  ,
+    );
+
+    var memory_data_high_rx_busy  : logic   ;
+    var memory_data_high_rx_finish: logic   ;
+    var memory_data_high_rx_en    : logic    = memory_data_low_rx_finish;
+    var memory_data_high          : logic<8>;
     inst memory_data_high_rx: uarty::Rx (
         CLK                                 ,
         RST                                 ,
         DATA_IN                             ,
-        RE      : memory_data_high_rx_enable,
+        RE      : memory_data_high_rx_en    ,
         data_out: memory_data_high          ,
         busy    : memory_data_high_rx_busy  ,
         finish  : memory_data_high_rx_finish,
@@ -535,6 +566,19 @@ module Debug (
 
     var memory_data_read_finish: logic     = memory_data_high_rx_finish;
     var memory_data            : logic<16> = (memory_data_high << 8) + memory_data_low;
+
+    var memory_data_high_rts_en      : logic = memory_data_high_rx_en && ~memory_data_high_rx_finish;
+    var memory_data_high_rts_data_out: logic;
+    var memory_data_high_rts_busy    : logic;
+    var memory_data_high_rts_finish  : logic;
+    inst memory_data_high_rts: uarty::Rts (
+        CLK                                    ,
+        RST                                    ,
+        EN      : memory_data_high_rts_en      ,
+        data_out: memory_data_high_rts_data_out,
+        busy    : memory_data_high_rts_busy    ,
+        finish  : memory_data_high_rts_finish  ,
+    );
 
     var addr_ref_busy  : logic   ;
     var addr_ref_finish: logic   ;
@@ -653,6 +697,12 @@ module Debug (
         abs_low_rts_data_out
     } else if abs_high_rts_en {
         abs_high_rts_data_out
+    } else if memory_data_low_rts_en {
+        memory_data_low_rts_data_out
+    } else if read_ind_low_rts_en {
+        read_ind_low_rts_data_out
+    } else if read_ind_high_rts_en {
+        read_ind_high_rts_data_out
     } else {
         1
     };
