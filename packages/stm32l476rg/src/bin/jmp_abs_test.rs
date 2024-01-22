@@ -21,13 +21,6 @@ fn main() -> ! {
     )
     .unwrap();
 
-    let mut write_buf1 = [0x0u8; 5];
-    write_buf1[0] = CpuMode::Debug as u8;
-    write_buf1[1] = OpeMode::Inst as u8;
-    write_buf1[2] = 0x4c;
-    write_buf1[3] = 0xf5;
-    write_buf1[4] = 0xc5;
-
     let mut buf = [0x0u8; 1];
     buf[0] = CpuMode::Debug as u8;
     'blocking_write_cpu_mode: loop {
