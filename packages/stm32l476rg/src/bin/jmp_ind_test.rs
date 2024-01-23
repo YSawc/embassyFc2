@@ -90,48 +90,45 @@ fn main() -> ! {
             Err(_) => (),
         }
     }
-    loop {}
 
-    // buf[0] = 0x7e;
-    // 'blocking_write_memory_low: loop {
-    //     match usart.blocking_write(&buf) {
-    //         Ok(_) => {
-    //             info!("write memory low data.");
-    //             break 'blocking_write_memory_low;
-    //         }
-    //         Err(e) => info!("error while writing: {}", e),
-    //     }
-    // }
+    buf[0] = 0x7e;
+    'blocking_write_memory_low: loop {
+        match usart.blocking_write(&buf) {
+            Ok(_) => {
+                info!("write memory low data.");
+                break 'blocking_write_memory_low;
+            }
+            Err(e) => info!("error while writing: {}", e),
+        }
+    }
 
-    // buf[0] = 0xdb;
-    // 'blocking_write_memory_high: loop {
-    //     match usart.blocking_write(&buf) {
-    //         Ok(_) => {
-    //             info!("write memory high data.");
-    //             break 'blocking_write_memory_high;
-    //         }
-    //         Err(e) => info!("error while writing: {}", e),
-    //     }
-    // }
+    buf[0] = 0xdb;
+    'blocking_write_memory_high: loop {
+        match usart.blocking_write(&buf) {
+            Ok(_) => {
+                info!("write memory high data.");
+                break 'blocking_write_memory_high;
+            }
+            Err(e) => info!("error while writing: {}", e),
+        }
+    }
 
-    // let mut read_buf2 = [0x0u8; 1];
-    // // let mut read_buf2 = [0x0u8; 2];
-    // loop {
-    //     match usart.blocking_read(&mut read_buf2) {
-    //         Ok(_) => {
-    //             match read_buf2 {
-    //                 [0xdb] => {
-    //                     // [0x7e, 0xdb] => {
-    //                     info!("test passed!");
-    //                 }
-    //                 v => {
-    //                     info!("test failed. return value is {:?}", v);
-    //                 }
-    //             }
-    //             info!("wait kill..");
-    //             loop {}
-    //         }
-    //         Err(_) => (),
-    //     }
-    // }
+    let mut read_buf2 = [0x0u8; 2];
+    loop {
+        match usart.blocking_read(&mut read_buf2) {
+            Ok(_) => {
+                match read_buf2 {
+                    [0xdb, 0x7e] => {
+                        info!("test passed!");
+                    }
+                    v => {
+                        info!("test failed. return value is {:?}", v);
+                    }
+                }
+                info!("wait kill..");
+                loop {}
+            }
+            Err(_) => (),
+        }
+    }
 }

@@ -1,21 +1,24 @@
 module Debug (
-    CLK               : input  logic    ,
-    RST               : input  logic    ,
-    DATA_IN           : input  logic    ,
-    EN                : input  logic    ,
-    memory_read_finish: input  logic    ,
-    tx_finish         : input  logic    ,
-    addr_low          : output logic<8> ,
-    addr_high         : output logic<8> ,
-    busy              : output logic    ,
-    WE                : output logic    ,
-    RTS               : output logic    ,
-    memory_addr_low   : output logic<8> ,
-    memory_addr_high  : output logic<8> ,
-    a                 : output logic<8> ,
-    x                 : output logic<8> ,
-    y                 : output logic<8> ,
-    pc                : output logic<16>,
+    CLK                                     : input  logic    ,
+    RST                                     : input  logic    ,
+    DATA_IN                                 : input  logic    ,
+    EN                                      : input  logic    ,
+    memory_read_finish                      : input  logic    ,
+    tx_finish                               : input  logic    ,
+    addr_low                                : output logic<8> ,
+    addr_high                               : output logic<8> ,
+    busy                                    : output logic    ,
+    WE                                      : output logic    ,
+    RTS                                     : output logic    ,
+    memory_addr_low                         : output logic<8> ,
+    memory_addr_high                        : output logic<8> ,
+    memory_addr_low_after_debug_inst_finish : output logic<8> ,
+    memory_addr_high_after_debug_inst_finish: output logic<8> ,
+    ope_finish                              : output logic    ,
+    a                                       : output logic<8> ,
+    x                                       : output logic<8> ,
+    y                                       : output logic<8> ,
+    pc                                      : output logic<16>,
 ) {
     enum Status: logic<3> {
         idle,
@@ -476,7 +479,6 @@ module Debug (
         busy    : read_ind_low_busy,
         finish  : ind_low_finish   ,
     );
-    assign memory_addr_low = ind_low_data;
 
     var read_ind_low_rts_en      : logic = ind_low_en && ~ind_low_finish;
     var read_ind_low_rts_data_out: logic;
@@ -505,10 +507,7 @@ module Debug (
         busy    : read_ind_high_busy,
         finish  : ind_high_finish   ,
     );
-    assign memory_addr_high  = ind_high_data;
     var ind_target_finish: logic = ind_high_finish;
-
-    assign WE = ind_target_finish && ~memory_read_finish;
 
     var read_ind_high_rts_en      : logic = ind_high_en && ~ind_high_finish;
     var read_ind_high_rts_data_out: logic;
@@ -525,7 +524,7 @@ module Debug (
 
     var memory_data_low_rx_busy  : logic   ;
     var memory_data_low_rx_finish: logic   ;
-    var memory_data_low_rx_en    : logic    = memory_read_finish;
+    var memory_data_low_rx_en    : logic    = memory_read_finish && ~memory_data_low_rx_finish;
     var memory_data_low          : logic<8>;
     inst memory_data_low_rx: uarty::Rx (
         CLK                                ,
@@ -699,6 +698,8 @@ module Debug (
         abs_high_rts_data_out
     } else if memory_data_low_rts_en {
         memory_data_low_rts_data_out
+    } else if memory_data_high_rts_en {
+        memory_data_high_rts_data_out
     } else if read_ind_low_rts_en {
         read_ind_low_rts_data_out
     } else if read_ind_high_rts_en {
@@ -706,4 +707,34 @@ module Debug (
     } else {
         1
     };
+
+    assign memory_addr_low = if ope_inst_finish {
+        ope_inst_debug_out_low
+    } else if ind_low_finish {
+        ind_low_data
+    } else {
+        0
+    };
+
+    assign memory_addr_high = if ope_inst_finish {
+        ope_inst_debug_out_high
+    } else if ind_high_finish {
+        ind_high_data
+    } else {
+        0
+    };
+
+    assign memory_addr_low_after_debug_inst_finish = if ope_inst_finish {
+        ope_inst_debug_out_low
+    } else {
+        0
+    };
+    assign memory_addr_high_after_debug_inst_finish = if ope_inst_finish {
+        ope_inst_debug_out_high
+    } else {
+        0
+    };
+
+    assign WE         = ope_inst_finish || (ind_target_finish && ~memory_read_finish);
+    assign ope_finish = ope_inst_finish;
 }
