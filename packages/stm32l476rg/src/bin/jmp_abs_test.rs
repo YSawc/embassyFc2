@@ -78,7 +78,7 @@ fn main() -> ! {
         match usart.blocking_read(&mut read_buf) {
             Ok(_) => {
                 match read_buf {
-                    [0xf5, 0xc5] => info!("test passed!"),
+                    [0xc5, 0xf5] => info!("test passed!"),
                     v => info!("test failed. return value is {:?}", v),
                 }
                 info!("wait kill..");
