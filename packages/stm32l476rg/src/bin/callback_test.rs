@@ -22,40 +22,19 @@ fn main() -> ! {
     .unwrap();
     let mut buf = [0x0u8; 1];
     buf[0] = CpuMode::Callback as u8;
-    'blocking_write_cpu_mode: loop {
-        match usart.blocking_write(&buf) {
-            Ok(_) => {
-                info!("write cpu operation mode.");
-                break 'blocking_write_cpu_mode;
-            }
-            Err(e) => info!("error while writing: {}", e),
-        }
-    }
+    usart.blocking_write(&buf).unwrap();
+    info!("write cpu operation mode.");
     buf[0] = 0xba;
-    'blocking_write_callback_value: loop {
-        match usart.blocking_write(&buf) {
-            Ok(_) => {
-                info!("write callback value.");
-                break 'blocking_write_callback_value;
-            }
-            Err(e) => info!("error while writing: {}", e),
+    usart.blocking_write(&buf).unwrap();
+    info!("write callback value.");
+    let mut read_buf = [0x0u8; 1];
+    usart.blocking_read(&mut read_buf).unwrap();
+    match read_buf {
+        [0xba] => info!("test passed!"),
+        v => {
+            info!("test failed. return value is {:?}", v);
+            loop {}
         }
     }
-
-    loop {
-        match usart.blocking_read(&mut buf) {
-            Ok(_) => {
-                match buf.first().unwrap() {
-                    0xba => info!("test passed!"),
-                    v => info!(
-                        "callback received but not expected value returned! return value is {:?}",
-                        v
-                    ),
-                }
-                info!("wait kill..");
-                loop {}
-            }
-            Err(_) => (),
-        }
-    }
+    loop {}
 }

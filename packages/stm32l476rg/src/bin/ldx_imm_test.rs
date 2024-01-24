@@ -22,56 +22,25 @@ fn main() -> ! {
     .unwrap();
     let mut buf = [0x0u8; 1];
     buf[0] = CpuMode::Debug as u8;
-    'blocking_write_cpu_mode: loop {
-        match usart.blocking_write(&buf) {
-            Ok(_) => {
-                info!("write cpu operation mode.");
-                break 'blocking_write_cpu_mode;
-            }
-            Err(e) => info!("error while writing: {}", e),
-        }
-    }
+    usart.blocking_write(&buf).unwrap();
+    info!("write cpu operation mode.");
     buf[0] = OpeMode::Inst as u8;
-    'blocking_write_operation: loop {
-        match usart.blocking_write(&buf) {
-            Ok(_) => {
-                info!("write operation mode.");
-                break 'blocking_write_operation;
-            }
-            Err(e) => info!("error while writing: {}", e),
-        }
-    }
+    usart.blocking_write(&buf).unwrap();
+    info!("write operation mode.");
     buf[0] = 0xa2;
-    'blocking_write_instruction: loop {
-        match usart.blocking_write(&buf) {
-            Ok(_) => {
-                info!("write instruction.");
-                break 'blocking_write_instruction;
-            }
-            Err(e) => info!("error while writing: {}", e),
-        }
-    }
+    usart.blocking_write(&buf).unwrap();
+    info!("write instruction.");
     buf[0] = 0x45;
-    'blocking_write_imm: loop {
-        match usart.blocking_write(&buf) {
-            Ok(_) => {
-                info!("write imm data.");
-                break 'blocking_write_imm;
-            }
-            Err(e) => info!("error while writing: {}", e),
+    usart.blocking_write(&buf).unwrap();
+    info!("write callback value.");
+    let mut read_buf = [0x0u8; 1];
+    usart.blocking_read(&mut read_buf).unwrap();
+    match read_buf {
+        [0x45] => info!("test passed!"),
+        v => {
+            info!("test failed. return value is {:?}", v);
+            loop {}
         }
     }
-    loop {
-        match usart.blocking_read(&mut buf) {
-            Ok(_) => {
-                match buf.first().unwrap() {
-                    0x45 => info!("test passed!"),
-                    v => info!("test failed. return value is {:?}", v),
-                }
-                info!("wait kill..");
-                loop {}
-            }
-            Err(_) => (),
-        }
-    }
+    loop {}
 }
