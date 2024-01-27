@@ -1,50 +1,40 @@
 module OpeInst (
-    CLK           : input  logic                    ,
-    RST           : input  logic                    ,
-    EN            : input  logic                    ,
-    ope_kind      : input  OperatorsPkg::OpeKind    ,
-    addr_low      : input  logic                <8> ,
-    addr_high     : input  logic                <8> ,
-    a             : output logic                <8> ,
-    x             : output logic                <8> ,
-    y             : output logic                <8> ,
-    pc            : output logic                <16>,
-    busy          : output logic                    ,
-    debug_out_low : output logic                <8> ,
-    debug_out_high: output logic                <8> ,
-    finish        : output logic                    ,
+    CLK      : input  logic                    ,
+    RST      : input  logic                    ,
+    EN       : input  logic                    ,
+    ope_kind : input  OperatorsPkg::OpeKind    ,
+    addr_low : input  logic                <8> ,
+    addr_high: input  logic                <8> ,
+    a        : output logic                <8> ,
+    x        : output logic                <8> ,
+    y        : output logic                <8> ,
+    pc       : output logic                <16>,
+    busy     : output logic                    ,
+    finish   : output logic                    ,
 ) {
-    enum Status: logic<3> {
+    enum Status: logic {
         idle,
         work,
     }
-
-    var status         : Status    ;
-    var n_status       : Status    ;
-    var n_a            : logic <8> ;
-    var n_x            : logic <8> ;
-    var n_y            : logic <8> ;
-    var n_pc           : logic <16>;
-    var n_busy         : logic     ;
-    var n_finish       : logic     ;
-    var n_addr_low_reg : logic <8> ;
-    var n_addr_high_reg: logic <8> ;
-    var addr_low_reg   : logic <8> ;
-    var addr_high_reg  : logic <8> ;
-
-    var ope_en  : logic;
-    var n_ope_en: logic;
+    var status  : Status    ;
+    var n_status: Status    ;
+    var n_a     : logic <8> ;
+    var n_x     : logic <8> ;
+    var n_y     : logic <8> ;
+    var n_pc    : logic <16>;
+    var n_busy  : logic     ;
+    var n_finish: logic     ;
+    var ope_en  : logic     ;
+    var n_ope_en: logic     ;
     always_comb {
-        n_status        = status;
-        n_busy          = busy;
-        n_finish        = finish;
-        n_addr_low_reg  = addr_low_reg;
-        n_addr_high_reg = addr_high_reg;
-        n_ope_en        = ope_en;
-        n_a             = a;
-        n_x             = x;
-        n_y             = y;
-        n_pc            = pc;
+        n_status = status;
+        n_busy   = busy;
+        n_finish = finish;
+        n_ope_en = ope_en;
+        n_a      = a;
+        n_x      = x;
+        n_y      = y;
+        n_pc     = pc;
         case status {
             Status::idle: {
                 if EN {
@@ -53,60 +43,41 @@ module OpeInst (
                 }
             }
             Status::work: {
-                if ope_kind == OperatorsPkg::OpeKind::Lda {
-                    n_a            = addr_low;
-                    n_addr_low_reg = n_a;
-                } else if ope_kind == OperatorsPkg::OpeKind::Ldx {
-                    n_x            = addr_low;
-                    n_addr_low_reg = n_x;
-                } else if ope_kind == OperatorsPkg::OpeKind::Ldy {
-                    n_y            = addr_low;
-                    n_addr_low_reg = n_y;
-                } else if ope_kind == OperatorsPkg::OpeKind::Jmp {
-                    n_pc            = (addr_high << 8) + addr_low;
-                    n_addr_low_reg  = addr_low;
-                    n_addr_high_reg = addr_high;
-                } else {
-                    n_a            = 0;
-                    n_x            = 0;
-                    n_y            = 0;
-                    n_pc           = 0;
-                    n_addr_low_reg = 0;
-                }
                 n_status = Status::idle;
                 n_busy   = 0;
                 n_finish = 1;
+                if ope_kind == OperatorsPkg::OpeKind::Lda {
+                    n_a = addr_low;
+                } else if ope_kind == OperatorsPkg::OpeKind::Ldx {
+                    n_x = addr_low;
+                } else if ope_kind == OperatorsPkg::OpeKind::Ldy {
+                    n_y = addr_low;
+                } else if ope_kind == OperatorsPkg::OpeKind::Jmp {
+                    n_pc = (addr_high << 8) + addr_low;
+                }
             }
         }
     }
 
     always_ff (posedge CLK, async_high RST) {
         if_reset {
-            status         = Status::idle;
-            finish         = 0;
-            busy           = 0;
-            addr_low_reg   = 0;
-            addr_high_reg  = 0;
-            ope_en         = 0;
-            a              = 0;
-            x              = 0;
-            y              = 0;
-            pc             = 0;
-            debug_out_low  = 0;
-            debug_out_high = 0;
+            status = Status::idle;
+            finish = 0;
+            busy   = 0;
+            ope_en = 0;
+            a      = 0;
+            x      = 0;
+            y      = 0;
+            pc     = 0;
         } else {
-            status         = n_status;
-            finish         = n_finish;
-            busy           = n_busy;
-            addr_low_reg   = n_addr_low_reg;
-            addr_high_reg  = n_addr_high_reg;
-            ope_en         = n_ope_en;
-            a              = n_a;
-            x              = n_x;
-            y              = n_y;
-            pc             = n_pc;
-            debug_out_low  = n_addr_low_reg;
-            debug_out_high = n_addr_high_reg;
+            status = n_status;
+            finish = n_finish;
+            busy   = n_busy;
+            ope_en = n_ope_en;
+            a      = n_a;
+            x      = n_x;
+            y      = n_y;
+            pc     = n_pc;
         }
     }
 }

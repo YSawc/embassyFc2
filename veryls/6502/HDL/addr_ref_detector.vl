@@ -1,0 +1,67 @@
+module AddrRefDetector (
+    CLK       : input  logic                 ,
+    RST       : input  logic                 ,
+    EN        : input  logic                 ,
+    addr_mode : input  OperatorsPkg::AddrMode,
+    low_rx_en : output logic                 ,
+    high_rx_en: output logic                 ,
+    busy      : output logic                 ,
+    finish    : output logic                 ,
+) {
+    enum Status: logic {
+        idle,
+        work,
+    }
+    var status      : Status;
+    var n_status    : Status;
+    var n_busy      : logic ;
+    var n_finish    : logic ;
+    var n_low_rx_en : logic ;
+    var n_high_rx_en: logic ;
+
+    always_comb {
+        n_status     = status;
+        n_busy       = busy;
+        n_finish     = finish;
+        n_low_rx_en  = low_rx_en;
+        n_high_rx_en = high_rx_en;
+        case status {
+            Status::idle: {
+                if EN {
+                    n_busy   = 1;
+                    n_status = Status::work;
+                }
+            }
+            Status::work: {
+                n_busy   = 0;
+                n_finish = 1;
+                if addr_mode == OperatorsPkg::AddrMode::Impl || addr_mode == OperatorsPkg::AddrMode::Acc {
+                    n_low_rx_en  = 0;
+                    n_high_rx_en = 0;
+                } else if OperatorsPkg::AddrMode::IndX || OperatorsPkg::AddrMode::IndY || OperatorsPkg::AddrMode::Zp || OperatorsPkg::AddrMode::ZpX || OperatorsPkg::AddrMode::ZpY {
+                    n_low_rx_en  = 1;
+                    n_high_rx_en = 0;
+                } else {
+                    n_low_rx_en  = 1;
+                    n_high_rx_en = 1;
+                }
+            }
+        }
+    }
+
+    always_ff (posedge CLK, async_high RST) {
+        if_reset {
+            status     = Status::idle;
+            low_rx_en  = 0;
+            high_rx_en = 0;
+            busy       = 0;
+            finish     = 0;
+        } else {
+            status     = n_status;
+            low_rx_en  = n_low_rx_en;
+            high_rx_en = n_high_rx_en;
+            busy       = n_busy;
+            finish     = n_finish;
+        }
+    }
+}

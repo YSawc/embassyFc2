@@ -5,16 +5,17 @@ module Debug (
     EN                : input  logic    ,
     memory_read_finish: input  logic    ,
     tx_finish         : input  logic    ,
+    busy              : output logic    ,
+    RTS               : output logic    ,
     addr_low          : output logic<8> ,
     addr_high         : output logic<8> ,
-    busy              : output logic    ,
-    WE                : output logic    ,
-    RTS               : output logic    ,
     memory_addr_low   : output logic<8> ,
     memory_addr_high  : output logic<8> ,
+    tx_en             : output logic    ,
+    tx_data_out       : output logic    ,
     debug_out_low     : output logic<8> ,
     debug_out_high    : output logic<8> ,
-    ope_finish        : output logic    ,
+    finish            : output logic    ,
     a                 : output logic<8> ,
     x                 : output logic<8> ,
     y                 : output logic<8> ,
@@ -283,7 +284,6 @@ module Debug (
     assign operators[8'hfe] = {OperatorsPkg::OpeKind::Inc, OperatorsPkg::AddrMode::AbsX}; // 0xfe
     enum OpeMode: logic {
         Inst,
-        Addr,
     }
     var raw_operator_mode: logic<8>;
     var ope_read_busy    : logic   ;
@@ -333,10 +333,10 @@ module Debug (
     var inst_casted_addr_mode: OperatorsPkg::AddrMode;
     assign inst_casted_addr_mode = operators[raw_inst_mode].addr_mode;
 
-    var inst_read_rts_en      : logic<8>;
-    var inst_read_rts_data_out: logic   ;
-    var inst_read_rts_busy    : logic   ;
-    var inst_read_rts_finish  : logic   ;
+    var inst_read_rts_en      : logic;
+    var inst_read_rts_data_out: logic;
+    var inst_read_rts_busy    : logic;
+    var inst_read_rts_finish  : logic;
     assign inst_read_rts_en       = inst_read_en && ~inst_read_finish;
     inst inst_read_rts: uarty::Rts (
         CLK                             ,
@@ -347,394 +347,126 @@ module Debug (
         finish  : inst_read_rts_finish  ,
     );
 
-    var raw_addr_mode   : logic<8>;
-    var addr_read_busy  : logic   ;
-    var addr_read_en    : logic   ;
-    assign addr_read_en     = EN && (casted_ope_mode == OpeMode::Addr) && ope_mode_finish && ~addr_read_finish;
-    var addr_read_finish: logic;
-    inst addr_mode_rx: uarty::Rx (
-        CLK                       ,
-        RST                       ,
-        DATA_IN                   ,
-        RE      : addr_read_en    ,
-        data_out: raw_addr_mode   ,
-        busy    : addr_read_busy  ,
-        finish  : addr_read_finish,
-    );
-    var casted_addr_mode: OperatorsPkg::AddrMode;
-    assign casted_addr_mode = raw_addr_mode as OperatorsPkg::AddrMode;
-    var ref_addr_mode   : OperatorsPkg::AddrMode;
-    assign ref_addr_mode    = if inst_read_finish {
-        inst_casted_addr_mode
-    } else if addr_read_finish {
-        casted_addr_mode
-    } else {
-        OperatorsPkg::AddrMode::Acc
-    };
-    var addr_mode_rts_en      : logic = addr_read_en && ~addr_read_finish;
-    var addr_mode_rts_data_out: logic;
-    var addr_mode_rts_busy    : logic;
-    var addr_mode_rts_finish  : logic;
-    inst addr_mode_rts: uarty::Rts (
-        CLK                             ,
-        RST                             ,
-        EN      : addr_mode_rts_en      ,
-        data_out: addr_mode_rts_data_out,
-        busy    : addr_mode_rts_busy    ,
-        finish  : addr_mode_rts_finish  ,
-    );
-
-    var imm_en        : logic   ;
-    var read_imm_rx_en: logic    = imm_en;
-    var imm_finish    : logic   ;
-    var imm_data      : logic<8>;
-    var read_imm_busy : logic   ;
-    inst read_imm_rx: uarty::Rx (
-        CLK                     ,
-        RST                     ,
-        DATA_IN                 ,
-        RE      : read_imm_rx_en,
-        data_out: imm_data      ,
-        busy    : read_imm_busy ,
-        finish  : imm_finish    ,
-    );
-    var read_imm_rts_en      : logic = imm_en && ~imm_finish;
-    var read_imm_rts_data_out: logic;
-    var read_imm_rts_busy    : logic;
-    var read_imm_rts_finish  : logic;
-    inst read_imm_rts: uarty::Rts (
-        CLK                            ,
-        RST                            ,
-        EN      : read_imm_rts_en      ,
-        data_out: read_imm_rts_data_out,
-        busy    : read_imm_rts_busy    ,
-        finish  : read_imm_rts_finish  ,
-    );
-
-    var abs_low_en       : logic   ;
-    var abs_low_finish   : logic   ;
-    var abs_low_data     : logic<8>;
-    var read_abs_low_busy: logic   ;
-    assign abs_low_en        = abs_en && ~abs_low_finish;
-    inst read_abs_low_rx: uarty::Rx (
-        CLK                        ,
-        RST                        ,
-        DATA_IN                    ,
-        RE      : abs_low_en       ,
-        data_out: abs_low_data     ,
-        busy    : read_abs_low_busy,
-        finish  : abs_low_finish   ,
-    );
-    var abs_low_rts_en      : logic = abs_low_en && ~abs_low_finish;
-    var abs_low_rts_data_out: logic;
-    var abs_low_rts_busy    : logic;
-    var abs_low_rts_finish  : logic;
-    inst abs_low_rts: uarty::Rts (
-        CLK                           ,
-        RST                           ,
-        EN      : abs_low_rts_en      ,
-        data_out: abs_low_rts_data_out,
-        busy    : abs_low_rts_busy    ,
-        finish  : abs_low_rts_finish  ,
-    );
-
-    var abs_high_en       : logic;
-    var abs_high_finish   : logic;
-    assign abs_high_en        = abs_en && abs_low_finish && ~abs_high_finish;
-    var abs_high_data     : logic<8>;
-    var read_abs_high_busy: logic   ;
-    inst read_abs_high_rx: uarty::Rx (
-        CLK                         ,
-        RST                         ,
-        DATA_IN                     ,
-        RE      : abs_high_en       ,
-        data_out: abs_high_data     ,
-        busy    : read_abs_high_busy,
-        finish  : abs_high_finish   ,
-    );
-    var abs_high_rts_en      : logic = abs_high_en && ~abs_high_finish;
-    var abs_high_rts_data_out: logic;
-    var abs_high_rts_busy    : logic;
-    var abs_high_rts_finish  : logic;
-    inst abs_high_rts: uarty::Rts (
-        CLK                            ,
-        RST                            ,
-        EN      : abs_high_rts_en      ,
-        data_out: abs_high_rts_data_out,
-        busy    : abs_high_rts_busy    ,
-        finish  : abs_high_rts_finish  ,
-    );
-
-    var ind_low_en       : logic   ;
-    var ind_low_finish   : logic   ;
-    var ind_low_data     : logic<8>;
-    var read_ind_low_busy: logic   ;
-    assign ind_low_en        = ind_en && ~ind_low_finish;
-    inst read_ind_low_rx: uarty::Rx (
-        CLK                        ,
-        RST                        ,
-        DATA_IN                    ,
-        RE      : ind_low_en       ,
-        data_out: ind_low_data     ,
-        busy    : read_ind_low_busy,
-        finish  : ind_low_finish   ,
-    );
-
-    var read_ind_low_rts_en      : logic = ind_low_en && ~ind_low_finish;
-    var read_ind_low_rts_data_out: logic;
-    var read_ind_low_rts_busy    : logic;
-    var read_ind_low_rts_finish  : logic;
-    inst read_ind_log_rts: uarty::Rts (
-        CLK                                ,
-        RST                                ,
-        EN      : read_ind_low_rts_en      ,
-        data_out: read_ind_low_rts_data_out,
-        busy    : read_ind_low_rts_busy    ,
-        finish  : read_ind_low_rts_finish  ,
-    );
-
-    var ind_high_en       : logic;
-    var ind_high_finish   : logic;
-    assign ind_high_en        = ind_low_finish;
-    var ind_high_data     : logic<8>;
-    var read_ind_high_busy: logic   ;
-    inst read_ind_high_rx: uarty::Rx (
-        CLK                         ,
-        RST                         ,
-        DATA_IN                     ,
-        RE      : ind_high_en       ,
-        data_out: ind_high_data     ,
-        busy    : read_ind_high_busy,
-        finish  : ind_high_finish   ,
-    );
-    var ind_target_finish: logic = ind_high_finish;
-
-    var read_ind_high_rts_en      : logic = ind_high_en && ~ind_high_finish;
-    var read_ind_high_rts_data_out: logic;
-    var read_ind_high_rts_busy    : logic;
-    var read_ind_high_rts_finish  : logic;
-    inst read_ind_high_rts: uarty::Rts (
+    var addr_ref_detector_en    : logic = inst_read_finish && ~addr_ref_detector_finish;
+    var addr_ref_detector_busy  : logic;
+    var addr_ref_detector_finish: logic;
+    inst addr_ref_detector: AddrRefDetector (
         CLK                                 ,
         RST                                 ,
-        EN      : read_ind_high_rts_en      ,
-        data_out: read_ind_high_rts_data_out,
-        busy    : read_ind_high_rts_busy    ,
-        finish  : read_ind_high_rts_finish  ,
+        EN        : addr_ref_detector_en    ,
+        addr_mode : inst_casted_addr_mode   ,
+        low_rx_en : tmp_low_rx_en           ,
+        high_rx_en: tmp_high_rx_en          ,
+        busy      : addr_ref_detector_busy  ,
+        finish    : addr_ref_detector_finish,
     );
-
-    var memory_data_low_rx_busy  : logic   ;
-    var memory_data_low_rx_finish: logic   ;
-    var memory_data_low_rx_en    : logic    = memory_read_finish && ~memory_data_low_rx_finish;
-    var memory_data_low          : logic<8>;
-    inst memory_data_low_rx: uarty::Rx (
+    var tmp_low_rx_en           : logic   ;
+    var tmp_high_rx_en          : logic   ;
+    var addr_ref_low_rx_en      : logic    = tmp_low_rx_en && ~addr_ref_low_rx_finish;
+    var addr_ref_low_rx_data_out: logic<8>;
+    var addr_ref_low_rx_busy    : logic   ;
+    var addr_ref_low_rx_finish  : logic   ;
+    inst addr_ref_low_rx: uarty::Rx (
+        CLK                               ,
+        RST                               ,
+        DATA_IN                           ,
+        RE      : addr_ref_low_rx_en      ,
+        data_out: addr_ref_low_rx_data_out,
+        busy    : addr_ref_low_rx_busy    ,
+        finish  : addr_ref_low_rx_finish  ,
+    );
+    var tmp_addr_ref_low_rx_finish: logic = if addr_ref_detector_finish {
+        if tmp_low_rx_en {
+            addr_ref_low_rx_finish
+        } else {
+            1
+        }
+    } else {
+        0
+    };
+    var addr_ref_low_rx_rts_en      : logic    = addr_ref_low_rx_en;
+    var addr_ref_low_rx_rts_data_out: logic<8>;
+    var addr_ref_low_rx_rts_busy    : logic   ;
+    var addr_ref_low_rx_rts_finish  : logic   ;
+    inst addr_ref_low_rx_rts: uarty::Rts (
+        CLK                                   ,
+        RST                                   ,
+        EN      : addr_ref_low_rx_rts_en      ,
+        data_out: addr_ref_low_rx_rts_data_out,
+        busy    : addr_ref_low_rx_rts_busy    ,
+        finish  : addr_ref_low_rx_rts_finish  ,
+    );
+    var addr_ref_high_rx_en      : logic = tmp_high_rx_en && addr_ref_low_rx_finish && ~addr_ref_high_rx_finish;
+    var addr_ref_high_rx_data_out: logic;
+    var addr_ref_high_rx_busy    : logic;
+    var addr_ref_high_rx_finish  : logic;
+    inst addr_ref_high_rx: uarty::Rx (
         CLK                                ,
         RST                                ,
         DATA_IN                            ,
-        RE      : memory_data_low_rx_en    ,
-        data_out: memory_data_low          ,
-        busy    : memory_data_low_rx_busy  ,
-        finish  : memory_data_low_rx_finish,
+        RE      : addr_ref_high_rx_en      ,
+        data_out: addr_ref_high_rx_data_out,
+        busy    : addr_ref_high_rx_busy    ,
+        finish  : addr_ref_high_rx_finish  ,
     );
-
-    var memory_data_low_rts_en      : logic = memory_data_low_rx_en && ~memory_data_low_rx_finish;
-    var memory_data_low_rts_data_out: logic;
-    var memory_data_low_rts_busy    : logic;
-    var memory_data_low_rts_finish  : logic;
-    inst memory_data_low_rts: uarty::Rts (
-        CLK                                   ,
-        RST                                   ,
-        EN      : memory_data_low_rts_en      ,
-        data_out: memory_data_low_rts_data_out,
-        busy    : memory_data_low_rts_busy    ,
-        finish  : memory_data_low_rts_finish  ,
+    var addr_ref_high_rx_rts_en      : logic = addr_ref_high_rx_en;
+    var addr_ref_high_rx_rts_data_out: logic;
+    var addr_ref_high_rx_rts_busy    : logic;
+    var addr_ref_high_rx_rts_finish  : logic;
+    inst addr_ref_high_rx_rts: uarty::Rts (
+        CLK                                    ,
+        RST                                    ,
+        EN      : addr_ref_high_rx_rts_en      ,
+        data_out: addr_ref_high_rx_rts_data_out,
+        busy    : addr_ref_high_rx_rts_busy    ,
+        finish  : addr_ref_high_rx_rts_finish  ,
     );
+    var tmp_addr_ref_high_rx_finish: logic = if addr_ref_detector_finish {
+        if tmp_high_rx_en {
+            addr_ref_high_rx_finish
+        } else {
+            1
+        }
+    } else {
+        0
+    };
+    var addr_ref_finish: logic = addr_ref_detector_finish && tmp_addr_ref_low_rx_finish && tmp_addr_ref_high_rx_finish;
 
-    var memory_data_high_rx_busy  : logic   ;
-    var memory_data_high_rx_finish: logic   ;
-    var memory_data_high_rx_en    : logic    = memory_data_low_rx_finish;
-    var memory_data_high          : logic<8>;
-    inst memory_data_high_rx: uarty::Rx (
+    var ope_inst_busy  : logic;
+    var ope_inst_finish: logic;
+    var ope_inst_en    : logic;
+    assign ope_inst_en     = EN && addr_ref_finish && ~ope_inst_finish;
+    inst ope_inst: OpeInst (
         CLK                                 ,
         RST                                 ,
-        DATA_IN                             ,
-        RE      : memory_data_high_rx_en    ,
-        data_out: memory_data_high          ,
-        busy    : memory_data_high_rx_busy  ,
-        finish  : memory_data_high_rx_finish,
+        EN       : ope_inst_en              ,
+        ope_kind : inst_casted_ope_kind     ,
+        addr_low : addr_ref_low_rx_data_out ,
+        addr_high: addr_ref_high_rx_data_out,
+        a                                   ,
+        x                                   ,
+        y                                   ,
+        pc                                  ,
+        busy     : ope_inst_busy            ,
+        finish   : ope_inst_finish          ,
     );
-
-    var memory_data_read_finish: logic     = memory_data_high_rx_finish;
-    var memory_data            : logic<16> = (memory_data_high << 8) + memory_data_low;
-
-    var memory_data_high_rts_en      : logic = memory_data_high_rx_en && ~memory_data_high_rx_finish;
-    var memory_data_high_rts_data_out: logic;
-    var memory_data_high_rts_busy    : logic;
-    var memory_data_high_rts_finish  : logic;
-    inst memory_data_high_rts: uarty::Rts (
-        CLK                                    ,
-        RST                                    ,
-        EN      : memory_data_high_rts_en      ,
-        data_out: memory_data_high_rts_data_out,
-        busy    : memory_data_high_rts_busy    ,
-        finish  : memory_data_high_rts_finish  ,
-    );
-
-    var addr_ref_busy  : logic   ;
-    var addr_ref_finish: logic   ;
-    var addr_ref_en    : logic   ;
-    var addr_ref_low   : logic<8>;
-    var addr_ref_high  : logic<8>;
-    assign addr_ref_en     = EN && ~addr_ref_finish && ~imm_finish && (inst_read_finish || addr_read_finish);
-    var abs_en         : logic;
-    var ind_en         : logic;
-
-    var abs_read_finish: logic = abs_high_finish;
-
-    var abs_data: logic<16> = (abs_high_data << 8) + abs_low_data;
-
-    inst addr_ref: AddrRef (
-        CLK                                     ,
-        RST                                     ,
-        EN             : addr_ref_en            ,
-        a                                       ,
-        addr_mode      : ref_addr_mode          ,
-        imm_finish                              ,
-        abs_finish     : abs_read_finish        ,
-        ind_finish     : memory_data_read_finish,
-        imm_data                                ,
-        abs_data                                ,
-        memory_data                             ,
-        ope_mode_finish                         ,
-        imm_en                                  ,
-        abs_en                                  ,
-        ind_en                                  ,
-        addr_low       : addr_ref_low           ,
-        addr_high      : addr_ref_high          ,
-        busy           : addr_ref_busy          ,
-        finish         : addr_ref_finish        ,
-    );
-
-    var ope_inst_busy          : logic   ;
-    var ope_inst_finish        : logic   ;
-    var ope_inst_en            : logic   ;
-    var ope_inst_debug_out_low : logic<8>;
-    var ope_inst_debug_out_high: logic<8>;
-    assign ope_inst_en             = EN && ~ope_inst_finish && addr_ref_finish && inst_read_finish;
-    inst ope_inst: OpeInst (
-        CLK                                    ,
-        RST                                    ,
-        EN            : ope_inst_en            ,
-        ope_kind      : inst_casted_ope_kind   ,
-        addr_low      : addr_ref_low           ,
-        addr_high     : addr_ref_high          ,
-        a                                      ,
-        x                                      ,
-        y                                      ,
-        pc                                     ,
-        busy          : ope_inst_busy          ,
-        debug_out_low : ope_inst_debug_out_low ,
-        debug_out_high: ope_inst_debug_out_high,
-        finish        : ope_inst_finish        ,
-    );
-
-    assign addr_low = if casted_ope_mode == OpeMode::Inst {
-        if abs_low_finish {
-            abs_low_data
-        } else if addr_read_finish {
-            addr_ref_low
-        } else if ope_inst_finish {
-            ope_inst_debug_out_low
-        } else if inst_read_finish {
-            ope_inst_debug_out_low
-        } else {
-            0
-        }
-    } else if casted_ope_mode == OpeMode::Addr {
-        addr_ref_low
-    } else {
-        1
-    };
-    assign addr_high = if casted_ope_mode == OpeMode::Inst {
-        if abs_high_finish {
-            abs_high_data
-        } else if addr_read_finish {
-            addr_ref_low
-        } else if ope_inst_finish {
-            ope_inst_debug_out_high
-        } else if inst_read_finish {
-            ope_inst_debug_out_high
-        } else {
-            0
-        }
-    } else if casted_ope_mode == OpeMode::Addr {
-        addr_ref_high
-    } else {
-        1
-    };
 
     assign busy = if casted_ope_mode == OpeMode::Inst {
-        if abs_high_finish {
-            0
-        } else {
-            ~ope_inst_finish
-        }
-    } else if (casted_ope_mode == OpeMode::Addr) {
-        ~addr_ref_finish
+        ~ope_inst_finish
     } else {
         1
     };
 
     assign RTS = if ope_read_rts_en {
         ope_read_rts_data_out
-    } else if addr_mode_rts_en {
-        addr_mode_rts_data_out
-    } else if read_imm_rts_en {
-        read_imm_rts_data_out
     } else if inst_read_rts_en {
         inst_read_rts_data_out
-    } else if abs_low_rts_en {
-        abs_low_rts_data_out
-    } else if abs_high_rts_en {
-        abs_high_rts_data_out
-    } else if memory_data_low_rts_en {
-        memory_data_low_rts_data_out
-    } else if memory_data_high_rts_en {
-        memory_data_high_rts_data_out
-    } else if read_ind_low_rts_en {
-        read_ind_low_rts_data_out
-    } else if read_ind_high_rts_en {
-        read_ind_high_rts_data_out
+    } else if addr_ref_low_rx_rts_en {
+        addr_ref_low_rx_rts_data_out
+    } else if addr_ref_high_rx_rts_en {
+        addr_ref_high_rx_rts_data_out
     } else {
         1
     };
-
-    assign memory_addr_low = if ope_inst_finish {
-        ope_inst_debug_out_low
-    } else if ind_low_finish {
-        ind_low_data
-    } else {
-        0
-    };
-
-    assign memory_addr_high = if ope_inst_finish {
-        ope_inst_debug_out_high
-    } else if ind_high_finish {
-        ind_high_data
-    } else {
-        0
-    };
-
-    assign debug_out_low = if ope_inst_finish {
-        ope_inst_debug_out_low
-    } else {
-        0
-    };
-    assign debug_out_high = if ope_inst_finish {
-        ope_inst_debug_out_high
-    } else {
-        0
-    };
-
-    assign WE         = ope_inst_finish || (ind_target_finish && ~memory_read_finish);
-    assign ope_finish = ope_inst_finish;
+    assign finish = ope_inst_finish;
 }
