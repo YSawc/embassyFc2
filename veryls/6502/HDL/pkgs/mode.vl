@@ -1,9 +1,7 @@
 package ModePkg {
     enum CpuMode: logic<8> {
         nop,
-        normal = 8'h2,
-        callback = 8'h3, // [mode, callback value]
-        sequence = 8'h4, // [mode, args]
-        debug = 8'h5, // [mode, subcommand]
+        normal,
+        debug, // [mode, subcommand]
     }
 }

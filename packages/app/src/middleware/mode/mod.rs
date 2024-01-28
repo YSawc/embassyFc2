@@ -1,8 +1,7 @@
 pub enum CpuMode {
-    Normal = 2,
-    Callback = 3,
-    Sequence = 4,
-    Debug = 5,
+    Nop,
+    Normal,
+    Debug,
 }
 
 pub enum OpeMode {
