@@ -38,7 +38,7 @@ module AddrRefDetector (
                 if addr_mode == OperatorsPkg::AddrMode::Impl || addr_mode == OperatorsPkg::AddrMode::Acc {
                     n_low_rx_en  = 0;
                     n_high_rx_en = 0;
-                } else if OperatorsPkg::AddrMode::IndX || OperatorsPkg::AddrMode::IndY || OperatorsPkg::AddrMode::Zp || OperatorsPkg::AddrMode::ZpX || OperatorsPkg::AddrMode::ZpY {
+                } else if OperatorsPkg::AddrMode::Imm || OperatorsPkg::AddrMode::IndX || OperatorsPkg::AddrMode::IndY || OperatorsPkg::AddrMode::Zp || OperatorsPkg::AddrMode::ZpX || OperatorsPkg::AddrMode::ZpY {
                     n_low_rx_en  = 1;
                     n_high_rx_en = 0;
                 } else {

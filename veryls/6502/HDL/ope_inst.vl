@@ -35,6 +35,9 @@ module OpeInst (
         n_x      = x;
         n_y      = y;
         n_pc     = pc;
+        if finish {
+            n_finish = 0;
+        }
         case status {
             Status::idle: {
                 if EN {
