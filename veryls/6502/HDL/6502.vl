@@ -15,7 +15,7 @@ module main (
 
     var mode               : ModePkg::CpuMode;
     var tmp_mode           : ModePkg::CpuMode;
-    var mode_handler_en    : logic            = (mode == ModePkg::CpuMode::nop); // enable if ope_ins_finish.
+    var mode_handler_en    : logic            = (mode == ModePkg::CpuMode::nop);
     var mode_handler_rts   : logic           ;
     var mode_handler_busy  : logic           ;
     var mode_handler_finish: logic           ;
@@ -29,59 +29,17 @@ module main (
         busy   : mode_handler_busy  ,
         finish : mode_handler_finish,
     );
+    assign mode = if debug_ope_inst_finish {
+        ModePkg::CpuMode::nop
+    } else {
+        tmp_mode
+    };
 
-    var callback_read_en     : logic<8> = (mode == ModePkg::CpuMode::callback) && ~callback_read_finish;
-    var callback_read_finish : logic   ;
-    var callback_return_value: int     ;
-    var callback_read_rx_busy: int     ;
-    inst callback_read_rx: uarty::Rx (
-        CLK                            ,
-        RST                            ,
-        DATA_IN : GPIO_0_1             ,
-        RE      : callback_read_en     ,
-        data_out: callback_return_value,
-        busy    : callback_read_rx_busy,
-        finish  : callback_read_finish ,
-    );
-
-    var callback_tx_enable: logic = (mode == ModePkg::CpuMode::callback) && callback_read_finish && ~callback_tx_finish && ~CTS;
-    var callback_tx_out   : logic;
-    var callback_tx_busy  : logic;
-    var callback_tx_finish: logic;
-    inst callback_tx: uarty::Tx (
-        CLK                            ,
-        RST                            ,
-        WE      : callback_tx_enable   ,
-        DATA_IN : callback_return_value,
-        data_out: callback_tx_out      ,
-        busy    : callback_tx_busy     ,
-        finish  : callback_tx_finish   ,
-    );
-
-    var sequence_count_read_rx_en  : logic    = mode == ModePkg::CpuMode::sequence && ~write_busy;
-    var sequence_args_count        : logic<8>;
-    var sequence_count_read_rx_busy: logic   ;
-    var sequence_finish            : logic   ;
-    inst sequence_count_read_rx: uarty::Rx (
-        CLK                                  ,
-        RST                                  ,
-        DATA_IN : GPIO_0_1                   ,
-        RE      : sequence_count_read_rx_en  ,
-        data_out: sequence_args_count        ,
-        busy    : sequence_count_read_rx_busy,
-        finish  : sequence_finish            ,
-    );
-
-    var debug_en             : logic     = (mode == ModePkg::CpuMode::debug) && ~write_busy;
+    var debug_en             : logic     = mode == ModePkg::CpuMode::debug;
+    var write_en             : logic     = ~CTS;
     var debug_busy           : logic    ;
-    var addr_low             : logic<8> ;
-    var addr_high            : logic<8> ;
-    var memory_addr_low      : logic<8> ;
-    var memory_addr_high     : logic<8> ;
     var debug_tx_en          : logic    ;
     var debug_tx_data_out    : logic    ;
-    var debug_out_low        : logic<8> ;
-    var debug_out_high       : logic<8> ;
     var debug_ope_inst_finish: logic    ;
     var tmp_a                : logic<8> ;
     var tmp_x                : logic<8> ;
@@ -89,114 +47,22 @@ module main (
     var tmp_pc               : logic<16>;
     var debug_rts            : logic    ;
     inst debug: Debug (
-        CLK                                           ,
-        RST                                           ,
-        DATA_IN           : GPIO_0_1                  ,
-        EN                : debug_en                  ,
-        memory_read_finish: memory_addr_high_tx_finish,
-        tx_finish                                     ,
-        busy              : debug_busy                ,
-        RTS               : debug_rts                 ,
-        finish            : debug_ope_inst_finish     ,
-        a                 : tmp_a                     ,
-        x                 : tmp_x                     ,
-        y                 : tmp_y                     ,
-        pc                : tmp_pc                    ,
-    );
-    assign mode = if debug_ope_inst_finish {
-        ModePkg::CpuMode::nop
-    } else {
-        tmp_mode
-    };
-
-    var addr_low_tx_out   : logic;
-    var addr_low_tx_busy  : logic;
-    var addr_low_tx_finish: logic;
-    var addr_low_tx_enable: logic = ~debug_tx_en && ~debug_busy && ~addr_low_tx_finish && ~CTS;
-    inst addr_low_tx: uarty::Tx (
-        CLK                         ,
-        RST                         ,
-        WE      : addr_low_tx_enable,
-        DATA_IN : addr_low          ,
-        data_out: addr_low_tx_out   ,
-        busy    : addr_low_tx_busy  ,
-        finish  : addr_low_tx_finish,
-    );
-
-    var addr_high_tx_out   : logic;
-    var addr_high_tx_busy  : logic;
-    var addr_high_tx_finish: logic;
-    var addr_high_tx_enable: logic = ~debug_tx_en && ~debug_busy && addr_low_tx_finish && ~addr_high_tx_finish && ~CTS;
-    inst addr_high_tx: uarty::Tx (
-        CLK                          ,
-        RST                          ,
-        WE      : addr_high_tx_enable,
-        DATA_IN : addr_high          ,
-        data_out: addr_high_tx_out   ,
-        busy    : addr_high_tx_busy  ,
-        finish  : addr_high_tx_finish,
-    );
-
-    var memory_addr_low_tx_out   : logic;
-    var memory_addr_low_tx_busy  : logic;
-    var memory_addr_low_tx_finish: logic;
-    var memory_addr_low_tx_enable: logic = debug_tx_en && ~debug_ope_inst_finish && ~memory_addr_low_tx_finish && ~CTS;
-    inst memory_addr_low_tx: uarty::Tx (
-        CLK                                ,
-        RST                                ,
-        WE      : memory_addr_low_tx_enable,
-        DATA_IN : memory_addr_low          ,
-        data_out: memory_addr_low_tx_out   ,
-        busy    : memory_addr_low_tx_busy  ,
-        finish  : memory_addr_low_tx_finish,
-    );
-
-    var memory_addr_high_tx_out   : logic;
-    var memory_addr_high_tx_busy  : logic;
-    var memory_addr_high_tx_finish: logic;
-    var memory_addr_high_tx_enable: logic = debug_tx_en && ~debug_ope_inst_finish && memory_addr_low_tx_finish && ~memory_addr_high_tx_finish && ~CTS;
-    inst memory_addr_high_tx: uarty::Tx (
-        CLK                                 ,
-        RST                                 ,
-        WE      : memory_addr_high_tx_enable,
-        DATA_IN : memory_addr_high          ,
-        data_out: memory_addr_high_tx_out   ,
-        busy    : memory_addr_high_tx_busy  ,
-        finish  : memory_addr_high_tx_finish,
-    );
-
-    var debug_out_low_tx_out   : logic;
-    var debug_out_low_tx_busy  : logic;
-    var debug_out_low_tx_finish: logic;
-    var debug_out_low_tx_enable: logic = debug_tx_en && debug_ope_inst_finish && ~debug_out_low_tx_finish && ~CTS;
-    inst debug_out_low_tx: uarty::Tx (
-        CLK                              ,
-        RST                              ,
-        WE      : debug_out_low_tx_enable,
-        DATA_IN : debug_out_low          ,
-        data_out: debug_out_low_tx_out   ,
-        busy    : debug_out_low_tx_busy  ,
-        finish  : debug_out_low_tx_finish,
-    );
-
-    var debug_out_high_tx_out   : logic;
-    var debug_out_high_tx_busy  : logic;
-    var debug_out_high_tx_finish: logic;
-    var debug_out_high_tx_enable: logic = debug_tx_en && debug_ope_inst_finish && debug_out_low_tx_finish && ~debug_out_high_tx_finish && ~CTS;
-    inst debug_out_high_tx: uarty::Tx (
         CLK                               ,
         RST                               ,
-        WE      : debug_out_high_tx_enable,
-        DATA_IN : debug_out_high          ,
-        data_out: debug_out_high_tx_out   ,
-        busy    : debug_out_high_tx_busy  ,
-        finish  : debug_out_high_tx_finish,
+        DATA_IN    : GPIO_0_1             ,
+        EN         : debug_en             ,
+        WE         : write_en             ,
+        tx_data_out                       ,
+        busy       : debug_busy           ,
+        RTS        : debug_rts            ,
+        finish     : debug_ope_inst_finish,
+        a          : tmp_a                ,
+        x          : tmp_x                ,
+        y          : tmp_y                ,
+        pc         : tmp_pc               ,
     );
 
-    var write_busy: logic = callback_tx_busy;
-    assign GPIO_0_0   = if mode == ModePkg::CpuMode::callback {
-        callback_tx_out
-    } else if mode == ModePkg::CpuMode::debug {
+    assign GPIO_0_0 = if mode == ModePkg::CpuMode::debug {
         if debug_tx_en {
             debug_tx_data_out
         } else {
@@ -208,8 +74,6 @@ module main (
 
     assign GPIO_0_2 = if mode_handler_en {
         ~mode_handler_busy
-    } else if callback_read_en {
-        ~callback_read_rx_busy
     } else if debug_busy {
         debug_rts
     } else {
