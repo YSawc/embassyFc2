@@ -405,6 +405,8 @@ module Debug (
     var addr_ref_detector_en    : logic = seq_status == SeqStatus::AddrRefDetect;
     var addr_ref_detector_busy  : logic;
     var addr_ref_detector_finish: logic;
+    var tmp_low_rx_en           : logic;
+    var tmp_high_rx_en          : logic;
     inst addr_ref_detector: AddrRefDetector (
         CLK                                 ,
         RST                                 ,
@@ -415,8 +417,6 @@ module Debug (
         busy      : addr_ref_detector_busy  ,
         finish    : addr_ref_detector_finish,
     );
-    var tmp_low_rx_en           : logic   ;
-    var tmp_high_rx_en          : logic   ;
     var addr_ref_low_rx_en      : logic    = seq_status == SeqStatus::AddrRefLowRead;
     var addr_ref_low_rx_data_out: logic<8>;
     var addr_ref_low_rx_busy    : logic   ;
