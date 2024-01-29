@@ -39,6 +39,11 @@ module Debug (
         AddrRefDetect,
         AddrRefLowRead,
         AddrRefHighRead,
+        IndTransferReady,
+        IndLowTransfer,
+        IndHighTransfer,
+        IndMemoryLowRead,
+        IndMemoryHighRead,
         OpeExecute,
     }
 
@@ -407,15 +412,19 @@ module Debug (
     var addr_ref_detector_finish: logic;
     var tmp_low_rx_en           : logic;
     var tmp_high_rx_en          : logic;
+    var tmp_ind_low_tx_en       : logic;
+    var tmp_ind_high_tx_en      : logic;
     inst addr_ref_detector: AddrRefDetector (
-        CLK                                 ,
-        RST                                 ,
-        EN        : addr_ref_detector_en    ,
-        addr_mode : inst_casted_addr_mode   ,
-        low_rx_en : tmp_low_rx_en           ,
-        high_rx_en: tmp_high_rx_en          ,
-        busy      : addr_ref_detector_busy  ,
-        finish    : addr_ref_detector_finish,
+        CLK                                     ,
+        RST                                     ,
+        EN            : addr_ref_detector_en    ,
+        addr_mode     : inst_casted_addr_mode   ,
+        low_rx_en     : tmp_low_rx_en           ,
+        high_rx_en    : tmp_high_rx_en          ,
+        ind_low_tx_en : tmp_ind_low_tx_en       ,
+        ind_high_tx_en: tmp_ind_high_tx_en      ,
+        busy          : addr_ref_detector_busy  ,
+        finish        : addr_ref_detector_finish,
     );
     var addr_ref_low_rx_en      : logic    = seq_status == SeqStatus::AddrRefLowRead;
     var addr_ref_low_rx_data_out: logic<8>;
@@ -445,23 +454,89 @@ module Debug (
         finish  : addr_ref_high_rx_finish  ,
     );
 
+    var ind_row_tx_en      : logic = WE && seq_status == SeqStatus::IndLowTransfer;
+    var ind_row_tx_data_out: logic;
+    var ind_row_tx_busy    : logic;
+    var ind_row_tx_finish  : logic;
+    inst ind_low_tx: uarty::Tx (
+        CLK                               ,
+        RST                               ,
+        WE      : ind_row_tx_en           ,
+        DATA_IN : addr_ref_low_rx_data_out,
+        data_out: ind_row_tx_data_out     ,
+        busy    : ind_row_tx_busy         ,
+        finish  : ind_row_tx_finish       ,
+    );
+
+    var ind_high_tx_en      : logic = WE && seq_status == SeqStatus::IndHighTransfer;
+    var ind_high_tx_data_out: logic;
+    var ind_high_tx_busy    : logic;
+    var ind_high_tx_finish  : logic;
+    inst ind_high_tx: uarty::Tx (
+        CLK                                ,
+        RST                                ,
+        WE      : ind_high_tx_en           ,
+        DATA_IN : addr_ref_high_rx_data_out,
+        data_out: ind_high_tx_data_out     ,
+        busy    : ind_high_tx_busy         ,
+        finish  : ind_high_tx_finish       ,
+    );
+
+    var ind_memory_low_rx_en      : logic    = seq_status == SeqStatus::IndMemoryLowRead;
+    var ind_memory_low_rx_data_out: logic<8>;
+    var ind_memory_low_rx_busy    : logic   ;
+    var ind_memory_low_rx_finish  : logic   ;
+    inst ind_memory_low_rx: uarty::Rx (
+        CLK                                 ,
+        RST                                 ,
+        DATA_IN                             ,
+        RE      : ind_memory_low_rx_en      ,
+        data_out: ind_memory_low_rx_data_out,
+        busy    : ind_memory_low_rx_busy    ,
+        finish  : ind_memory_low_rx_finish  ,
+    );
+
+    var ind_memory_high_rx_en      : logic    = seq_status == SeqStatus::IndMemoryHighRead;
+    var ind_memory_high_rx_data_out: logic<8>;
+    var ind_memory_high_rx_busy    : logic   ;
+    var ind_memory_high_rx_finish  : logic   ;
+    inst ind_memory_high_rx: uarty::Rx (
+        CLK                                  ,
+        RST                                  ,
+        DATA_IN                              ,
+        RE      : ind_memory_high_rx_en      ,
+        data_out: ind_memory_high_rx_data_out,
+        busy    : ind_memory_high_rx_busy    ,
+        finish  : ind_memory_high_rx_finish  ,
+    );
+
+    var ope_inst_addr_low: logic<8> = if tmp_ind_low_tx_en {
+        ind_memory_low_rx_data_out
+    } else {
+        addr_ref_low_rx_data_out
+    };
+    var ope_inst_addr_high: logic<8> = if tmp_ind_low_tx_en {
+        ind_memory_high_rx_data_out
+    } else {
+        addr_ref_high_rx_data_out
+    };
     var ope_inst_busy  : logic;
     var ope_inst_finish: logic;
     var ope_inst_en    : logic;
     assign ope_inst_en     = seq_status == SeqStatus::OpeExecute;
     inst ope_inst: OpeInst (
-        CLK                                 ,
-        RST                                 ,
-        EN       : ope_inst_en              ,
-        ope_kind : inst_casted_ope_kind     ,
-        addr_low : addr_ref_low_rx_data_out ,
-        addr_high: addr_ref_high_rx_data_out,
-        a        : tmp_a                    ,
-        x        : tmp_x                    ,
-        y        : tmp_y                    ,
-        pc       : tmp_pc                   ,
-        busy     : ope_inst_busy            ,
-        finish   : ope_inst_finish          ,
+        CLK                            ,
+        RST                            ,
+        EN       : ope_inst_en         ,
+        ope_kind : inst_casted_ope_kind,
+        addr_low : ope_inst_addr_low   ,
+        addr_high: ope_inst_addr_high  ,
+        a        : tmp_a               ,
+        x        : tmp_x               ,
+        y        : tmp_y               ,
+        pc       : tmp_pc              ,
+        busy     : ope_inst_busy       ,
+        finish   : ope_inst_finish     ,
     );
 
     assign n_finish                   = ope_inst_finish;
@@ -485,6 +560,10 @@ module Debug (
         ~addr_ref_high_rx_en
     } else if tx_reg_detect_rx_en {
         ~tx_reg_detect_rx_en
+    } else if ind_memory_low_rx_en {
+        ~ind_memory_low_rx_en
+    } else if ind_memory_high_rx_en {
+        ~ind_memory_high_rx_en
     } else {
         1
     };
@@ -531,7 +610,7 @@ module Debug (
                     if tmp_low_rx_en {
                         n_seq_status = SeqStatus::AddrRefLowRead;
                     } else {
-                        n_seq_status = SeqStatus::OpeExecute;
+                        n_seq_status = SeqStatus::IndTransferReady;
                     }
                 }
             } else if seq_status == SeqStatus::AddrRefLowRead {
@@ -539,13 +618,43 @@ module Debug (
                     if tmp_high_rx_en {
                         n_seq_status = SeqStatus::AddrRefHighRead;
                     } else {
-                        n_seq_status = SeqStatus::OpeExecute;
+                        n_seq_status = SeqStatus::IndTransferReady;
                     }
                 }
             } else if seq_status == SeqStatus::AddrRefHighRead {
                 if addr_ref_high_rx_finish {
                     tmp_addr_ref_high_rx_data_out = addr_ref_high_rx_data_out;
-                    n_seq_status                  = SeqStatus::OpeExecute;
+                    n_seq_status                  = SeqStatus::IndTransferReady;
+                }
+            } else if seq_status == SeqStatus::IndTransferReady {
+                if tmp_ind_low_tx_en {
+                    n_seq_status = SeqStatus::IndLowTransfer;
+                } else {
+                    n_seq_status = SeqStatus::OpeExecute;
+                }
+            } else if seq_status == SeqStatus::IndLowTransfer {
+                if ind_row_tx_finish {
+                    if tmp_ind_high_tx_en {
+                        n_seq_status = SeqStatus::IndHighTransfer;
+                    } else {
+                        n_seq_status = SeqStatus::IndMemoryLowRead;
+                    }
+                }
+            } else if seq_status == SeqStatus::IndHighTransfer {
+                if ind_high_tx_finish {
+                    n_seq_status = SeqStatus::IndMemoryLowRead;
+                }
+            } else if seq_status == SeqStatus::IndMemoryLowRead {
+                if ind_memory_low_rx_finish {
+                    if tmp_ind_high_tx_en {
+                        n_seq_status = SeqStatus::IndMemoryHighRead;
+                    } else {
+                        n_seq_status = SeqStatus::OpeExecute;
+                    }
+                }
+            } else if seq_status == SeqStatus::IndMemoryHighRead {
+                if ind_memory_high_rx_finish {
+                    n_seq_status = SeqStatus::OpeExecute;
                 }
             } else if seq_status == SeqStatus::OpeExecute {
                 if ope_inst_finish {
@@ -561,6 +670,10 @@ module Debug (
         register_row_tx_data_out
     } else if register_high_tx_en {
         register_high_tx_data_out
+    } else if ind_row_tx_en {
+        ind_row_tx_data_out
+    } else if ind_high_tx_en {
+        ind_high_tx_data_out
     } else {
         1
     };

@@ -2,7 +2,7 @@
 #![no_main]
 
 use defmt::*;
-use embassy_fc2_app::middleware::mode::{CpuMode, OpeMode};
+use embassy_fc2_app::middleware::mode::{CpuMode, OpeMode, TxReg};
 use embassy_stm32::dma::NoDma;
 use embassy_stm32::usart::{Config, Uart};
 use embassy_stm32::{bind_interrupts, peripherals, usart};
@@ -51,10 +51,15 @@ fn main() -> ! {
     buf[0] = 0xdb;
     usart.blocking_write(&buf).unwrap();
     info!("write memory high data.");
+    buf[0] = OpeMode::RegisterTransfer as u8;
+    usart.blocking_write(&buf).unwrap();
+    buf[0] = TxReg::PC as u8;
+    usart.blocking_write(&buf).unwrap();
+    info!("write tx reg.");
     let mut read_buf = [0x0u8; 2];
     usart.blocking_read(&mut read_buf).unwrap();
     match read_buf {
-        [0xdb, 0x7e] => info!("test passed!"),
+        [0x7e, 0xdb] => info!("test passed!"),
         v => {
             info!("test failed. return value is {:?}", v);
             loop {}

@@ -1,30 +1,36 @@
 module AddrRefDetector (
-    CLK       : input  logic                 ,
-    RST       : input  logic                 ,
-    EN        : input  logic                 ,
-    addr_mode : input  OperatorsPkg::AddrMode,
-    low_rx_en : output logic                 ,
-    high_rx_en: output logic                 ,
-    busy      : output logic                 ,
-    finish    : output logic                 ,
+    CLK           : input  logic                 ,
+    RST           : input  logic                 ,
+    EN            : input  logic                 ,
+    addr_mode     : input  OperatorsPkg::AddrMode,
+    low_rx_en     : output logic                 ,
+    high_rx_en    : output logic                 ,
+    ind_low_tx_en : output logic                 ,
+    ind_high_tx_en: output logic                 ,
+    busy          : output logic                 ,
+    finish        : output logic                 ,
 ) {
     enum Status: logic {
         idle,
         work,
     }
-    var status      : Status;
-    var n_status    : Status;
-    var n_busy      : logic ;
-    var n_finish    : logic ;
-    var n_low_rx_en : logic ;
-    var n_high_rx_en: logic ;
+    var status          : Status;
+    var n_status        : Status;
+    var n_busy          : logic ;
+    var n_finish        : logic ;
+    var n_low_rx_en     : logic ;
+    var n_high_rx_en    : logic ;
+    var n_ind_low_tx_en : logic ;
+    var n_ind_high_tx_en: logic ;
 
     always_comb {
-        n_status     = status;
-        n_busy       = busy;
-        n_finish     = finish;
-        n_low_rx_en  = low_rx_en;
-        n_high_rx_en = high_rx_en;
+        n_status         = status;
+        n_busy           = busy;
+        n_finish         = finish;
+        n_low_rx_en      = low_rx_en;
+        n_high_rx_en     = high_rx_en;
+        n_ind_low_tx_en  = ind_low_tx_en;
+        n_ind_high_tx_en = ind_high_tx_en;
         case status {
             Status::idle: {
                 if EN {
@@ -35,6 +41,7 @@ module AddrRefDetector (
             Status::work: {
                 n_busy   = 0;
                 n_finish = 1;
+                n_status = Status::idle;
                 if addr_mode == OperatorsPkg::AddrMode::Impl || addr_mode == OperatorsPkg::AddrMode::Acc {
                     n_low_rx_en  = 0;
                     n_high_rx_en = 0;
@@ -45,23 +52,38 @@ module AddrRefDetector (
                     n_low_rx_en  = 1;
                     n_high_rx_en = 1;
                 }
+
+                if addr_mode == OperatorsPkg::AddrMode::Ind {
+                    n_ind_low_tx_en  = 1;
+                    n_ind_high_tx_en = 1;
+                } else if addr_mode == OperatorsPkg::AddrMode::IndX || addr_mode == OperatorsPkg::AddrMode::IndY {
+                    n_ind_low_tx_en  = 1;
+                    n_ind_high_tx_en = 0;
+                } else {
+                    n_ind_low_tx_en  = 0;
+                    n_ind_high_tx_en = 0;
+                }
             }
         }
     }
 
     always_ff (posedge CLK, async_high RST) {
         if_reset {
-            status     = Status::idle;
-            low_rx_en  = 0;
-            high_rx_en = 0;
-            busy       = 0;
-            finish     = 0;
+            status         = Status::idle;
+            low_rx_en      = 0;
+            high_rx_en     = 0;
+            ind_low_tx_en  = 0;
+            ind_high_tx_en = 0;
+            busy           = 0;
+            finish         = 0;
         } else {
-            status     = n_status;
-            low_rx_en  = n_low_rx_en;
-            high_rx_en = n_high_rx_en;
-            busy       = n_busy;
-            finish     = n_finish;
+            status         = n_status;
+            low_rx_en      = n_low_rx_en;
+            high_rx_en     = n_high_rx_en;
+            ind_low_tx_en  = n_ind_low_tx_en;
+            ind_high_tx_en = n_ind_high_tx_en;
+            busy           = n_busy;
+            finish         = n_finish;
         }
     }
 }
