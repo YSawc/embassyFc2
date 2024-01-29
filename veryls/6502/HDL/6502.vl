@@ -36,9 +36,8 @@ module main (
     };
 
     var debug_en             : logic     = mode == ModePkg::CpuMode::debug;
-    var write_en             : logic     = ~CTS;
+    var debug_tx_en          : logic     = ~CTS;
     var debug_busy           : logic    ;
-    var debug_tx_en          : logic    ;
     var debug_tx_data_out    : logic    ;
     var debug_ope_inst_finish: logic    ;
     var tmp_a                : logic<8> ;
@@ -51,8 +50,8 @@ module main (
         RST                               ,
         DATA_IN    : GPIO_0_1             ,
         EN         : debug_en             ,
-        WE         : write_en             ,
-        tx_data_out                       ,
+        WE         : debug_tx_en          ,
+        tx_data_out: debug_tx_data_out    ,
         busy       : debug_busy           ,
         RTS        : debug_rts            ,
         finish     : debug_ope_inst_finish,

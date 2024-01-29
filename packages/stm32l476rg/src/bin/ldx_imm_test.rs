@@ -2,7 +2,7 @@
 #![no_main]
 
 use defmt::*;
-use embassy_fc2_app::middleware::mode::{CpuMode, OpeMode};
+use embassy_fc2_app::middleware::mode::{CpuMode, OpeMode, TxReg};
 use embassy_stm32::dma::NoDma;
 use embassy_stm32::usart::{Config, Uart};
 use embassy_stm32::{bind_interrupts, peripherals, usart};
@@ -33,6 +33,12 @@ fn main() -> ! {
     buf[0] = 0x45;
     usart.blocking_write(&buf).unwrap();
     info!("write callback value.");
+    buf[0] = OpeMode::RegisterTransfer as u8;
+    usart.blocking_write(&buf).unwrap();
+    info!("write operation mode.");
+    buf[0] = TxReg::X as u8;
+    usart.blocking_write(&buf).unwrap();
+    info!("write tx reg.");
     let mut read_buf = [0x0u8; 1];
     usart.blocking_read(&mut read_buf).unwrap();
     match read_buf {

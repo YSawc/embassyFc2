@@ -13,20 +13,28 @@ module Debug (
     y          : output logic<8> ,
     pc         : output logic<16>,
 ) {
+    var tmp_a : logic<8> ;
+    var tmp_x : logic<8> ;
+    var tmp_y : logic<8> ;
+    var tmp_pc: logic<16>;
+
     var n_busy  : logic;
     var n_RTS   : logic;
     var n_finish: logic;
 
-    enum Status: logic<3> {
+    enum Status: logic {
         idle,
         work,
     }
 
     var seq_status  : SeqStatus   ;
     var n_seq_status: SeqStatus   ;
-    enum SeqStatus: logic    <3> {
+    enum SeqStatus: logic    <4> {
         Ready,
         OpeRead,
+        TxRegisterDetect,
+        RegisterLowTransfer,
+        RegisterHighTransfer,
         InstRead,
         AddrRefDetect,
         AddrRefLowRead,
@@ -292,6 +300,7 @@ module Debug (
     assign operators[8'hfe] = {OperatorsPkg::OpeKind::Inc, OperatorsPkg::AddrMode::AbsX}; // 0xfe
     enum OpeMode: logic {
         Inst,
+        RegisterTransfer,
     }
     var raw_operator_mode: logic<8>;
     var ope_read_busy    : logic   ;
@@ -309,6 +318,72 @@ module Debug (
     );
     var casted_ope_mode: OpeMode;
     assign casted_ope_mode = raw_operator_mode as OpeMode;
+
+    var tx_reg_detect_rx_en      : logic    = seq_status == SeqStatus::TxRegisterDetect;
+    var tx_reg_detect_rx_data_out: logic<8>;
+    var tx_reg_detect_rx_busy    : logic   ;
+    var tx_reg_detect_rx_finish  : logic   ;
+    inst tx_reg_detect_rx: uarty::Rx (
+        CLK                                ,
+        RST                                ,
+        DATA_IN                            ,
+        RE      : tx_reg_detect_rx_en      ,
+        data_out: tx_reg_detect_rx_data_out,
+        busy    : tx_reg_detect_rx_busy    ,
+        finish  : tx_reg_detect_rx_finish  ,
+    );
+    enum TxReg: logic<2> {
+        A,
+        X,
+        Y,
+        PC,
+    }
+    var casted_tx_reg : TxReg = tx_reg_detect_rx_data_out as TxReg;
+    var tmp_high_tx_en: logic = casted_tx_reg == TxReg::PC;
+
+    var register_row_tx_en     : logic    = WE && seq_status == SeqStatus::RegisterLowTransfer;
+    var register_row_tx_data_in: logic<8> = if casted_tx_reg == TxReg::A {
+        a
+    } else if casted_tx_reg == TxReg::X {
+        x
+    } else if casted_tx_reg == TxReg::Y {
+        y
+    } else if casted_tx_reg == TxReg::PC {
+        pc & 8'hff
+    } else {
+        0
+    };
+    var register_row_tx_data_out: logic;
+    var register_row_tx_busy    : logic;
+    var register_row_tx_finish  : logic;
+    inst register_row_tx: uarty::Tx (
+        CLK                               ,
+        RST                               ,
+        WE      : register_row_tx_en      ,
+        DATA_IN : register_row_tx_data_in ,
+        data_out: register_row_tx_data_out,
+        busy    : register_row_tx_busy    ,
+        finish  : register_row_tx_finish  ,
+    );
+
+    var register_high_tx_en     : logic    = WE && seq_status == SeqStatus::RegisterHighTransfer;
+    var register_high_tx_data_in: logic<8> = if casted_tx_reg == TxReg::PC {
+        (pc & 16'hff00) >> 8
+    } else {
+        0
+    };
+    var register_high_tx_data_out: logic;
+    var register_high_tx_busy    : logic;
+    var register_high_tx_finish  : logic;
+    inst register_high_tx: uarty::Tx (
+        CLK                                ,
+        RST                                ,
+        WE      : register_high_tx_en      ,
+        DATA_IN : register_high_tx_data_in ,
+        data_out: register_high_tx_data_out,
+        busy    : register_high_tx_busy    ,
+        finish  : register_high_tx_finish  ,
+    );
 
     var raw_inst_mode   : logic<8>;
     var inst_read_busy  : logic   ;
@@ -381,17 +456,21 @@ module Debug (
         ope_kind : inst_casted_ope_kind     ,
         addr_low : addr_ref_low_rx_data_out ,
         addr_high: addr_ref_high_rx_data_out,
-        a                                   ,
-        x                                   ,
-        y                                   ,
-        pc                                  ,
+        a        : tmp_a                    ,
+        x        : tmp_x                    ,
+        y        : tmp_y                    ,
+        pc       : tmp_pc                   ,
         busy     : ope_inst_busy            ,
         finish   : ope_inst_finish          ,
     );
 
-    assign n_finish = ope_inst_finish;
-    assign n_busy   = if casted_ope_mode == OpeMode::Inst {
+    assign n_finish                   = ope_inst_finish;
+    var n_register_transfer_finish: logic;
+    var register_transfer_finish  : logic;
+    assign n_busy                     = if casted_ope_mode == OpeMode::Inst {
         ~ope_inst_finish
+    } else if casted_ope_mode == OpeMode::RegisterTransfer {
+        ~register_transfer_finish
     } else {
         1
     };
@@ -404,18 +483,44 @@ module Debug (
         ~addr_ref_low_rx_en
     } else if addr_ref_high_rx_en {
         ~addr_ref_high_rx_en
+    } else if tx_reg_detect_rx_en {
+        ~tx_reg_detect_rx_en
     } else {
         1
     };
 
     always_comb {
-        n_seq_status = seq_status;
+        n_seq_status               = seq_status;
+        n_register_transfer_finish = register_transfer_finish;
         if EN {
             if seq_status == SeqStatus::Ready {
-                n_seq_status = SeqStatus::OpeRead;
+                n_register_transfer_finish = 0;
+                n_seq_status               = SeqStatus::OpeRead;
             } else if seq_status == SeqStatus::OpeRead {
                 if ope_mode_finish {
-                    n_seq_status = SeqStatus::InstRead;
+                    if casted_ope_mode == OpeMode::Inst {
+                        n_seq_status = SeqStatus::InstRead;
+                    } else if casted_ope_mode == OpeMode::RegisterTransfer {
+                        n_seq_status = SeqStatus::TxRegisterDetect;
+                    }
+                }
+            } else if seq_status == SeqStatus::TxRegisterDetect {
+                if tx_reg_detect_rx_finish {
+                    n_seq_status = SeqStatus::RegisterLowTransfer;
+                }
+            } else if seq_status == SeqStatus::RegisterLowTransfer {
+                if register_row_tx_finish {
+                    if tmp_high_tx_en {
+                        n_seq_status = SeqStatus::RegisterHighTransfer;
+                    } else {
+                        n_register_transfer_finish = 1;
+                        n_seq_status               = SeqStatus::Ready;
+                    }
+                }
+            } else if seq_status == SeqStatus::RegisterHighTransfer {
+                if register_high_tx_finish {
+                    n_register_transfer_finish = 1;
+                    n_seq_status               = SeqStatus::Ready;
                 }
             } else if seq_status == SeqStatus::InstRead {
                 if inst_read_finish {
@@ -452,6 +557,18 @@ module Debug (
         }
     }
 
+    assign tx_data_out = if register_row_tx_en {
+        register_row_tx_data_out
+    } else if register_high_tx_en {
+        register_high_tx_data_out
+    } else {
+        1
+    };
+
+    assign a  = tmp_a;
+    assign x  = tmp_x;
+    assign y  = tmp_y;
+    assign pc = tmp_pc;
     always_ff (posedge CLK, async_high RST) {
         if_reset {
             busy       = 0;

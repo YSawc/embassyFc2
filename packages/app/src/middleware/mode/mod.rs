@@ -6,7 +6,14 @@ pub enum CpuMode {
 
 pub enum OpeMode {
     Inst,
-    Addr,
+    RegisterTransfer,
+}
+
+pub enum TxReg {
+    A,
+    X,
+    Y,
+    PC,
 }
 
 pub enum AddrMode {
