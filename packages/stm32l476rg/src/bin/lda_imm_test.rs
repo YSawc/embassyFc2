@@ -4,6 +4,7 @@
 use defmt::*;
 use embassy_fc2_app::middleware::mode::{CpuMode, OpeMode, TxReg};
 use embassy_stm32::dma::NoDma;
+use embassy_stm32::gpio::{Input, Pull};
 use embassy_stm32::usart::{Config, Uart};
 use embassy_stm32::{bind_interrupts, peripherals, usart};
 use {defmt_rtt as _, panic_probe as _};
@@ -20,6 +21,7 @@ fn main() -> ! {
         p.USART1, p.PA10, p.PA9, Irqs, p.PA12, p.PA11, NoDma, NoDma, config,
     )
     .unwrap();
+    let rw = Input::new(p.PA0, Pull::None);
     let mut buf = [0x0u8; 1];
     buf[0] = CpuMode::Debug as u8;
     usart.blocking_write(&buf).unwrap();
@@ -30,6 +32,13 @@ fn main() -> ! {
     buf[0] = 0xa9;
     usart.blocking_write(&buf).unwrap();
     info!("write instruction.");
+    match rw.is_high() {
+        true => info!("rw flag is high"),
+        false => {
+            info!("test failed. rw flag is not high.");
+            loop {}
+        }
+    }
     buf[0] = 0x34;
     usart.blocking_write(&buf).unwrap();
     info!("write callback value.");

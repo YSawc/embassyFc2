@@ -4,6 +4,7 @@
 use defmt::*;
 use embassy_fc2_app::middleware::mode::{CpuMode, OpeMode};
 use embassy_stm32::dma::NoDma;
+use embassy_stm32::gpio::{Input, Pull};
 use embassy_stm32::usart::{Config, Uart};
 use embassy_stm32::{bind_interrupts, peripherals, usart};
 use {defmt_rtt as _, panic_probe as _};
@@ -20,6 +21,7 @@ fn main() -> ! {
         p.USART1, p.PA10, p.PA9, Irqs, p.PA12, p.PA11, NoDma, NoDma, config,
     )
     .unwrap();
+    let rw = Input::new(p.PA0, Pull::None);
     let mut buf = [0x0u8; 1];
     buf[0] = CpuMode::Debug as u8;
     usart.blocking_write(&buf).unwrap();
@@ -39,6 +41,13 @@ fn main() -> ! {
     buf[0] = 0x85;
     usart.blocking_write(&buf).unwrap();
     info!("write instruction.");
+    match rw.is_low() {
+        true => info!("rw flag is low"),
+        false => {
+            info!("test failed. rw flag is not low.");
+            loop {}
+        }
+    }
     buf[0] = 0x45;
     usart.blocking_write(&buf).unwrap();
     info!("write target address.");
@@ -51,8 +60,6 @@ fn main() -> ! {
             loop {}
         }
     }
-    // let rw_flag = Input::new(p.PA0, Pull::None);
-    // info!("rw is high?:{}", rw_flag.is_high());
     let mut mock_memory = [0x0u8; 0xff];
     let mut data_buf = [0x0u8; 1];
     usart.blocking_read(&mut data_buf).unwrap();

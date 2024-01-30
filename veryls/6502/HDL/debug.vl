@@ -8,6 +8,7 @@ module Debug (
     busy       : output logic    ,
     RTS        : output logic    ,
     finish     : output logic    ,
+    rw         : output logic    ,
     a          : output logic<8> ,
     x          : output logic<8> ,
     y          : output logic<8> ,
@@ -36,6 +37,7 @@ module Debug (
         RegisterLowTransfer,
         RegisterHighTransfer,
         InstRead,
+        RWHandler,
         AddrRefDetect,
         AddrRefLowRead,
         AddrRefHighRead,
@@ -409,6 +411,20 @@ module Debug (
     var inst_casted_ope_kind : OperatorsPkg::OpeKind  = operators[raw_inst_mode].ope_kind;
     var inst_casted_addr_mode: OperatorsPkg::AddrMode = operators[raw_inst_mode].addr_mode;
 
+    var rw_handler_en    : logic = seq_status == SeqStatus::RWHandler;
+    var rw_handler_rw    : logic;
+    var rw_handler_busy  : logic;
+    var rw_handler_finish: logic;
+    inst rw_handler: RWHandler (
+        CLK                           ,
+        RST                           ,
+        EN      : rw_handler_en       ,
+        ope_kind: inst_casted_ope_kind,
+        rw      : rw_handler_rw       ,
+        busy    : rw_handler_busy     ,
+        finish  : rw_handler_finish   ,
+    );
+
     var addr_ref_detector_en    : logic = seq_status == SeqStatus::AddrRefDetect;
     var addr_ref_detector_busy  : logic;
     var addr_ref_detector_finish: logic;
@@ -638,6 +654,10 @@ module Debug (
                 }
             } else if seq_status == SeqStatus::InstRead {
                 if inst_read_finish {
+                    n_seq_status = SeqStatus::RWHandler;
+                }
+            } else if seq_status == SeqStatus::RWHandler {
+                if rw_handler_finish {
                     n_seq_status = SeqStatus::AddrRefDetect;
                 }
             } else if seq_status == SeqStatus::AddrRefDetect {
@@ -726,7 +746,7 @@ module Debug (
     } else {
         1
     };
-
+    assign rw = rw_handler_rw;
     assign a  = tmp_a;
     assign x  = tmp_x;
     assign y  = tmp_y;
