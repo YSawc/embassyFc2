@@ -1,0 +1,104 @@
+module OpeStoreToMemory (
+    CLK        : input  logic                   ,
+    RST        : input  logic                   ,
+    EN         : input  logic                   ,
+    WE         : input  logic                   ,
+    ope_kind   : input  OperatorsPkg::OpeKind   ,
+    target_addr: input  logic                <8>,
+    a          : input  logic                <8>,
+    x          : input  logic                <8>,
+    y          : input  logic                <8>,
+    tx_data_out: output logic                   ,
+    busy       : output logic                   ,
+    finish     : output logic                   ,
+) {
+    enum Status: logic<5> {
+        Ready,
+        TargettingAddr,
+        StoreToMemory,
+    }
+    var n_status     : Status;
+    var status       : Status;
+    var n_tx_data_out: logic ;
+    var n_busy       : logic ;
+    var n_finish     : logic ;
+
+    var send_data: logic<8> = if ope_kind == OperatorsPkg::OpeKind::Sta {
+        a
+    } else if ope_kind == OperatorsPkg::OpeKind::Stx {
+        x
+    } else if ope_kind == OperatorsPkg::OpeKind::Sty {
+        y
+    } else {
+        0
+    };
+
+    var targetting_addr_tx_en      : logic = WE && status == Status::TargettingAddr;
+    var targetting_addr_tx_data_out: logic;
+    var targetting_addr_tx_busy    : logic;
+    var targetting_addr_tx_finish  : logic;
+    inst targetting_addr_tx: uarty::Tx (
+        CLK                                  ,
+        RST                                  ,
+        WE      : targetting_addr_tx_en      ,
+        DATA_IN : target_addr                ,
+        data_out: targetting_addr_tx_data_out,
+        busy    : targetting_addr_tx_busy    ,
+        finish  : targetting_addr_tx_finish  ,
+    );
+
+    var store_to_memory_tx_en      : logic = WE && status == Status::StoreToMemory;
+    var store_to_memory_tx_data_out: logic;
+    var store_to_memory_tx_busy    : logic;
+    var store_to_memory_tx_finish  : logic;
+    inst store_to_memory_tx: uarty::Tx (
+        CLK                                  ,
+        RST                                  ,
+        WE      : store_to_memory_tx_en      ,
+        DATA_IN : send_data                  ,
+        data_out: store_to_memory_tx_data_out,
+        busy    : store_to_memory_tx_busy    ,
+        finish  : store_to_memory_tx_finish  ,
+    );
+
+    always_comb {
+        n_tx_data_out = tx_data_out;
+        n_status      = status;
+        n_finish      = finish;
+        if EN {
+            if status == Status::Ready {
+                n_finish = 0;
+                n_status = Status::TargettingAddr;
+            } else if status == Status::TargettingAddr {
+                if targetting_addr_tx_finish {
+                    n_status = Status::StoreToMemory;
+                } else {
+                    n_tx_data_out = targetting_addr_tx_data_out;
+                }
+            } else if status == Status::StoreToMemory {
+                if store_to_memory_tx_finish {
+                    n_status = Status::Ready;
+                    n_finish = 1;
+                } else {
+                    n_tx_data_out = store_to_memory_tx_data_out;
+                }
+            } else {
+                n_status = Status::Ready;
+            }
+        }
+    }
+
+    always_ff (posedge CLK, async_high RST) {
+        if_reset {
+            tx_data_out = 0;
+            busy        = 0;
+            status      = Status::Ready;
+            finish      = 0;
+        } else {
+            tx_data_out = n_tx_data_out;
+            busy        = n_busy;
+            status      = n_status;
+            finish      = n_finish;
+        }
+    }
+}

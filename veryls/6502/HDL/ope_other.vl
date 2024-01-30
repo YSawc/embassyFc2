@@ -1,4 +1,4 @@
-module OpeInst (
+module OpeOther (
     CLK      : input  logic                    ,
     RST      : input  logic                    ,
     EN       : input  logic                    ,
