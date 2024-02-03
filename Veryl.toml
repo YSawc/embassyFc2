@@ -6,7 +6,7 @@ version = "0.1.0"
 indent_width = 4
 
 [dependencies]
-"https://github.com/YSawc/uarty" = "0.1.4"
+"https://github.com/YSawc/uarty" = "0.1.6"
 
 [build]
 target = {type = "directory", path = "veryls/6502/HDL/sv"}
