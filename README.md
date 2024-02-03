@@ -9,7 +9,24 @@ This repository includes embed software and hardware projects.
 3. run software
 ```
 cd packages/stm32l476rg
-cargo run --bin callback_test
+cargo run --bin jmp_abs_test
+```
+
+If test passed, passed message shown as below.
+```
+...
+INFO  rw flag is high
+└─ jmp_abs_test::__cortex_m_rt_main @ src/bin/jmp_abs_test.rs:36
+INFO  write target memory row.
+└─ jmp_abs_test::__cortex_m_rt_main @ src/bin/jmp_abs_test.rs:44
+INFO  write target memory high.
+└─ jmp_abs_test::__cortex_m_rt_main @ src/bin/jmp_abs_test.rs:47
+INFO  write operation mode.
+└─ jmp_abs_test::__cortex_m_rt_main @ src/bin/jmp_abs_test.rs:50
+INFO  write tx reg.
+└─ jmp_abs_test::__cortex_m_rt_main @ src/bin/jmp_abs_test.rs:53
+INFO  test passed!
+└─ jmp_abs_test::__cortex_m_rt_main @ src/bin/jmp_abs_test.rs:5
 ```
 
 #### default pin function.
@@ -21,17 +38,6 @@ cargo run --bin callback_test
 |PA9|GPIO1|TX|
 |PA12|GPIO2|CTS|
 |PA11|GPIO3|RTS|
-
-If test passed, passed message shown as below.
-```
-...
-INFO  wrote mode
-└─ callback_test::__cortex_m_rt_main @ src/bin/callback_test.rs:31
-INFO  test passed!
-└─ callback_test::__cortex_m_rt_main @ src/bin/callback_test.rs:38
-INFO  wait kill..
-└─ callback_test::__cortex_m_rt_main @ src/bin/callback_test.rs:41
-```
 
 #### requirements
 - usbblaster rules
