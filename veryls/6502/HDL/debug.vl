@@ -428,26 +428,28 @@ module Debug (
         finish  : rw_handler_finish   ,
     );
 
-    var addr_ref_detector_en       : logic = seq_status == SeqStatus::AddrRefDetect;
-    var addr_ref_detector_busy     : logic;
-    var addr_ref_detector_finish   : logic;
-    var tmp_low_rx_en              : logic;
-    var tmp_high_rx_en             : logic;
-    var tmp_ind_low_tx_en          : logic;
-    var tmp_ind_high_tx_en         : logic;
-    var tmp_zp_adding_without_carry: logic;
+    var addr_ref_detector_en        : logic = seq_status == SeqStatus::AddrRefDetect;
+    var addr_ref_detector_busy      : logic;
+    var addr_ref_detector_finish    : logic;
+    var tmp_low_rx_en               : logic;
+    var tmp_high_rx_en              : logic;
+    var tmp_ind_low_tx_en           : logic;
+    var tmp_ind_high_tx_en          : logic;
+    var tmp_zpx_adding_without_carry: logic;
+    var tmp_zpy_adding_without_carry: logic;
     inst addr_ref_detector: AddrRefDetector (
-        CLK                                                 ,
-        RST                                                 ,
-        EN                     : addr_ref_detector_en       ,
-        addr_mode              : inst_casted_addr_mode      ,
-        low_rx_en              : tmp_low_rx_en              ,
-        high_rx_en             : tmp_high_rx_en             ,
-        ind_low_tx_en          : tmp_ind_low_tx_en          ,
-        ind_high_tx_en         : tmp_ind_high_tx_en         ,
-        zp_adding_without_carry: tmp_zp_adding_without_carry,
-        busy                   : addr_ref_detector_busy     ,
-        finish                 : addr_ref_detector_finish   ,
+        CLK                                                   ,
+        RST                                                   ,
+        EN                      : addr_ref_detector_en        ,
+        addr_mode               : inst_casted_addr_mode       ,
+        low_rx_en               : tmp_low_rx_en               ,
+        high_rx_en              : tmp_high_rx_en              ,
+        ind_low_tx_en           : tmp_ind_low_tx_en           ,
+        ind_high_tx_en          : tmp_ind_high_tx_en          ,
+        zpx_adding_without_carry: tmp_zpx_adding_without_carry,
+        zpy_adding_without_carry: tmp_zpy_adding_without_carry,
+        busy                    : addr_ref_detector_busy      ,
+        finish                  : addr_ref_detector_finish    ,
     );
     var addr_ref_low_rx_en      : logic    = seq_status == SeqStatus::AddrRefLowRead;
     var addr_ref_low_rx_data_out: logic<8>;
@@ -486,8 +488,10 @@ module Debug (
         }
     }
 
-    var casted_addr_ref_low_rx_data_out: logic<8> = if tmp_zp_adding_without_carry {
+    var casted_addr_ref_low_rx_data_out: logic<8> = if tmp_zpx_adding_without_carry {
         wrapping_add(addr_ref_low_rx_data_out, a_x)
+    } else if tmp_zpy_adding_without_carry {
+        wrapping_add(addr_ref_low_rx_data_out, a_y)
     } else {
         addr_ref_low_rx_data_out
     };
