@@ -4,6 +4,9 @@ module Debug (
     DATA_IN    : input  logic    ,
     EN         : input  logic    ,
     WE         : input  logic    ,
+    a_a        : input  logic<8> ,
+    a_x        : input  logic<8> ,
+    a_y        : input  logic<8> ,
     tx_data_out: output logic    ,
     busy       : output logic    ,
     RTS        : output logic    ,
@@ -425,24 +428,26 @@ module Debug (
         finish  : rw_handler_finish   ,
     );
 
-    var addr_ref_detector_en    : logic = seq_status == SeqStatus::AddrRefDetect;
-    var addr_ref_detector_busy  : logic;
-    var addr_ref_detector_finish: logic;
-    var tmp_low_rx_en           : logic;
-    var tmp_high_rx_en          : logic;
-    var tmp_ind_low_tx_en       : logic;
-    var tmp_ind_high_tx_en      : logic;
+    var addr_ref_detector_en       : logic = seq_status == SeqStatus::AddrRefDetect;
+    var addr_ref_detector_busy     : logic;
+    var addr_ref_detector_finish   : logic;
+    var tmp_low_rx_en              : logic;
+    var tmp_high_rx_en             : logic;
+    var tmp_ind_low_tx_en          : logic;
+    var tmp_ind_high_tx_en         : logic;
+    var tmp_zp_adding_without_carry: logic;
     inst addr_ref_detector: AddrRefDetector (
-        CLK                                     ,
-        RST                                     ,
-        EN            : addr_ref_detector_en    ,
-        addr_mode     : inst_casted_addr_mode   ,
-        low_rx_en     : tmp_low_rx_en           ,
-        high_rx_en    : tmp_high_rx_en          ,
-        ind_low_tx_en : tmp_ind_low_tx_en       ,
-        ind_high_tx_en: tmp_ind_high_tx_en      ,
-        busy          : addr_ref_detector_busy  ,
-        finish        : addr_ref_detector_finish,
+        CLK                                                 ,
+        RST                                                 ,
+        EN                     : addr_ref_detector_en       ,
+        addr_mode              : inst_casted_addr_mode      ,
+        low_rx_en              : tmp_low_rx_en              ,
+        high_rx_en             : tmp_high_rx_en             ,
+        ind_low_tx_en          : tmp_ind_low_tx_en          ,
+        ind_high_tx_en         : tmp_ind_high_tx_en         ,
+        zp_adding_without_carry: tmp_zp_adding_without_carry,
+        busy                   : addr_ref_detector_busy     ,
+        finish                 : addr_ref_detector_finish   ,
     );
     var addr_ref_low_rx_en      : logic    = seq_status == SeqStatus::AddrRefLowRead;
     var addr_ref_low_rx_data_out: logic<8>;
@@ -457,6 +462,36 @@ module Debug (
         busy    : addr_ref_low_rx_busy    ,
         finish  : addr_ref_low_rx_finish  ,
     );
+
+    var int_buffer : logic<16>;
+    var is_overflow: logic    ;
+    var result     : logic<8> ;
+    function init_reg_for_calc () -> void {
+        int_buffer  = 0;
+        is_overflow = 0;
+        result      = 0;
+    }
+
+    function wrapping_add (
+        data: input logic<8>,
+        x   : input logic<8>,
+    ) -> logic<8> {
+        init_reg_for_calc();
+        int_buffer        = data + x;
+        is_overflow       = int_buffer >= 16'h100;
+        if is_overflow {
+            return (data + x - 8'hff);
+        } else {
+            return (data + x);
+        }
+    }
+
+    var casted_addr_ref_low_rx_data_out: logic<8> = if tmp_zp_adding_without_carry {
+        wrapping_add(addr_ref_low_rx_data_out, a_x)
+    } else {
+        addr_ref_low_rx_data_out
+    };
+
     var addr_ref_high_rx_en          : logic    = seq_status == SeqStatus::AddrRefHighRead;
     var addr_ref_high_rx_data_out    : logic<8>;
     var tmp_addr_ref_high_rx_data_out: logic<8>;
@@ -477,13 +512,13 @@ module Debug (
     var ind_row_tx_busy    : logic;
     var ind_row_tx_finish  : logic;
     inst ind_low_tx: uarty::Tx (
-        CLK                               ,
-        RST                               ,
-        WE      : ind_row_tx_en           ,
-        DATA_IN : addr_ref_low_rx_data_out,
-        data_out: ind_row_tx_data_out     ,
-        busy    : ind_row_tx_busy         ,
-        finish  : ind_row_tx_finish       ,
+        CLK                                      ,
+        RST                                      ,
+        WE      : ind_row_tx_en                  ,
+        DATA_IN : casted_addr_ref_low_rx_data_out,
+        data_out: ind_row_tx_data_out            ,
+        busy    : ind_row_tx_busy                ,
+        finish  : ind_row_tx_finish              ,
     );
 
     var ind_high_tx_en      : logic = WE && seq_status == SeqStatus::IndHighTransfer;
@@ -529,22 +564,24 @@ module Debug (
     );
 
     var ope_store_to_memory_en      : logic    = seq_status == SeqStatus::OpeStoreToMemory;
+    var zp_adding_without_carry     : logic   ;
     var ope_store_to_memory_data_out: logic<8>;
     var ope_store_to_memory_busy    : logic   ;
     var ope_store_to_memory_finish  : logic   ;
     inst ope_store_to_memory: OpeStoreToMemory (
-        CLK                                      ,
-        RST                                      ,
-        EN         : ope_store_to_memory_en      ,
-        WE                                       ,
-        ope_kind   : inst_casted_ope_kind        ,
-        target_addr: addr_ref_low_rx_data_out    ,
-        a                                        ,
-        x                                        ,
-        y                                        ,
-        tx_data_out: ope_store_to_memory_data_out,
-        busy       : ope_store_to_memory_busy    ,
-        finish     : ope_store_to_memory_finish  ,
+        CLK                                                     ,
+        RST                                                     ,
+        EN                     : ope_store_to_memory_en         ,
+        WE                                                      ,
+        ope_kind               : inst_casted_ope_kind           ,
+        target_addr            : casted_addr_ref_low_rx_data_out,
+        a                                                       ,
+        x                                                       ,
+        y                                                       ,
+        zp_adding_without_carry                                 ,
+        tx_data_out            : ope_store_to_memory_data_out   ,
+        busy                   : ope_store_to_memory_busy       ,
+        finish                 : ope_store_to_memory_finish     ,
     );
 
     var ope_splitter_en             : logic = seq_status == SeqStatus::OpeReady;
@@ -564,7 +601,7 @@ module Debug (
     var ope_inst_addr_low: logic<8> = if tmp_ind_low_tx_en {
         ind_memory_low_rx_data_out
     } else {
-        addr_ref_low_rx_data_out
+        casted_addr_ref_low_rx_data_out
     };
     var ope_inst_addr_high: logic<8> = if tmp_ind_low_tx_en {
         ind_memory_high_rx_data_out
