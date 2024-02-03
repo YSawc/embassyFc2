@@ -468,7 +468,7 @@ module Debug (
     var int_buffer : logic<16>;
     var is_overflow: logic    ;
     var result     : logic<8> ;
-    function init_reg_for_calc () -> void {
+    function init_reg_for_calc () -> logic {
         int_buffer  = 0;
         is_overflow = 0;
         result      = 0;
@@ -478,9 +478,9 @@ module Debug (
         data: input logic<8>,
         x   : input logic<8>,
     ) -> logic<8> {
-        init_reg_for_calc();
-        int_buffer        = data + x;
-        is_overflow       = int_buffer >= 16'h100;
+        var _          : logic = init_reg_for_calc();
+        int_buffer  = data + x;
+        is_overflow = int_buffer >= 16'h100;
         if is_overflow {
             return (data + x - 8'hff);
         } else {

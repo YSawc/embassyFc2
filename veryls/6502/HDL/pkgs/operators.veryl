@@ -117,265 +117,265 @@ package OperatorsPkg {
         addr_mode: AddrMode,
     }
 
-    var operators: Operator<8'hff>;
-    function prepare_operators () -> void {
-        operators = { //
-        {OpeKind::Brk, AddrMode::Impl}, //
-         {OpeKind::Ora, AddrMode::IndX}, //
-         {OpeKind::Kil, AddrMode::Impl}, //
-         {OpeKind::Slo, AddrMode::IndX}, //
-         {OpeKind::Dop, AddrMode::Zp}, //
-         {OpeKind::Ora, AddrMode::Zp}, //
-         {OpeKind::Asl, AddrMode::Zp}, //
-         {OpeKind::Slo, AddrMode::Zp}, //
-         {OpeKind::Php, AddrMode::Impl}, //
-         {OpeKind::Ora, AddrMode::Imm}, //
-         {OpeKind::Asl, AddrMode::Acc}, //
-         {OpeKind::Aac, AddrMode::Imm}, //
-         {OpeKind::Top, AddrMode::Abs}, //
-         {OpeKind::Ora, AddrMode::Abs}, //
-         {OpeKind::Asl, AddrMode::Abs}, //
-         {OpeKind::Slo, AddrMode::Abs}, //
-         {OpeKind::Bpl, AddrMode::Rel}, //
-         {OpeKind::Ora, AddrMode::IndY}, //
-         {OpeKind::Kil, AddrMode::Impl}, //
-         {OpeKind::Slo, AddrMode::IndY}, //
-         {OpeKind::Dop, AddrMode::ZpX}, //
-         {OpeKind::Ora, AddrMode::ZpX}, //
-         {OpeKind::Asl, AddrMode::ZpX}, //
-         {OpeKind::Slo, AddrMode::ZpX}, //
-         {OpeKind::Clc, AddrMode::Impl}, //
-         {OpeKind::Ora, AddrMode::AbsY}, //
-         {OpeKind::Nop, AddrMode::Nop}, //
-         {OpeKind::Slo, AddrMode::AbsY}, //
-         {OpeKind::Top, AddrMode::AbsX}, //
-         {OpeKind::Ora, AddrMode::AbsX}, //
-         {OpeKind::Asl, AddrMode::AbsX}, //
-         {OpeKind::Slo, AddrMode::AbsX}, //
-         {OpeKind::Jsr, AddrMode::Abs}, //
-         {OpeKind::And, AddrMode::IndX}, //
-         {OpeKind::Kil, AddrMode::Impl}, //
-         {OpeKind::Rla, AddrMode::IndX}, //
-         {OpeKind::Bit, AddrMode::Zp}, //
-         {OpeKind::And, AddrMode::Zp}, //
-         {OpeKind::Rol, AddrMode::Zp}, //
-         {OpeKind::Rla, AddrMode::Zp}, //
-         {OpeKind::Plp, AddrMode::Impl}, //
-         {OpeKind::And, AddrMode::Imm}, //
-         {OpeKind::Rol, AddrMode::Acc}, //
-         {OpeKind::Aac, AddrMode::Imm}, //
-         {OpeKind::Bit, AddrMode::Abs}, //
-         {OpeKind::And, AddrMode::Abs}, //
-         {OpeKind::Rol, AddrMode::Abs}, //
-         {OpeKind::Rla, AddrMode::Abs}, //
-         {OpeKind::Bmi, AddrMode::Rel}, //
-         {OpeKind::And, AddrMode::IndY}, //
-         {OpeKind::Kil, AddrMode::Impl}, //
-         {OpeKind::Rla, AddrMode::IndY}, //
-         {OpeKind::Dop, AddrMode::ZpX}, //
-         {OpeKind::And, AddrMode::ZpX}, //
-         {OpeKind::Rol, AddrMode::ZpX}, //
-         {OpeKind::Rla, AddrMode::ZpX}, //
-         {OpeKind::Sec, AddrMode::Impl}, //
-         {OpeKind::And, AddrMode::AbsY}, //
-         {OpeKind::Nop, AddrMode::Nop}, //
-         {OpeKind::Rla, AddrMode::AbsY}, //
-         {OpeKind::Top, AddrMode::AbsX}, //
-         {OpeKind::And, AddrMode::AbsX}, //
-         {OpeKind::Rol, AddrMode::AbsX}, //
-         {OpeKind::Rla, AddrMode::AbsX}, //
-         {OpeKind::Rti, AddrMode::Impl}, //
-         {OpeKind::Eor, AddrMode::IndX}, //
-         {OpeKind::Kil, AddrMode::Impl}, //
-         {OpeKind::Sre, AddrMode::IndX}, //
-         {OpeKind::Dop, AddrMode::Zp}, //
-         {OpeKind::Eor, AddrMode::Zp}, //
-         {OpeKind::Lsr, AddrMode::Zp}, //
-         {OpeKind::Sre, AddrMode::Zp}, //
-         {OpeKind::Pha, AddrMode::Impl}, //
-         {OpeKind::Eor, AddrMode::Imm}, //
-         {OpeKind::Lsr, AddrMode::Acc}, //
-         {OpeKind::Asr, AddrMode::Imm}, //
-         {OpeKind::Jmp, AddrMode::Abs}, //
-         {OpeKind::Eor, AddrMode::Abs}, //
-         {OpeKind::Lsr, AddrMode::Abs}, //
-         {OpeKind::Sre, AddrMode::Abs}, //
-         {OpeKind::Bvc, AddrMode::Rel}, //
-         {OpeKind::Eor, AddrMode::IndY}, //
-         {OpeKind::Kil, AddrMode::Impl}, //
-         {OpeKind::Sre, AddrMode::IndY}, //
-         {OpeKind::Dop, AddrMode::ZpX}, //
-         {OpeKind::Eor, AddrMode::ZpX}, //
-         {OpeKind::Lsr, AddrMode::ZpX}, //
-         {OpeKind::Sre, AddrMode::ZpX}, //
-         {OpeKind::Cli, AddrMode::Impl}, //
-         {OpeKind::Eor, AddrMode::AbsY}, //
-         {OpeKind::Nop, AddrMode::Nop}, //
-         {OpeKind::Sre, AddrMode::AbsY}, //
-         {OpeKind::Top, AddrMode::AbsX}, //
-         {OpeKind::Eor, AddrMode::AbsX}, //
-         {OpeKind::Lsr, AddrMode::AbsX}, //
-         {OpeKind::Sre, AddrMode::AbsX}, //
-         {OpeKind::Rts, AddrMode::Impl}, //
-         {OpeKind::Adc, AddrMode::IndX}, //
-         {OpeKind::Kil, AddrMode::Impl}, //
-         {OpeKind::Rra, AddrMode::IndX}, //
-         {OpeKind::Dop, AddrMode::Zp}, //
-         {OpeKind::Adc, AddrMode::Zp}, //
-         {OpeKind::Ror, AddrMode::Zp}, //
-         {OpeKind::Rra, AddrMode::Zp}, //
-         {OpeKind::Pla, AddrMode::Impl}, //
-         {OpeKind::Adc, AddrMode::Imm}, //
-         {OpeKind::Ror, AddrMode::Acc}, //
-         {OpeKind::Arr, AddrMode::Imm}, //
-         {OpeKind::Jmp, AddrMode::Ind}, //
-         {OpeKind::Adc, AddrMode::Abs}, //
-         {OpeKind::Ror, AddrMode::Abs}, //
-         {OpeKind::Rra, AddrMode::Abs}, //
-         {OpeKind::Bvs, AddrMode::Rel}, //
-         {OpeKind::Adc, AddrMode::IndY}, //
-         {OpeKind::Kil, AddrMode::Impl}, //
-         {OpeKind::Rra, AddrMode::IndY}, //
-         {OpeKind::Dop, AddrMode::ZpX}, //
-         {OpeKind::Adc, AddrMode::ZpX}, //
-         {OpeKind::Ror, AddrMode::ZpX}, //
-         {OpeKind::Rra, AddrMode::ZpX}, //
-         {OpeKind::Sei, AddrMode::Impl}, //
-         {OpeKind::Adc, AddrMode::AbsY}, //
-         {OpeKind::Nop, AddrMode::Nop}, //
-         {OpeKind::Rra, AddrMode::AbsY}, //
-         {OpeKind::Top, AddrMode::AbsX}, //
-         {OpeKind::Adc, AddrMode::AbsX}, //
-         {OpeKind::Ror, AddrMode::AbsX}, //
-         {OpeKind::Rra, AddrMode::AbsX}, //
-         {OpeKind::Dop, AddrMode::Imm}, //
-         {OpeKind::Sta, AddrMode::IndX}, //
-         {OpeKind::Dop, AddrMode::Imm}, //
-         {OpeKind::Sax, AddrMode::IndX}, //
-         {OpeKind::Sty, AddrMode::Zp}, //
-         {OpeKind::Sta, AddrMode::Zp}, //
-         {OpeKind::Stx, AddrMode::Zp}, //
-         {OpeKind::Sax, AddrMode::Zp}, //
-         {OpeKind::Dey, AddrMode::Impl}, //
-         {OpeKind::Dop, AddrMode::Imm}, //
-         {OpeKind::Txa, AddrMode::Impl}, //
-         {OpeKind::Xaa, AddrMode::Imm}, //
-         {OpeKind::Sty, AddrMode::Abs}, //
-         {OpeKind::Sta, AddrMode::Abs}, //
-         {OpeKind::Stx, AddrMode::Abs}, //
-         {OpeKind::Sax, AddrMode::Abs}, //
-         {OpeKind::Bcc, AddrMode::Rel}, //
-         {OpeKind::Sta, AddrMode::IndY}, //
-         {OpeKind::Kil, AddrMode::Impl}, //
-         {OpeKind::Axa, AddrMode::ZpY}, //
-         {OpeKind::Sty, AddrMode::ZpX}, //
-         {OpeKind::Sta, AddrMode::ZpX}, //
-         {OpeKind::Stx, AddrMode::ZpY}, //
-         {OpeKind::Sax, AddrMode::ZpY}, //
-         {OpeKind::Tya, AddrMode::Impl}, //
-         {OpeKind::Sta, AddrMode::AbsY}, //
-         {OpeKind::Txs, AddrMode::Impl}, //
-         {OpeKind::Xas, AddrMode::AbsY}, //
-         {OpeKind::Sya, AddrMode::AbsX}, //
-         {OpeKind::Sta, AddrMode::AbsX}, //
-         {OpeKind::Sxa, AddrMode::AbsX}, //
-         {OpeKind::Axa, AddrMode::AbsY}, //
-         {OpeKind::Ldy, AddrMode::Imm}, //
-         {OpeKind::Lda, AddrMode::IndX}, //
-         {OpeKind::Ldx, AddrMode::Imm}, //
-         {OpeKind::Lax, AddrMode::IndX}, //
-         {OpeKind::Ldy, AddrMode::Zp}, //
-         {OpeKind::Lda, AddrMode::Zp}, //
-         {OpeKind::Ldx, AddrMode::Zp}, //
-         {OpeKind::Lax, AddrMode::Zp}, //
-         {OpeKind::Tay, AddrMode::Impl}, //
-         {OpeKind::Lda, AddrMode::Imm}, //
-         {OpeKind::Tax, AddrMode::Impl}, //
-         {OpeKind::Lxa, AddrMode::Imm}, //
-         {OpeKind::Ldy, AddrMode::Abs}, //
-         {OpeKind::Lda, AddrMode::Abs}, //
-         {OpeKind::Ldx, AddrMode::Abs}, //
-         {OpeKind::Lax, AddrMode::Abs}, //
-         {OpeKind::Bcs, AddrMode::Rel}, //
-         {OpeKind::Lda, AddrMode::IndY}, //
-         {OpeKind::Kil, AddrMode::Impl}, //
-         {OpeKind::Lax, AddrMode::IndY}, //
-         {OpeKind::Ldy, AddrMode::ZpX}, //
-         {OpeKind::Lda, AddrMode::ZpX}, //
-         {OpeKind::Ldx, AddrMode::ZpY}, //
-         {OpeKind::Lax, AddrMode::ZpY}, //
-         {OpeKind::Clv, AddrMode::Impl}, //
-         {OpeKind::Lda, AddrMode::AbsY}, //
-         {OpeKind::Tsx, AddrMode::Impl}, //
-         {OpeKind::Las, AddrMode::AbsY}, //
-         {OpeKind::Ldy, AddrMode::AbsX}, //
-         {OpeKind::Lda, AddrMode::AbsX}, //
-         {OpeKind::Ldx, AddrMode::AbsY}, //
-         {OpeKind::Lax, AddrMode::AbsY}, //
-         {OpeKind::Cpy, AddrMode::Imm}, //
-         {OpeKind::Cmp, AddrMode::IndX}, //
-         {OpeKind::Dop, AddrMode::Imm}, //
-         {OpeKind::Dcp, AddrMode::IndX}, //
-         {OpeKind::Cpy, AddrMode::Zp}, //
-         {OpeKind::Cmp, AddrMode::Zp}, //
-         {OpeKind::Dec, AddrMode::Zp}, //
-         {OpeKind::Dcp, AddrMode::Zp}, //
-         {OpeKind::Iny, AddrMode::Impl}, //
-         {OpeKind::Cmp, AddrMode::Imm}, //
-         {OpeKind::Dex, AddrMode::Impl}, //
-         {OpeKind::Axs, AddrMode::Imm}, //
-         {OpeKind::Cpy, AddrMode::Abs}, //
-         {OpeKind::Cmp, AddrMode::Abs}, //
-         {OpeKind::Dec, AddrMode::Abs}, //
-         {OpeKind::Dcp, AddrMode::Abs}, //
-         {OpeKind::Bne, AddrMode::Rel}, //
-         {OpeKind::Cmp, AddrMode::IndY}, //
-         {OpeKind::Kil, AddrMode::Impl}, //
-         {OpeKind::Dcp, AddrMode::IndY}, //
-         {OpeKind::Dop, AddrMode::ZpX}, //
-         {OpeKind::Cmp, AddrMode::ZpX}, //
-         {OpeKind::Dec, AddrMode::ZpX}, //
-         {OpeKind::Dcp, AddrMode::ZpX}, //
-         {OpeKind::Cld, AddrMode::Impl}, //
-         {OpeKind::Cmp, AddrMode::AbsY}, //
-         {OpeKind::Nop, AddrMode::Nop}, //
-         {OpeKind::Dcp, AddrMode::AbsY}, //
-         {OpeKind::Top, AddrMode::AbsX}, //
-         {OpeKind::Cmp, AddrMode::AbsX}, //
-         {OpeKind::Dec, AddrMode::AbsX}, //
-         {OpeKind::Dcp, AddrMode::AbsX}, //
-         {OpeKind::Cpx, AddrMode::Imm}, //
-         {OpeKind::Sbc, AddrMode::IndX}, //
-         {OpeKind::Dop, AddrMode::Imm}, //
-         {OpeKind::Isb, AddrMode::IndX}, //
-         {OpeKind::Cpx, AddrMode::Zp}, //
-         {OpeKind::Sbc, AddrMode::Zp}, //
-         {OpeKind::Inc, AddrMode::Zp}, //
-         {OpeKind::Isb, AddrMode::Zp}, //
-         {OpeKind::Inx, AddrMode::Impl}, //
-         {OpeKind::Sbc, AddrMode::Imm}, //
-         {OpeKind::Nop, AddrMode::Impl}, //
-         {OpeKind::Sbc, AddrMode::Imm}, //
-         {OpeKind::Cpx, AddrMode::Abs}, //
-         {OpeKind::Sbc, AddrMode::Abs}, //
-         {OpeKind::Inc, AddrMode::Abs}, //
-         {OpeKind::Isb, AddrMode::Abs}, //
-         {OpeKind::Beq, AddrMode::Rel}, //
-         {OpeKind::Sbc, AddrMode::IndY}, //
-         {OpeKind::Kil, AddrMode::Impl}, //
-         {OpeKind::Isb, AddrMode::IndY}, //
-         {OpeKind::Dop, AddrMode::ZpX}, //
-         {OpeKind::Sbc, AddrMode::ZpX}, //
-         {OpeKind::Inc, AddrMode::ZpX}, //
-         {OpeKind::Isb, AddrMode::ZpX}, //
-         {OpeKind::Sed, AddrMode::Impl}, //
-         {OpeKind::Sbc, AddrMode::AbsY}, //
-         {OpeKind::Nop, AddrMode::Nop}, //
-         {OpeKind::Isb, AddrMode::AbsY}, //
-         {OpeKind::Top, AddrMode::AbsX}, //
-         {OpeKind::Sbc, AddrMode::AbsX}, //
-         {OpeKind::Inc, AddrMode::AbsX}, //
-         {OpeKind::Isb, AddrMode::AbsX} //
-        };
-    }
+    // var operators: Operator<8'hff>;
+    // function prepare_operators () -> void {
+    //     operators = { //
+    //     {OpeKind::Brk, AddrMode::Impl}, //
+    //      {OpeKind::Ora, AddrMode::IndX}, //
+    //      {OpeKind::Kil, AddrMode::Impl}, //
+    //      {OpeKind::Slo, AddrMode::IndX}, //
+    //      {OpeKind::Dop, AddrMode::Zp}, //
+    //      {OpeKind::Ora, AddrMode::Zp}, //
+    //      {OpeKind::Asl, AddrMode::Zp}, //
+    //      {OpeKind::Slo, AddrMode::Zp}, //
+    //      {OpeKind::Php, AddrMode::Impl}, //
+    //      {OpeKind::Ora, AddrMode::Imm}, //
+    //      {OpeKind::Asl, AddrMode::Acc}, //
+    //      {OpeKind::Aac, AddrMode::Imm}, //
+    //      {OpeKind::Top, AddrMode::Abs}, //
+    //      {OpeKind::Ora, AddrMode::Abs}, //
+    //      {OpeKind::Asl, AddrMode::Abs}, //
+    //      {OpeKind::Slo, AddrMode::Abs}, //
+    //      {OpeKind::Bpl, AddrMode::Rel}, //
+    //      {OpeKind::Ora, AddrMode::IndY}, //
+    //      {OpeKind::Kil, AddrMode::Impl}, //
+    //      {OpeKind::Slo, AddrMode::IndY}, //
+    //      {OpeKind::Dop, AddrMode::ZpX}, //
+    //      {OpeKind::Ora, AddrMode::ZpX}, //
+    //      {OpeKind::Asl, AddrMode::ZpX}, //
+    //      {OpeKind::Slo, AddrMode::ZpX}, //
+    //      {OpeKind::Clc, AddrMode::Impl}, //
+    //      {OpeKind::Ora, AddrMode::AbsY}, //
+    //      {OpeKind::Nop, AddrMode::Nop}, //
+    //      {OpeKind::Slo, AddrMode::AbsY}, //
+    //      {OpeKind::Top, AddrMode::AbsX}, //
+    //      {OpeKind::Ora, AddrMode::AbsX}, //
+    //      {OpeKind::Asl, AddrMode::AbsX}, //
+    //      {OpeKind::Slo, AddrMode::AbsX}, //
+    //      {OpeKind::Jsr, AddrMode::Abs}, //
+    //      {OpeKind::And, AddrMode::IndX}, //
+    //      {OpeKind::Kil, AddrMode::Impl}, //
+    //      {OpeKind::Rla, AddrMode::IndX}, //
+    //      {OpeKind::Bit, AddrMode::Zp}, //
+    //      {OpeKind::And, AddrMode::Zp}, //
+    //      {OpeKind::Rol, AddrMode::Zp}, //
+    //      {OpeKind::Rla, AddrMode::Zp}, //
+    //      {OpeKind::Plp, AddrMode::Impl}, //
+    //      {OpeKind::And, AddrMode::Imm}, //
+    //      {OpeKind::Rol, AddrMode::Acc}, //
+    //      {OpeKind::Aac, AddrMode::Imm}, //
+    //      {OpeKind::Bit, AddrMode::Abs}, //
+    //      {OpeKind::And, AddrMode::Abs}, //
+    //      {OpeKind::Rol, AddrMode::Abs}, //
+    //      {OpeKind::Rla, AddrMode::Abs}, //
+    //      {OpeKind::Bmi, AddrMode::Rel}, //
+    //      {OpeKind::And, AddrMode::IndY}, //
+    //      {OpeKind::Kil, AddrMode::Impl}, //
+    //      {OpeKind::Rla, AddrMode::IndY}, //
+    //      {OpeKind::Dop, AddrMode::ZpX}, //
+    //      {OpeKind::And, AddrMode::ZpX}, //
+    //      {OpeKind::Rol, AddrMode::ZpX}, //
+    //      {OpeKind::Rla, AddrMode::ZpX}, //
+    //      {OpeKind::Sec, AddrMode::Impl}, //
+    //      {OpeKind::And, AddrMode::AbsY}, //
+    //      {OpeKind::Nop, AddrMode::Nop}, //
+    //      {OpeKind::Rla, AddrMode::AbsY}, //
+    //      {OpeKind::Top, AddrMode::AbsX}, //
+    //      {OpeKind::And, AddrMode::AbsX}, //
+    //      {OpeKind::Rol, AddrMode::AbsX}, //
+    //      {OpeKind::Rla, AddrMode::AbsX}, //
+    //      {OpeKind::Rti, AddrMode::Impl}, //
+    //      {OpeKind::Eor, AddrMode::IndX}, //
+    //      {OpeKind::Kil, AddrMode::Impl}, //
+    //      {OpeKind::Sre, AddrMode::IndX}, //
+    //      {OpeKind::Dop, AddrMode::Zp}, //
+    //      {OpeKind::Eor, AddrMode::Zp}, //
+    //      {OpeKind::Lsr, AddrMode::Zp}, //
+    //      {OpeKind::Sre, AddrMode::Zp}, //
+    //      {OpeKind::Pha, AddrMode::Impl}, //
+    //      {OpeKind::Eor, AddrMode::Imm}, //
+    //      {OpeKind::Lsr, AddrMode::Acc}, //
+    //      {OpeKind::Asr, AddrMode::Imm}, //
+    //      {OpeKind::Jmp, AddrMode::Abs}, //
+    //      {OpeKind::Eor, AddrMode::Abs}, //
+    //      {OpeKind::Lsr, AddrMode::Abs}, //
+    //      {OpeKind::Sre, AddrMode::Abs}, //
+    //      {OpeKind::Bvc, AddrMode::Rel}, //
+    //      {OpeKind::Eor, AddrMode::IndY}, //
+    //      {OpeKind::Kil, AddrMode::Impl}, //
+    //      {OpeKind::Sre, AddrMode::IndY}, //
+    //      {OpeKind::Dop, AddrMode::ZpX}, //
+    //      {OpeKind::Eor, AddrMode::ZpX}, //
+    //      {OpeKind::Lsr, AddrMode::ZpX}, //
+    //      {OpeKind::Sre, AddrMode::ZpX}, //
+    //      {OpeKind::Cli, AddrMode::Impl}, //
+    //      {OpeKind::Eor, AddrMode::AbsY}, //
+    //      {OpeKind::Nop, AddrMode::Nop}, //
+    //      {OpeKind::Sre, AddrMode::AbsY}, //
+    //      {OpeKind::Top, AddrMode::AbsX}, //
+    //      {OpeKind::Eor, AddrMode::AbsX}, //
+    //      {OpeKind::Lsr, AddrMode::AbsX}, //
+    //      {OpeKind::Sre, AddrMode::AbsX}, //
+    //      {OpeKind::Rts, AddrMode::Impl}, //
+    //      {OpeKind::Adc, AddrMode::IndX}, //
+    //      {OpeKind::Kil, AddrMode::Impl}, //
+    //      {OpeKind::Rra, AddrMode::IndX}, //
+    //      {OpeKind::Dop, AddrMode::Zp}, //
+    //      {OpeKind::Adc, AddrMode::Zp}, //
+    //      {OpeKind::Ror, AddrMode::Zp}, //
+    //      {OpeKind::Rra, AddrMode::Zp}, //
+    //      {OpeKind::Pla, AddrMode::Impl}, //
+    //      {OpeKind::Adc, AddrMode::Imm}, //
+    //      {OpeKind::Ror, AddrMode::Acc}, //
+    //      {OpeKind::Arr, AddrMode::Imm}, //
+    //      {OpeKind::Jmp, AddrMode::Ind}, //
+    //      {OpeKind::Adc, AddrMode::Abs}, //
+    //      {OpeKind::Ror, AddrMode::Abs}, //
+    //      {OpeKind::Rra, AddrMode::Abs}, //
+    //      {OpeKind::Bvs, AddrMode::Rel}, //
+    //      {OpeKind::Adc, AddrMode::IndY}, //
+    //      {OpeKind::Kil, AddrMode::Impl}, //
+    //      {OpeKind::Rra, AddrMode::IndY}, //
+    //      {OpeKind::Dop, AddrMode::ZpX}, //
+    //      {OpeKind::Adc, AddrMode::ZpX}, //
+    //      {OpeKind::Ror, AddrMode::ZpX}, //
+    //      {OpeKind::Rra, AddrMode::ZpX}, //
+    //      {OpeKind::Sei, AddrMode::Impl}, //
+    //      {OpeKind::Adc, AddrMode::AbsY}, //
+    //      {OpeKind::Nop, AddrMode::Nop}, //
+    //      {OpeKind::Rra, AddrMode::AbsY}, //
+    //      {OpeKind::Top, AddrMode::AbsX}, //
+    //      {OpeKind::Adc, AddrMode::AbsX}, //
+    //      {OpeKind::Ror, AddrMode::AbsX}, //
+    //      {OpeKind::Rra, AddrMode::AbsX}, //
+    //      {OpeKind::Dop, AddrMode::Imm}, //
+    //      {OpeKind::Sta, AddrMode::IndX}, //
+    //      {OpeKind::Dop, AddrMode::Imm}, //
+    //      {OpeKind::Sax, AddrMode::IndX}, //
+    //      {OpeKind::Sty, AddrMode::Zp}, //
+    //      {OpeKind::Sta, AddrMode::Zp}, //
+    //      {OpeKind::Stx, AddrMode::Zp}, //
+    //      {OpeKind::Sax, AddrMode::Zp}, //
+    //      {OpeKind::Dey, AddrMode::Impl}, //
+    //      {OpeKind::Dop, AddrMode::Imm}, //
+    //      {OpeKind::Txa, AddrMode::Impl}, //
+    //      {OpeKind::Xaa, AddrMode::Imm}, //
+    //      {OpeKind::Sty, AddrMode::Abs}, //
+    //      {OpeKind::Sta, AddrMode::Abs}, //
+    //      {OpeKind::Stx, AddrMode::Abs}, //
+    //      {OpeKind::Sax, AddrMode::Abs}, //
+    //      {OpeKind::Bcc, AddrMode::Rel}, //
+    //      {OpeKind::Sta, AddrMode::IndY}, //
+    //      {OpeKind::Kil, AddrMode::Impl}, //
+    //      {OpeKind::Axa, AddrMode::ZpY}, //
+    //      {OpeKind::Sty, AddrMode::ZpX}, //
+    //      {OpeKind::Sta, AddrMode::ZpX}, //
+    //      {OpeKind::Stx, AddrMode::ZpY}, //
+    //      {OpeKind::Sax, AddrMode::ZpY}, //
+    //      {OpeKind::Tya, AddrMode::Impl}, //
+    //      {OpeKind::Sta, AddrMode::AbsY}, //
+    //      {OpeKind::Txs, AddrMode::Impl}, //
+    //      {OpeKind::Xas, AddrMode::AbsY}, //
+    //      {OpeKind::Sya, AddrMode::AbsX}, //
+    //      {OpeKind::Sta, AddrMode::AbsX}, //
+    //      {OpeKind::Sxa, AddrMode::AbsX}, //
+    //      {OpeKind::Axa, AddrMode::AbsY}, //
+    //      {OpeKind::Ldy, AddrMode::Imm}, //
+    //      {OpeKind::Lda, AddrMode::IndX}, //
+    //      {OpeKind::Ldx, AddrMode::Imm}, //
+    //      {OpeKind::Lax, AddrMode::IndX}, //
+    //      {OpeKind::Ldy, AddrMode::Zp}, //
+    //      {OpeKind::Lda, AddrMode::Zp}, //
+    //      {OpeKind::Ldx, AddrMode::Zp}, //
+    //      {OpeKind::Lax, AddrMode::Zp}, //
+    //      {OpeKind::Tay, AddrMode::Impl}, //
+    //      {OpeKind::Lda, AddrMode::Imm}, //
+    //      {OpeKind::Tax, AddrMode::Impl}, //
+    //      {OpeKind::Lxa, AddrMode::Imm}, //
+    //      {OpeKind::Ldy, AddrMode::Abs}, //
+    //      {OpeKind::Lda, AddrMode::Abs}, //
+    //      {OpeKind::Ldx, AddrMode::Abs}, //
+    //      {OpeKind::Lax, AddrMode::Abs}, //
+    //      {OpeKind::Bcs, AddrMode::Rel}, //
+    //      {OpeKind::Lda, AddrMode::IndY}, //
+    //      {OpeKind::Kil, AddrMode::Impl}, //
+    //      {OpeKind::Lax, AddrMode::IndY}, //
+    //      {OpeKind::Ldy, AddrMode::ZpX}, //
+    //      {OpeKind::Lda, AddrMode::ZpX}, //
+    //      {OpeKind::Ldx, AddrMode::ZpY}, //
+    //      {OpeKind::Lax, AddrMode::ZpY}, //
+    //      {OpeKind::Clv, AddrMode::Impl}, //
+    //      {OpeKind::Lda, AddrMode::AbsY}, //
+    //      {OpeKind::Tsx, AddrMode::Impl}, //
+    //      {OpeKind::Las, AddrMode::AbsY}, //
+    //      {OpeKind::Ldy, AddrMode::AbsX}, //
+    //      {OpeKind::Lda, AddrMode::AbsX}, //
+    //      {OpeKind::Ldx, AddrMode::AbsY}, //
+    //      {OpeKind::Lax, AddrMode::AbsY}, //
+    //      {OpeKind::Cpy, AddrMode::Imm}, //
+    //      {OpeKind::Cmp, AddrMode::IndX}, //
+    //      {OpeKind::Dop, AddrMode::Imm}, //
+    //      {OpeKind::Dcp, AddrMode::IndX}, //
+    //      {OpeKind::Cpy, AddrMode::Zp}, //
+    //      {OpeKind::Cmp, AddrMode::Zp}, //
+    //      {OpeKind::Dec, AddrMode::Zp}, //
+    //      {OpeKind::Dcp, AddrMode::Zp}, //
+    //      {OpeKind::Iny, AddrMode::Impl}, //
+    //      {OpeKind::Cmp, AddrMode::Imm}, //
+    //      {OpeKind::Dex, AddrMode::Impl}, //
+    //      {OpeKind::Axs, AddrMode::Imm}, //
+    //      {OpeKind::Cpy, AddrMode::Abs}, //
+    //      {OpeKind::Cmp, AddrMode::Abs}, //
+    //      {OpeKind::Dec, AddrMode::Abs}, //
+    //      {OpeKind::Dcp, AddrMode::Abs}, //
+    //      {OpeKind::Bne, AddrMode::Rel}, //
+    //      {OpeKind::Cmp, AddrMode::IndY}, //
+    //      {OpeKind::Kil, AddrMode::Impl}, //
+    //      {OpeKind::Dcp, AddrMode::IndY}, //
+    //      {OpeKind::Dop, AddrMode::ZpX}, //
+    //      {OpeKind::Cmp, AddrMode::ZpX}, //
+    //      {OpeKind::Dec, AddrMode::ZpX}, //
+    //      {OpeKind::Dcp, AddrMode::ZpX}, //
+    //      {OpeKind::Cld, AddrMode::Impl}, //
+    //      {OpeKind::Cmp, AddrMode::AbsY}, //
+    //      {OpeKind::Nop, AddrMode::Nop}, //
+    //      {OpeKind::Dcp, AddrMode::AbsY}, //
+    //      {OpeKind::Top, AddrMode::AbsX}, //
+    //      {OpeKind::Cmp, AddrMode::AbsX}, //
+    //      {OpeKind::Dec, AddrMode::AbsX}, //
+    //      {OpeKind::Dcp, AddrMode::AbsX}, //
+    //      {OpeKind::Cpx, AddrMode::Imm}, //
+    //      {OpeKind::Sbc, AddrMode::IndX}, //
+    //      {OpeKind::Dop, AddrMode::Imm}, //
+    //      {OpeKind::Isb, AddrMode::IndX}, //
+    //      {OpeKind::Cpx, AddrMode::Zp}, //
+    //      {OpeKind::Sbc, AddrMode::Zp}, //
+    //      {OpeKind::Inc, AddrMode::Zp}, //
+    //      {OpeKind::Isb, AddrMode::Zp}, //
+    //      {OpeKind::Inx, AddrMode::Impl}, //
+    //      {OpeKind::Sbc, AddrMode::Imm}, //
+    //      {OpeKind::Nop, AddrMode::Impl}, //
+    //      {OpeKind::Sbc, AddrMode::Imm}, //
+    //      {OpeKind::Cpx, AddrMode::Abs}, //
+    //      {OpeKind::Sbc, AddrMode::Abs}, //
+    //      {OpeKind::Inc, AddrMode::Abs}, //
+    //      {OpeKind::Isb, AddrMode::Abs}, //
+    //      {OpeKind::Beq, AddrMode::Rel}, //
+    //      {OpeKind::Sbc, AddrMode::IndY}, //
+    //      {OpeKind::Kil, AddrMode::Impl}, //
+    //      {OpeKind::Isb, AddrMode::IndY}, //
+    //      {OpeKind::Dop, AddrMode::ZpX}, //
+    //      {OpeKind::Sbc, AddrMode::ZpX}, //
+    //      {OpeKind::Inc, AddrMode::ZpX}, //
+    //      {OpeKind::Isb, AddrMode::ZpX}, //
+    //      {OpeKind::Sed, AddrMode::Impl}, //
+    //      {OpeKind::Sbc, AddrMode::AbsY}, //
+    //      {OpeKind::Nop, AddrMode::Nop}, //
+    //      {OpeKind::Isb, AddrMode::AbsY}, //
+    //      {OpeKind::Top, AddrMode::AbsX}, //
+    //      {OpeKind::Sbc, AddrMode::AbsX}, //
+    //      {OpeKind::Inc, AddrMode::AbsX}, //
+    //      {OpeKind::Isb, AddrMode::AbsX} //
+    //     };
+    // }
 }

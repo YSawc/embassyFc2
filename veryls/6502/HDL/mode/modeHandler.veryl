@@ -8,10 +8,10 @@ module ModeHandler (
     busy   : output logic           ,
     finish : output logic           ,
 ) {
-    var mode_read_enable: logic = (mode == ModePkg::CpuMode::nop);
-    var mode_read_data  : int  ;
-    var mode_read_busy  : logic;
-    var mode_read_finish: logic;
+    var mode_read_enable: logic    = (mode == ModePkg::CpuMode::nop);
+    var mode_read_data  : logic<8>;
+    var mode_read_busy  : logic   ;
+    var mode_read_finish: logic   ;
     inst mode_read_rx: uarty::Rx (
         CLK                       ,
         RST                       ,
