@@ -5,7 +5,7 @@ This repository includes embed software and hardware projects.
 #### examples
 - callback test
 1. run veryls/6502 in simulator
-2. connect stm32l476rg and DE0-CV with usart.(In default, stm32 pin A0 and A1 of stm32 is RX and TX, and GPIO 0-0 and 0-1 of DE0-CV is RX and TX)
+2. connect stm32l476rg and DE0-CV with usart.(default pin function is below.)
 3. run software
 ```
 cd packages/stm32l476rg
@@ -34,6 +34,7 @@ INFO  test passed!
 |stm32|de0-cv|description|
 |-|-|-|
 |A0|GPIO4|RW|
+|A1|GPIO5|Nop(Low if cpumode in fpga is not nop)|
 |PA2|GPIO0|RX|
 |PA9|GPIO1|TX|
 |PA12|GPIO2|CTS|
