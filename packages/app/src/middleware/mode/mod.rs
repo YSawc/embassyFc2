@@ -7,6 +7,7 @@ pub enum CpuMode {
 pub enum OpeMode {
     Inst,
     RegisterTransfer,
+    Reset,
 }
 
 pub enum TxReg {

@@ -16,6 +16,7 @@ module Debug (
     x          : output logic<8> ,
     y          : output logic<8> ,
     pc         : output logic<16>,
+    reset      : output logic    ,
 ) {
     var tmp_a : logic<8> ;
     var tmp_x : logic<8> ;
@@ -310,9 +311,10 @@ module Debug (
     assign operators[8'hfc] = {OperatorsPkg::OpeKind::Top, OperatorsPkg::AddrMode::AbsX}; // 0xfc
     assign operators[8'hfd] = {OperatorsPkg::OpeKind::Sbc, OperatorsPkg::AddrMode::AbsX}; // 0xfd
     assign operators[8'hfe] = {OperatorsPkg::OpeKind::Inc, OperatorsPkg::AddrMode::AbsX}; // 0xfe
-    enum OpeMode: logic {
+    enum OpeMode: logic<2> {
         Inst,
         RegisterTransfer,
+        Reset,
     }
     var raw_operator_mode: logic<8>;
     var ope_read_busy    : logic   ;
@@ -330,6 +332,11 @@ module Debug (
     );
     var casted_ope_mode: OpeMode;
     assign casted_ope_mode = raw_operator_mode as OpeMode;
+    var n_reset        : logic = if casted_ope_mode == OpeMode::Reset {
+        1
+    } else {
+        0
+    };
 
     var tx_reg_detect_rx_en      : logic    = seq_status == SeqStatus::TxRegisterDetect;
     var tx_reg_detect_rx_data_out: logic<8>;
@@ -798,11 +805,13 @@ module Debug (
             RTS        = 1;
             seq_status = SeqStatus::Ready;
             finish     = 0;
+            reset      = 0;
         } else {
             busy       = n_busy;
             RTS        = n_RTS;
             seq_status = n_seq_status;
             finish     = n_finish;
+            reset      = n_reset;
         }
     }
 }

@@ -8,7 +8,7 @@ fn exe_testcase(testcase: String, timeout: u8) {
         .arg("cargo")
         .arg("run")
         .arg("--bin")
-        .arg("jmp_abs_test")
+        .arg(format!("{}", testcase))
         .output()
     {
         Ok(output) => {
@@ -16,7 +16,7 @@ fn exe_testcase(testcase: String, timeout: u8) {
                 .unwrap()
                 .contains("test pass")
             {
-                panic!("jmp_abs_test failed.");
+                panic!("{} failed.", testcase);
             }
         }
         Err(e) => println!("child error occured. {}", e),

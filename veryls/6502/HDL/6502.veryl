@@ -7,12 +7,14 @@ module main (
     GPIO_0_0: output logic   , // TX
     GPIO_0_2: output logic   , // RTS
     GPIO_0_4: output logic   , // RW
+    GPIO_0_5: output logic   , // Nop(Low if cpumode is not nop)
 ) {
-    var CTS: logic     = GPIO_0_3;
-    var a  : logic<8> ;
-    var x  : logic<8> ;
-    var y  : logic<8> ;
-    var pc : logic<16>;
+    var CTS  : logic     = GPIO_0_3;
+    var a    : logic<8> ;
+    var x    : logic<8> ;
+    var y    : logic<8> ;
+    var pc   : logic<16>;
+    var reset: logic     = RST || debug_reset;
 
     var mode               : ModePkg::CpuMode;
     var tmp_mode           : ModePkg::CpuMode;
@@ -22,7 +24,7 @@ module main (
     var mode_handler_finish: logic           ;
     inst mode_handler: ModeHandler (
         CLK                         ,
-        RST                         ,
+        RST    : reset              ,
         EN     : mode_handler_en    ,
         DATA_IN: GPIO_0_1           ,
         mode   : tmp_mode           ,
@@ -47,9 +49,10 @@ module main (
     var tmp_y            : logic<8> ;
     var tmp_pc           : logic<16>;
     var debug_rts        : logic    ;
+    var debug_reset      : logic    ;
     inst debug: Debug (
         CLK                           ,
-        RST                           ,
+        RST        : reset            ,
         DATA_IN    : GPIO_0_1         ,
         EN         : debug_en         ,
         WE         : debug_tx_en      ,
@@ -65,7 +68,13 @@ module main (
         x          : tmp_x            ,
         y          : tmp_y            ,
         pc         : tmp_pc           ,
+        reset      : debug_reset      ,
     );
+
+    assign a  = tmp_a;
+    assign x  = tmp_x;
+    assign y  = tmp_y;
+    assign pc = tmp_pc;
 
     assign GPIO_0_0 = if mode == ModePkg::CpuMode::debug {
         if debug_tx_en {
@@ -88,8 +97,6 @@ module main (
     } else {
         1
     };
-    assign a  = tmp_a;
-    assign x  = tmp_x;
-    assign y  = tmp_y;
-    assign pc = tmp_pc;
+
+    assign GPIO_0_5 = mode == ModePkg::CpuMode::nop;
 }
