@@ -25,7 +25,6 @@ fn main() -> ! {
     let rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut buf = [0x0u8; 1];
-
     // if fpga is not nop, send reset signal
     match nop.is_low() {
         true => {

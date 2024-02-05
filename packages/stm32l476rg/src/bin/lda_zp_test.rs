@@ -7,6 +7,7 @@ use embassy_stm32::dma::NoDma;
 use embassy_stm32::gpio::{Input, Pull};
 use embassy_stm32::usart::{Config, Uart};
 use embassy_stm32::{bind_interrupts, peripherals, usart};
+use embassy_time::Timer;
 use {defmt_rtt as _, panic_probe as _};
 
 bind_interrupts!(struct Irqs {
@@ -22,7 +23,26 @@ fn main() -> ! {
     )
     .unwrap();
     let rw = Input::new(p.PA0, Pull::None);
+    let nop = Input::new(p.PA1, Pull::None);
     let mut buf = [0x0u8; 1];
+    // if fpga is not nop, send reset signal
+    match nop.is_low() {
+        true => {
+            buf[0] = OpeMode::Reset as u8;
+            usart.blocking_write(&buf).unwrap();
+            info!("send reset signal.");
+            let _ = Timer::after_millis(1500);
+            match nop.is_high() {
+                true => info!("fpga reset!"),
+                false => {
+                    info!("failed to reset fpga.");
+                    loop {}
+                }
+            }
+        }
+        false => {}
+    }
+
     buf[0] = CpuMode::Debug as u8;
     usart.blocking_write(&buf).unwrap();
     info!("write cpu operation mode.");
