@@ -472,33 +472,10 @@ module Debug (
         finish  : addr_ref_low_rx_finish  ,
     );
 
-    var int_buffer : logic<16>;
-    var is_overflow: logic    ;
-    var result     : logic<8> ;
-    function init_reg_for_calc () -> logic {
-        int_buffer  = 0;
-        is_overflow = 0;
-        result      = 0;
-    }
-
-    function wrapping_add (
-        data: input logic<8>,
-        x   : input logic<8>,
-    ) -> logic<8> {
-        var _          : logic = init_reg_for_calc();
-        int_buffer  = data + x;
-        is_overflow = int_buffer >= 16'h100;
-        if is_overflow {
-            return (data + x - 8'hff);
-        } else {
-            return (data + x);
-        }
-    }
-
     var casted_addr_ref_low_rx_data_out: logic<8> = if tmp_zpx_adding_without_carry {
-        wrapping_add(addr_ref_low_rx_data_out, a_x)
+        utilPkg::wrapping_add(addr_ref_low_rx_data_out, a_x)
     } else if tmp_zpy_adding_without_carry {
-        wrapping_add(addr_ref_low_rx_data_out, a_y)
+        utilPkg::wrapping_add(addr_ref_low_rx_data_out, a_y)
     } else {
         addr_ref_low_rx_data_out
     };

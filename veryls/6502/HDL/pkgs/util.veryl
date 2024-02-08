@@ -1,0 +1,16 @@
+package utilPkg {
+    function wrapping_add (
+        l: input logic<8>,
+        r: input logic<8>,
+    ) -> logic<8> {
+        var int_buffer : logic<16>;
+        var is_overflow: logic    ;
+        int_buffer  = l + r;
+        is_overflow = int_buffer >= 16'h100;
+        if is_overflow {
+            return (l + r - 8'hff);
+        } else {
+            return (l + r);
+        }
+    }
+}
