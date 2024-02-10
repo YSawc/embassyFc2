@@ -8,6 +8,7 @@ module OpeOther (
     a        : output logic                <8> ,
     x        : output logic                <8> ,
     y        : output logic                <8> ,
+    p        : output logic                <8> ,
     pc       : output logic                <16>,
     busy     : output logic                    ,
     finish   : output logic                    ,
@@ -21,11 +22,45 @@ module OpeOther (
     var n_a     : logic <8> ;
     var n_x     : logic <8> ;
     var n_y     : logic <8> ;
+    var n_p     : logic <8> ;
     var n_pc    : logic <16>;
     var n_busy  : logic     ;
     var n_finish: logic     ;
     var ope_en  : logic     ;
     var n_ope_en: logic     ;
+
+    function set_n (
+        current_p : ref   logic<8>,
+        input_data: input logic<8>,
+    ) {
+        var is_zero  : logic = (input_data == 0);
+        current_p = if is_zero {
+            current_p | 8'b00000010
+        } else {
+            current_p & 8'b11111101
+        };
+    }
+
+    function set_z (
+        current_p : ref   logic<8>,
+        input_data: input logic<8>,
+    ) {
+        var is_negative: logic = (input_data >= 8'h80);
+        current_p   = if is_negative {
+            current_p | 8'b10000000
+        } else {
+            current_p & 8'b01111111
+        };
+    }
+
+    function set_nz (
+        current_p : ref   logic<8>,
+        input_data: input logic<8>,
+    ) {
+        set_n(current_p, input_data);
+        set_z(current_p, input_data);
+    }
+
     always_comb {
         n_status = status;
         n_busy   = busy;
@@ -34,6 +69,7 @@ module OpeOther (
         n_a      = a;
         n_x      = x;
         n_y      = y;
+        n_p      = p;
         n_pc     = pc;
         if finish {
             n_finish = 0;
@@ -50,11 +86,14 @@ module OpeOther (
                 n_busy   = 0;
                 n_finish = 1;
                 if ope_kind == OperatorsPkg::OpeKind::Lda {
-                    n_a = addr_low;
+                    n_a    = addr_low;
+                    set_nz(n_p, n_a);
                 } else if ope_kind == OperatorsPkg::OpeKind::Ldx {
-                    n_x = addr_low;
+                    n_x    = addr_low;
+                    set_nz(n_p, n_x);
                 } else if ope_kind == OperatorsPkg::OpeKind::Ldy {
-                    n_y = addr_low;
+                    n_y    = addr_low;
+                    set_nz(n_p, n_y);
                 } else if ope_kind == OperatorsPkg::OpeKind::Jmp {
                     n_pc = (addr_high << 8) + addr_low;
                 }
@@ -71,6 +110,7 @@ module OpeOther (
             a      = 0;
             x      = 0;
             y      = 0;
+            p      = 0;
             pc     = 0;
         } else {
             status = n_status;
@@ -80,6 +120,7 @@ module OpeOther (
             a      = n_a;
             x      = n_x;
             y      = n_y;
+            p      = n_p;
             pc     = n_pc;
         }
     }

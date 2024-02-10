@@ -13,6 +13,7 @@ module main (
     var a    : logic<8> ;
     var x    : logic<8> ;
     var y    : logic<8> ;
+    var p    : logic<8> ;
     var pc   : logic<16>;
     var reset: logic     = RST || debug_reset;
 
@@ -47,6 +48,7 @@ module main (
     var tmp_a            : logic<8> ;
     var tmp_x            : logic<8> ;
     var tmp_y            : logic<8> ;
+    var tmp_p            : logic<8> ;
     var tmp_pc           : logic<16>;
     var debug_rts        : logic    ;
     var debug_reset      : logic    ;
@@ -59,6 +61,7 @@ module main (
         a_a        : a                ,
         a_x        : x                ,
         a_y        : y                ,
+        a_p        : p                ,
         tx_data_out: debug_tx_data_out,
         busy       : debug_busy       ,
         RTS        : debug_rts        ,
@@ -67,6 +70,7 @@ module main (
         a          : tmp_a            ,
         x          : tmp_x            ,
         y          : tmp_y            ,
+        p          : tmp_p            ,
         pc         : tmp_pc           ,
         reset      : debug_reset      ,
     );
@@ -74,6 +78,7 @@ module main (
     assign a  = tmp_a;
     assign x  = tmp_x;
     assign y  = tmp_y;
+    assign p  = tmp_p;
     assign pc = tmp_pc;
 
     assign GPIO_0_0 = if mode == ModePkg::CpuMode::debug {

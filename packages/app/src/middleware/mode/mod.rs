@@ -14,6 +14,8 @@ pub enum TxReg {
     A,
     X,
     Y,
+    S,
+    P,
     PC,
 }
 

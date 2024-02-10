@@ -7,6 +7,7 @@ module Debug (
     a_a        : input  logic<8> ,
     a_x        : input  logic<8> ,
     a_y        : input  logic<8> ,
+    a_p        : input  logic<8> ,
     tx_data_out: output logic    ,
     busy       : output logic    ,
     RTS        : output logic    ,
@@ -15,12 +16,14 @@ module Debug (
     a          : output logic<8> ,
     x          : output logic<8> ,
     y          : output logic<8> ,
+    p          : output logic<8> ,
     pc         : output logic<16>,
     reset      : output logic    ,
 ) {
     var tmp_a : logic<8> ;
     var tmp_x : logic<8> ;
     var tmp_y : logic<8> ;
+    var tmp_p : logic<8> ;
     var tmp_pc: logic<16>;
 
     var n_busy  : logic;
@@ -351,10 +354,12 @@ module Debug (
         busy    : tx_reg_detect_rx_busy    ,
         finish  : tx_reg_detect_rx_finish  ,
     );
-    enum TxReg: logic<2> {
+    enum TxReg: logic<3> {
         A,
         X,
         Y,
+        S,
+        P,
         PC,
     }
     var casted_tx_reg : TxReg = tx_reg_detect_rx_data_out as TxReg;
@@ -367,6 +372,10 @@ module Debug (
         x
     } else if casted_tx_reg == TxReg::Y {
         y
+    } else if casted_tx_reg == TxReg::S {
+        0
+    } else if casted_tx_reg == TxReg::P {
+        p
     } else if casted_tx_reg == TxReg::PC {
         pc & 8'hff
     } else {
@@ -610,6 +619,7 @@ module Debug (
         a        : tmp_a               ,
         x        : tmp_x               ,
         y        : tmp_y               ,
+        p        : tmp_p               ,
         pc       : tmp_pc              ,
         busy     : ope_other_busy      ,
         finish   : ope_other_finish    ,
@@ -775,20 +785,23 @@ module Debug (
     assign a  = tmp_a;
     assign x  = tmp_x;
     assign y  = tmp_y;
+    assign p  = tmp_p;
     assign pc = tmp_pc;
     always_ff (posedge CLK, async_high RST) {
         if_reset {
-            busy       = 0;
-            RTS        = 1;
-            seq_status = SeqStatus::Ready;
-            finish     = 0;
-            reset      = 0;
+            busy                     = 0;
+            RTS                      = 1;
+            seq_status               = SeqStatus::Ready;
+            register_transfer_finish = 0;
+            finish                   = 0;
+            reset                    = 0;
         } else {
-            busy       = n_busy;
-            RTS        = n_RTS;
-            seq_status = n_seq_status;
-            finish     = n_finish;
-            reset      = n_reset;
+            busy                     = n_busy;
+            RTS                      = n_RTS;
+            register_transfer_finish = n_register_transfer_finish;
+            seq_status               = n_seq_status;
+            finish                   = n_finish;
+            reset                    = n_reset;
         }
     }
 }

@@ -71,11 +71,27 @@ fn main() -> ! {
     let mut read_buf = [0x0u8; 1];
     usart.blocking_read(&mut read_buf).unwrap();
     match read_buf {
-        [0x90] => info!("test passed!"),
+        [0x90] => info!("valid x register."),
         v => {
             info!("test failed. return value is {:?}", v);
             loop {}
         }
     }
+    buf[0] = OpeMode::RegisterTransfer as u8;
+    usart.blocking_write(&buf).unwrap();
+    info!("write operation mode.");
+    buf[0] = TxReg::P as u8;
+    usart.blocking_write(&buf).unwrap();
+    info!("write tx reg.");
+    let mut read_buf = [0x0u8; 1];
+    usart.blocking_read(&mut read_buf).unwrap();
+    match read_buf {
+        [0b10000000] => info!("valid p register."),
+        v => {
+            info!("test failed. return value is {:?}", v);
+            loop {}
+        }
+    }
+    info!("test passed!");
     loop {}
 }

@@ -12,7 +12,7 @@ cd packages/stm32l476rg
 cargo run --bin jmp_abs_test
 ```
 
-If test passed, passed message shown as below.
+If test passed, passed message shown as below. If test not passed, fpga requires reset for initializing internal state machine and registers.
 ```
 ...
 INFO  rw flag is high
