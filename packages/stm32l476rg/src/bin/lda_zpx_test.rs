@@ -8,6 +8,7 @@ use embassy_stm32::gpio::{Input, Pull};
 use embassy_stm32::usart::{Config, Uart};
 use embassy_stm32::{bind_interrupts, peripherals, usart};
 use embassy_time::Timer;
+use stm32l476rg::pin::util::check_valid_p_status;
 use {defmt_rtt as _, panic_probe as _};
 
 bind_interrupts!(struct Irqs {
@@ -88,21 +89,7 @@ fn main() -> ! {
             loop {}
         }
     }
-    buf[0] = OpeMode::RegisterTransfer as u8;
-    usart.blocking_write(&buf).unwrap();
-    info!("write operation mode.");
-    buf[0] = TxReg::P as u8;
-    usart.blocking_write(&buf).unwrap();
-    info!("write tx reg.");
-    let mut read_buf = [0x0u8; 1];
-    usart.blocking_read(&mut read_buf).unwrap();
-    match read_buf {
-        [0b00000000] => info!("valid p register."),
-        v => {
-            info!("test failed. return value is {:?}", v);
-            loop {}
-        }
-    }
+    check_valid_p_status(&mut usart, &[0b00000000]);
     info!("test passed!");
     loop {}
 }
