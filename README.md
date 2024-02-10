@@ -3,10 +3,13 @@ famicom simulator written with rust and [veryl](https://github.com/dalance/veryl
 This repository includes embed software and hardware projects.
 
 #### examples
-- callback test
+
+Before run below samples, there are some step needs.
 1. run veryls/6502 in simulator
 2. connect stm32l476rg and DE0-CV with usart.(default pin function is below.)
 3. run software
+
+##### single test runner
 ```
 cd packages/stm32l476rg
 cargo run --bin jmp_abs_test
@@ -27,6 +30,20 @@ INFO  write tx reg.
 └─ jmp_abs_test::__cortex_m_rt_main @ src/bin/jmp_abs_test.rs:53
 INFO  test passed!
 └─ jmp_abs_test::__cortex_m_rt_main @ src/bin/jmp_abs_test.rs:5
+```
+
+##### multiple test runner
+Package prepared to run many test once.
+```
+cd packages/test-executor
+cargo run
+...
+    Finished dev [unoptimized + debuginfo] target(s) in 0.00s                           Running `target/debug/test-executor`
+jmp_abs_test passed.
+jmp_ind_test passed.
+lda_zp_test passed
+...
+
 ```
 
 #### default pin function.
