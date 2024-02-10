@@ -2,13 +2,13 @@
 #![no_main]
 
 use defmt::*;
-use embassy_fc2_app::middleware::mode::{CpuMode, OpeMode};
+use embassy_fc2_app::middleware::mode::{CpuMode, OpeMode, TxReg};
 use embassy_stm32::dma::NoDma;
 use embassy_stm32::gpio::{Input, Pull};
 use embassy_stm32::usart::{Config, Uart};
 use embassy_stm32::{bind_interrupts, peripherals, usart};
 use embassy_time::Timer;
-use stm32l476rg::pin::util::check_valid_p_status;
+use stm32l476rg::pin::util::check_valid_register_status;
 use {defmt_rtt as _, panic_probe as _};
 
 bind_interrupts!(struct Irqs {
@@ -68,7 +68,7 @@ fn main() -> ! {
     buf[0] = 0x34;
     usart.blocking_write(&buf).unwrap();
     info!("write store value to a.");
-    check_valid_p_status(&mut usart, &[0b00000000]);
+    check_valid_register_status(&mut usart, TxReg::P, &[0b00000000]);
     buf[0] = OpeMode::Inst as u8;
     usart.blocking_write(&buf).unwrap();
     info!("write operation mode.");
@@ -105,7 +105,7 @@ fn main() -> ! {
         }
     }
     mock_memory[read_buf[0] as usize] = data_buf[0];
-    check_valid_p_status(&mut usart, &[0b00000000]);
+    check_valid_register_status(&mut usart, TxReg::P, &[0b00000000]);
     info!("test passed!");
     loop {}
 }

@@ -1,15 +1,18 @@
+#[derive(Clone, Copy, Debug)]
 pub enum CpuMode {
     Nop,
     Normal,
     Debug,
 }
 
+#[derive(Clone, Copy, Debug)]
 pub enum OpeMode {
     Inst,
     RegisterTransfer,
     Reset,
 }
 
+#[derive(Clone, Copy, Debug)]
 pub enum TxReg {
     A,
     X,
@@ -19,6 +22,7 @@ pub enum TxReg {
     PC,
 }
 
+#[derive(Clone, Copy, Debug)]
 pub enum AddrMode {
     Acc,
     Imm,
