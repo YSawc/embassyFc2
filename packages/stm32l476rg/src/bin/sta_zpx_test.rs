@@ -2,7 +2,7 @@
 #![no_main]
 
 use defmt::*;
-use embassy_fc2_app::middleware::mode::{CpuMode, OpeMode};
+use embassy_fc2_app::middleware::mode::{CpuMode, OpeMode, TxReg};
 use embassy_stm32::dma::NoDma;
 use embassy_stm32::gpio::{Input, Pull};
 use embassy_stm32::usart::{Config, Uart};
@@ -57,6 +57,23 @@ fn main() -> ! {
     usart.blocking_write(&buf).unwrap();
     info!("write store value to a.");
 
+    info!("negative flag shuld be on.");
+    buf[0] = OpeMode::RegisterTransfer as u8;
+    usart.blocking_write(&buf).unwrap();
+    info!("write operation mode.");
+    buf[0] = TxReg::P as u8;
+    usart.blocking_write(&buf).unwrap();
+    info!("write tx reg.");
+    let mut read_buf = [0x0u8; 1];
+    usart.blocking_read(&mut read_buf).unwrap();
+    match read_buf {
+        [0b10000000] => info!("valid p register."),
+        v => {
+            info!("test failed. return value is {:?}", v);
+            loop {}
+        }
+    }
+
     // store 0x11 to x
     buf[0] = OpeMode::Inst as u8;
     usart.blocking_write(&buf).unwrap();
@@ -67,6 +84,23 @@ fn main() -> ! {
     buf[0] = 0x11;
     usart.blocking_write(&buf).unwrap();
     info!("write store value to a.");
+
+    info!("negative flag shuld be off.");
+    buf[0] = OpeMode::RegisterTransfer as u8;
+    usart.blocking_write(&buf).unwrap();
+    info!("write operation mode.");
+    buf[0] = TxReg::P as u8;
+    usart.blocking_write(&buf).unwrap();
+    info!("write tx reg.");
+    let mut read_buf = [0x0u8; 1];
+    usart.blocking_read(&mut read_buf).unwrap();
+    match read_buf {
+        [0b00000000] => info!("valid p register."),
+        v => {
+            info!("test failed. return value is {:?}", v);
+            loop {}
+        }
+    }
 
     buf[0] = OpeMode::Inst as u8;
     usart.blocking_write(&buf).unwrap();
@@ -104,6 +138,22 @@ fn main() -> ! {
         }
     }
     mock_memory[read_buf[0] as usize] = data_buf[0];
+
+    buf[0] = OpeMode::RegisterTransfer as u8;
+    usart.blocking_write(&buf).unwrap();
+    info!("write operation mode.");
+    buf[0] = TxReg::P as u8;
+    usart.blocking_write(&buf).unwrap();
+    info!("write tx reg.");
+    let mut read_buf = [0x0u8; 1];
+    usart.blocking_read(&mut read_buf).unwrap();
+    match read_buf {
+        [0b00000000] => info!("valid p register."),
+        v => {
+            info!("test failed. return value is {:?}", v);
+            loop {}
+        }
+    }
     info!("test passed!");
     loop {}
 }
