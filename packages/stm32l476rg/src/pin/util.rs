@@ -1,6 +1,9 @@
 use defmt::*;
 use embassy_fc2_app::middleware::mode::{OpeMode, TxReg};
+use embassy_stm32::gpio::Input;
+use embassy_stm32::gpio::Pin;
 use embassy_stm32::usart::{BasicInstance, Uart};
+use embassy_time::Timer;
 
 pub fn check_valid_register_status<T: BasicInstance>(
     usart: &mut Uart<T>,
@@ -35,4 +38,25 @@ pub fn check_valid_register_status<T: BasicInstance>(
             }
         }
     };
+}
+
+pub fn send_reset_signal_if_not_nop<T: BasicInstance, P: Pin>(usart: &mut Uart<T>, nop: Input<P>) {
+    // if fpga is not nop, send reset signal
+    let mut buf = [0x0u8; 1];
+    match nop.is_low() {
+        true => {
+            buf[0] = OpeMode::Reset as u8;
+            usart.blocking_write(&buf).unwrap();
+            info!("send reset signal.");
+            let _ = Timer::after_millis(1500);
+            match nop.is_high() {
+                true => info!("fpga reset!"),
+                false => {
+                    info!("failed to reset fpga.");
+                    loop {}
+                }
+            }
+        }
+        false => {}
+    }
 }
