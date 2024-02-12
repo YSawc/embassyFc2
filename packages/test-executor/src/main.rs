@@ -41,4 +41,5 @@ fn main() {
     exe_testcase("stx_zp_test".to_string(), 6);
     exe_testcase("stx_zpy_test".to_string(), 6);
     exe_testcase("sty_zp_test".to_string(), 6);
+    println!("all test passed.");
 }

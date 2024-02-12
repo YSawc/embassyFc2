@@ -7,7 +7,7 @@ use embassy_stm32::dma::NoDma;
 use embassy_stm32::gpio::{Input, Pull};
 use embassy_stm32::usart::{Config, Uart};
 use embassy_stm32::{bind_interrupts, peripherals, usart};
-use stm32l476rg::pin::util::{send_reset_signal_if_not_nop, check_valid_register_status};
+use stm32l476rg::pin::util::{check_valid_register_status, send_reset_signal_if_not_nop};
 use {defmt_rtt as _, panic_probe as _};
 
 bind_interrupts!(struct Irqs {

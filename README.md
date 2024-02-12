@@ -50,7 +50,7 @@ lda_zp_test passed
 
 |stm32|de0-cv|description|
 |-|-|-|
-|A0|GPIO4|RW|
+|A0|GPIO4|RW(LOW=write, HIGH=read)|
 |A1|GPIO5|Nop(Low if cpumode in fpga is not nop)|
 |PA2|GPIO0|RX|
 |PA9|GPIO1|TX|

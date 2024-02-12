@@ -1,0 +1,159 @@
+module ReadMemory (
+    CLK             : input  logic   ,
+    RST             : input  logic   ,
+    EN              : input  logic   ,
+    WE              : input  logic   ,
+    DATA_IN         : input  logic   ,
+    target_low_addr : input  logic<8>,
+    target_high_addr: input  logic<8>,
+    high_en         : input  logic   ,
+    target_low_data : output logic<8>,
+    target_high_data: output logic<8>,
+    tx_data_out     : output logic   ,
+    RTS             : output logic   ,
+    busy            : output logic   ,
+    finish          : output logic   ,
+) {
+    var n_RTS       : logic       ;
+    var n_busy      : logic       ;
+    var n_finish    : logic       ;
+    var seq_status  : SeqStatus   ;
+    var n_seq_status: SeqStatus   ;
+    enum SeqStatus: logic    <3> {
+        Ready,
+        LowTx,
+        HighTx,
+        LowRx,
+        HighRx,
+        Finish,
+    }
+
+    var low_tx_en      : logic    = WE && seq_status == SeqStatus::LowTx;
+    var low_tx_data_in : logic<8> = target_low_addr;
+    var low_tx_data_out: logic   ;
+    var low_tx_busy    : logic   ;
+    var low_tx_finish  : logic   ;
+    inst low_tx: uarty::Tx (
+        CLK                      ,
+        RST                      ,
+        WE      : low_tx_en      ,
+        DATA_IN : low_tx_data_in ,
+        data_out: low_tx_data_out,
+        busy    : low_tx_busy    ,
+        finish  : low_tx_finish  ,
+    );
+
+    var high_tx_en      : logic    = WE && seq_status == SeqStatus::HighTx;
+    var high_tx_data_in : logic<8> = target_high_addr;
+    var high_tx_data_out: logic   ;
+    var high_tx_busy    : logic   ;
+    var high_tx_finish  : logic   ;
+    inst high_tx: uarty::Tx (
+        CLK                       ,
+        RST                       ,
+        WE      : high_tx_en      ,
+        DATA_IN : high_tx_data_in ,
+        data_out: high_tx_data_out,
+        busy    : high_tx_busy    ,
+        finish  : high_tx_finish  ,
+    );
+
+    var low_rx_en      : logic    = seq_status == SeqStatus::LowRx;
+    var low_rx_data_out: logic<8>;
+    var low_rx_busy    : logic   ;
+    var low_rx_finish  : logic   ;
+    inst low_rx: uarty::Rx (
+        CLK                      ,
+        RST                      ,
+        DATA_IN                  ,
+        RE      : low_rx_en      ,
+        data_out: low_rx_data_out,
+        busy    : low_rx_busy    ,
+        finish  : low_rx_finish  ,
+    );
+
+    var high_rx_en      : logic    = seq_status == SeqStatus::HighRx;
+    var high_rx_data_out: logic<8>;
+    var high_rx_busy    : logic   ;
+    var high_rx_finish  : logic   ;
+    inst high_rx: uarty::Rx (
+        CLK                       ,
+        RST                       ,
+        DATA_IN                   ,
+        RE      : high_rx_en      ,
+        data_out: high_rx_data_out,
+        busy    : high_rx_busy    ,
+        finish  : high_rx_finish  ,
+    );
+
+    assign n_RTS = if low_rx_en {
+        ~low_rx_en
+    } else if high_rx_en {
+        ~high_rx_en
+    } else {
+        1
+    };
+    assign target_low_data  = low_rx_data_out;
+    assign target_high_data = high_rx_data_out;
+    assign tx_data_out      = if low_tx_en {
+        low_tx_data_out
+    } else if high_tx_en {
+        high_tx_data_out
+    } else {
+        1
+    };
+
+    always_comb {
+        n_seq_status = seq_status;
+        n_finish     = finish;
+        if EN {
+            if seq_status == SeqStatus::Ready {
+                n_finish     = 0;
+                n_seq_status = SeqStatus::LowTx;
+            } else if seq_status == SeqStatus::LowTx {
+                if low_tx_finish {
+                    if high_en {
+                        n_seq_status = SeqStatus::HighTx;
+                    } else {
+                        n_seq_status = SeqStatus::LowRx;
+                    }
+                }
+            } else if seq_status == SeqStatus::HighTx {
+                if high_tx_finish {
+                    n_seq_status = SeqStatus::LowRx;
+                }
+            } else if seq_status == SeqStatus::LowRx {
+                if low_rx_finish {
+                    if high_en {
+                        n_seq_status = SeqStatus::HighRx;
+                    } else {
+                        n_seq_status = SeqStatus::Finish;
+                    }
+                }
+            } else if seq_status == SeqStatus::HighRx {
+                if high_rx_finish {
+                    n_seq_status = SeqStatus::Finish;
+                }
+            } else if seq_status == SeqStatus::Finish {
+                n_finish     = 1;
+                n_seq_status = SeqStatus::Ready;
+            } else {
+                n_seq_status = SeqStatus::Ready;
+            }
+        }
+    }
+
+    always_ff (posedge CLK, async_high RST) {
+        if_reset {
+            busy       = 0;
+            finish     = 0;
+            seq_status = SeqStatus::Ready;
+            RTS        = 1;
+        } else {
+            busy       = n_busy;
+            finish     = n_finish;
+            seq_status = n_seq_status;
+            RTS        = n_RTS;
+        }
+    }
+}
