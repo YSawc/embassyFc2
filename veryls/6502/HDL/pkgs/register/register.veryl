@@ -7,6 +7,39 @@ package RegisterPkg {
         p : PPkg::P   ,
         pc: logic  <7>,
     }
+
+    function set_n (
+        current_p : ref   logic<8>,
+        input_data: input logic<8>,
+    ) {
+        var is_zero  : logic = (input_data == 0);
+        current_p = if is_zero {
+            current_p | 8'b00000010
+        } else {
+            current_p & 8'b11111101
+        };
+    }
+
+    function set_z (
+        current_p : ref   logic<8>,
+        input_data: input logic<8>,
+    ) {
+        var is_negative: logic = (input_data >= 8'h80);
+        current_p   = if is_negative {
+            current_p | 8'b10000000
+        } else {
+            current_p & 8'b01111111
+        };
+    }
+
+    function set_nz (
+        current_p : ref   logic<8>,
+        input_data: input logic<8>,
+    ) {
+        set_n(current_p, input_data);
+        set_z(current_p, input_data);
+    }
+
     // var register: Register;
 
     // function init () -> void {
