@@ -60,3 +60,23 @@ pub fn send_reset_signal_if_not_nop<T: BasicInstance, P: Pin>(usart: &mut Uart<T
         false => {}
     }
 }
+
+pub fn check_rw_is_high<P: Pin>(rw: Input<P>) {
+    match rw.is_high() {
+        true => info!("rw flag is high"),
+        false => {
+            info!("test failed. rw flag is not high.");
+            loop {}
+        }
+    }
+}
+
+pub fn check_rw_is_low<P: Pin>(rw: Input<P>) {
+    match rw.is_low() {
+        true => info!("rw flag is low"),
+        false => {
+            info!("test failed. rw flag is not low.");
+            loop {}
+        }
+    }
+}

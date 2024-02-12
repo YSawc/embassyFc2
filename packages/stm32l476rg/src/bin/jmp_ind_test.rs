@@ -7,7 +7,9 @@ use embassy_stm32::dma::NoDma;
 use embassy_stm32::gpio::{Input, Pull};
 use embassy_stm32::usart::{Config, Uart};
 use embassy_stm32::{bind_interrupts, peripherals, usart};
-use stm32l476rg::pin::util::{send_reset_signal_if_not_nop, check_valid_register_status};
+use stm32l476rg::pin::util::{
+    check_rw_is_high, check_valid_register_status, send_reset_signal_if_not_nop,
+};
 use {defmt_rtt as _, panic_probe as _};
 
 bind_interrupts!(struct Irqs {
@@ -35,13 +37,7 @@ fn main() -> ! {
     buf[0] = 0x6c;
     usart.blocking_write(&buf).unwrap();
     info!("write instruction.");
-    match rw.is_high() {
-        true => info!("rw flag is high"),
-        false => {
-            info!("test failed. rw flag is not high.");
-            loop {}
-        }
-    }
+    check_rw_is_high(rw);
     buf[0] = 0x00;
     usart.blocking_write(&buf).unwrap();
     info!("write ind low data.");
