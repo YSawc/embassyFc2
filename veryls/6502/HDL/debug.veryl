@@ -48,7 +48,8 @@ module Debug (
         AddrRefDetect,
         AddrRefLowRead,
         AddrRefHighRead,
-        IndReadMemory,
+        IndReadLowMemory,
+        IndReadHighMemory,
         IndTransferReady,
         OpeReady,
         OpeStoreToMemory,
@@ -500,28 +501,46 @@ module Debug (
         finish  : addr_ref_high_rx_finish  ,
     );
 
-    var ind_read_memory_en              : logic    = seq_status == SeqStatus::IndReadMemory;
-    var ind_read_memory_target_low_data : logic<8>;
-    var ind_read_memory_target_high_data: logic<8>;
-    var ind_read_memory_tx_data_out     : logic   ;
-    var ind_read_memory_rts             : logic   ;
-    var ind_read_memory_busy            : logic   ;
-    var ind_read_memory_finish          : logic   ;
-    inst ind_read_memory: ReadMemory (
+    var ind_read_low_memory_en         : logic    = seq_status == SeqStatus::IndReadLowMemory;
+    var ind_read_low_memory_target_data: logic<8>;
+    var ind_read_low_memory_tx_data_out: logic   ;
+    var ind_read_low_memory_rts        : logic   ;
+    var ind_read_low_memory_busy       : logic   ;
+    var ind_read_low_memory_finish     : logic   ;
+    inst ind_read_low_memory: ReadMemory (
+        CLK                                              ,
+        RST                                              ,
+        EN              : ind_read_low_memory_en         ,
+        WE                                               ,
+        DATA_IN                                          ,
+        target_low_addr : casted_addr_ref_low_rx_data_out,
+        target_high_addr: 0                              ,
+        target_data     : ind_read_low_memory_target_data,
+        tx_data_out     : ind_read_low_memory_tx_data_out,
+        RTS             : ind_read_low_memory_rts        ,
+        busy            : ind_read_low_memory_busy       ,
+        finish          : ind_read_low_memory_finish     ,
+    );
+
+    var ind_read_high_memory_en         : logic    = seq_status == SeqStatus::IndReadHighMemory;
+    var ind_read_high_memory_target_data: logic<8>;
+    var ind_read_high_memory_tx_data_out: logic   ;
+    var ind_read_high_memory_rts        : logic   ;
+    var ind_read_high_memory_busy       : logic   ;
+    var ind_read_high_memory_finish     : logic   ;
+    inst ind_read_high_memory: ReadMemory (
         CLK                                               ,
         RST                                               ,
-        EN              : ind_read_memory_en              ,
+        EN              : ind_read_high_memory_en         ,
         WE                                                ,
         DATA_IN                                           ,
-        target_low_addr : casted_addr_ref_low_rx_data_out ,
-        target_high_addr: addr_ref_high_rx_data_out       ,
-        high_en         : tmp_ind_high_tx_en              ,
-        target_low_data : ind_read_memory_target_low_data ,
-        target_high_data: ind_read_memory_target_high_data,
-        tx_data_out     : ind_read_memory_tx_data_out     ,
-        RTS             : ind_read_memory_rts             ,
-        busy            : ind_read_memory_busy            ,
-        finish          : ind_read_memory_finish          ,
+        target_low_addr : addr_ref_high_rx_data_out       ,
+        target_high_addr: 0                               ,
+        target_data     : ind_read_high_memory_target_data,
+        tx_data_out     : ind_read_high_memory_tx_data_out,
+        RTS             : ind_read_high_memory_rts        ,
+        busy            : ind_read_high_memory_busy       ,
+        finish          : ind_read_high_memory_finish     ,
     );
 
     var ope_store_to_memory_en         : logic    = seq_status == SeqStatus::OpeStoreToMemory;
@@ -560,12 +579,12 @@ module Debug (
     );
 
     var ope_inst_addr_low: logic<8> = if tmp_ind_low_tx_en {
-        ind_read_memory_target_low_data
+        ind_read_low_memory_target_data
     } else {
         casted_addr_ref_low_rx_data_out
     };
     var ope_inst_addr_high: logic<8> = if tmp_ind_low_tx_en {
-        ind_read_memory_target_high_data
+        ind_read_high_memory_target_data
     } else {
         addr_ref_high_rx_data_out
     };
@@ -611,8 +630,10 @@ module Debug (
         ~addr_ref_high_rx_en
     } else if tx_reg_detect_rx_en {
         ~tx_reg_detect_rx_en
-    } else if ind_read_memory_en {
-        ind_read_memory_rts
+    } else if ind_read_low_memory_en {
+        ind_read_low_memory_rts
+    } else if ind_read_high_memory_en {
+        ind_read_high_memory_rts
     } else {
         1
     };
@@ -687,11 +708,13 @@ module Debug (
                     }
                 }
             } else if seq_status == SeqStatus::IndTransferReady {
-                if tmp_ind_low_tx_en {
-                    n_seq_status = SeqStatus::IndReadMemory;
+                n_seq_status = SeqStatus::IndReadLowMemory;
+            } else if seq_status == SeqStatus::IndReadLowMemory {
+                if ind_read_low_memory_finish {
+                    n_seq_status = SeqStatus::IndReadHighMemory;
                 }
-            } else if seq_status == SeqStatus::IndReadMemory {
-                if ind_read_memory_finish {
+            } else if seq_status == SeqStatus::IndReadHighMemory {
+                if ind_read_high_memory_finish {
                     n_seq_status = SeqStatus::OpeReady;
                 }
             } else if seq_status == SeqStatus::OpeReady {
@@ -720,8 +743,10 @@ module Debug (
         register_row_tx_data_out
     } else if register_high_tx_en {
         register_high_tx_data_out
-    } else if ind_read_memory_en {
-        ind_read_memory_tx_data_out
+    } else if ind_read_low_memory_en {
+        ind_read_low_memory_tx_data_out
+    } else if ind_read_high_memory_en {
+        ind_read_high_memory_tx_data_out
     } else if ope_store_to_memory_en {
         ope_store_to_memory_tx_data_out
     } else {

@@ -47,7 +47,7 @@ fn main() -> ! {
     let mut read_buf = [0x0u8; 2];
     usart.blocking_read(&mut read_buf).unwrap();
     match read_buf {
-        [0x00, 0x02] => info!("6502 access valid memory."),
+        [0x00, 0x00] => info!("6502 access valid memory."),
         v => {
             info!("test failed. return value is {:?}", v);
             loop {}
@@ -56,9 +56,18 @@ fn main() -> ! {
     buf[0] = 0x7e;
     usart.blocking_write(&buf).unwrap();
     info!("write memory low data.");
+    usart.blocking_read(&mut read_buf).unwrap();
+    match read_buf {
+        [0x02, 0x00] => info!("6502 access valid memory."),
+        v => {
+            info!("test failed. return value is {:?}", v);
+            loop {}
+        }
+    }
     buf[0] = 0xdb;
     usart.blocking_write(&buf).unwrap();
     info!("write memory high data.");
+
     check_valid_register_status(&mut usart, TxReg::PC, &[0x7e, 0xdb]);
     check_valid_register_status(&mut usart, TxReg::P, &[0b00000000]);
     info!("test passed!");
