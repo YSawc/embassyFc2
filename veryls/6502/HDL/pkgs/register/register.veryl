@@ -20,6 +20,38 @@ package RegisterPkg {
         };
     }
 
+    function plus_within_vnz (
+        current_p: ref   logic<8>,
+        input_l  : input logic<8>,
+        input_r  : input logic<8>,
+    ) -> logic<8> {
+        return tmp_plus_within_vnz(0, 0, 0, current_p, input_l, input_r);
+    }
+
+    function tmp_plus_within_vnz (
+        byte_buf   : input logic<16>,
+        is_overflow: input logic    ,
+        output_data: input logic<8> ,
+        current_p  : ref   logic<8> ,
+        input_l    : input logic<8> ,
+        input_r    : input logic<8> ,
+    ) -> logic<8>  {
+        byte_buf    = input_l + input_r;
+        is_overflow = byte_buf >= 16'h100;
+        current_p   = if is_overflow {
+            current_p | 8'b01000000
+        } else {
+            current_p & 8'b10111111
+        };
+        output_data = if is_overflow {
+            input_l + input_r - 8'hff
+        } else {
+            input_l + input_r
+        };
+        set_nz(current_p, output_data);
+        return output_data;
+    }
+
     function set_z (
         current_p : ref   logic<8>,
         input_data: input logic<8>,

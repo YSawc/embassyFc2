@@ -1,26 +1,26 @@
 module OpeSplitter (
-    CLK            : input  logic                ,
-    RST            : input  logic                ,
-    EN             : input  logic                ,
-    ope_kind       : input  OperatorsPkg::OpeKind,
-    store_memory_en: output logic                ,
-    busy           : output logic                ,
-    finish         : output logic                ,
+    CLK     : input  logic                ,
+    RST     : input  logic                ,
+    EN      : input  logic                ,
+    ope_kind: input  OperatorsPkg::OpeKind,
+    ope_mode: output ModePkg::OpeMode     ,
+    busy    : output logic                ,
+    finish  : output logic                ,
 ) {
     enum Status: logic {
         idle,
         work,
     }
-    var status           : Status;
-    var n_status         : Status;
-    var n_store_memory_en: logic ;
-    var n_busy           : logic ;
-    var n_finish         : logic ;
+    var status    : Status          ;
+    var n_status  : Status          ;
+    var n_ope_mode: ModePkg::OpeMode;
+    var n_busy    : logic           ;
+    var n_finish  : logic           ;
     always_comb {
-        n_status          = status;
-        n_busy            = busy;
-        n_finish          = finish;
-        n_store_memory_en = store_memory_en;
+        n_status   = status;
+        n_busy     = busy;
+        n_finish   = finish;
+        n_ope_mode = ope_mode;
         case status {
             Status::idle: {
                 if EN {
@@ -34,10 +34,12 @@ module OpeSplitter (
                 n_status = Status::idle;
                 n_busy   = 0;
                 n_finish = 1;
-                if ope_kind == OperatorsPkg::OpeKind::Sta || ope_kind == OperatorsPkg::OpeKind::Stx || ope_kind == OperatorsPkg::OpeKind::Sty {
-                    n_store_memory_en = 1;
+                if ope_kind == OperatorsPkg::OpeKind::Inc || ope_kind == OperatorsPkg::OpeKind::Dec {
+                    n_ope_mode = ModePkg::OpeMode::ReadAndStoreMemory;
+                } else if ope_kind == OperatorsPkg::OpeKind::Sta || ope_kind == OperatorsPkg::OpeKind::Stx || ope_kind == OperatorsPkg::OpeKind::Sty {
+                    n_ope_mode = ModePkg::OpeMode::StoreMemory;
                 } else {
-                    n_store_memory_en = 0;
+                    n_ope_mode = ModePkg::OpeMode::Other;
                 }
             }
         }
@@ -45,15 +47,15 @@ module OpeSplitter (
 
     always_ff (posedge CLK, async_high RST) {
         if_reset {
-            status          = Status::idle;
-            finish          = 0;
-            busy            = 0;
-            store_memory_en = 0;
+            status   = Status::idle;
+            finish   = 0;
+            busy     = 0;
+            ope_mode = ModePkg::OpeMode::Nop;
         } else {
-            status          = n_status;
-            finish          = n_finish;
-            busy            = n_busy;
-            store_memory_en = n_store_memory_en;
+            status   = n_status;
+            finish   = n_finish;
+            busy     = n_busy;
+            ope_mode = n_ope_mode;
         }
     }
 }

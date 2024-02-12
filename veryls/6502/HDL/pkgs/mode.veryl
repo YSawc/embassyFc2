@@ -4,4 +4,11 @@ package ModePkg {
         normal,
         debug, // [mode, subcommand]
     }
+
+    enum OpeMode: logic<2> {
+        Nop,
+        ReadAndStoreMemory,
+        StoreMemory,
+        Other,
+    }
 }
