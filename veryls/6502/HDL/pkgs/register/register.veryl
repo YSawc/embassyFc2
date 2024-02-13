@@ -44,7 +44,7 @@ package RegisterPkg {
             current_p & 8'b10111111
         };
         output_data = if is_overflow {
-            input_l + input_r - 8'hff
+            input_l + input_r - 16'h100
         } else {
             input_l + input_r
         };

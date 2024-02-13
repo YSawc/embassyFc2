@@ -40,7 +40,7 @@ pub fn check_valid_register_status<T: BasicInstance>(
     };
 }
 
-pub fn send_reset_signal_if_not_nop<T: BasicInstance, P: Pin>(usart: &mut Uart<T>, nop: Input<P>) {
+pub fn send_reset_signal_if_not_nop<T: BasicInstance, P: Pin>(usart: &mut Uart<T>, nop: &Input<P>) {
     // if fpga is not nop, send reset signal
     let mut buf = [0x0u8; 1];
     match nop.is_low() {

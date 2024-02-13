@@ -27,7 +27,7 @@ fn main() -> ! {
     let rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut buf = [0x0u8; 1];
-    send_reset_signal_if_not_nop(&mut usart, nop);
+    send_reset_signal_if_not_nop(&mut usart, &nop);
     buf[0] = CpuMode::Debug as u8;
     usart.blocking_write(&buf).unwrap();
     info!("write cpu operation mode.");
