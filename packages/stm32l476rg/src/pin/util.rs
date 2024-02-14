@@ -40,6 +40,13 @@ pub fn check_valid_register_status<T: BasicInstance>(
     };
 }
 
+pub fn usart_write<T: BasicInstance>(usart: &mut Uart<T>, send_data: &[u8]) {
+    for n in send_data {
+        usart.blocking_write(&[*n]).unwrap();
+        info!("usart write data({})", n);
+    }
+}
+
 pub fn send_reset_signal_if_not_nop<T: BasicInstance, P: Pin>(usart: &mut Uart<T>, nop: &Input<P>) {
     // if fpga is not nop, send reset signal
     let mut buf = [0x0u8; 1];

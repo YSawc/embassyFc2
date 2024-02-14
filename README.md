@@ -1,6 +1,7 @@
 #### embassy fc2
 famicom simulator written with rust and [veryl](https://github.com/dalance/veryl).
 This repository includes embed software and hardware projects.
+Currently software is used to send signals for cpu test.
 
 #### examples
 

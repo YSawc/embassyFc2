@@ -7,9 +7,7 @@ use embassy_stm32::dma::NoDma;
 use embassy_stm32::gpio::{Input, Pull};
 use embassy_stm32::usart::{Config, Uart};
 use embassy_stm32::{bind_interrupts, peripherals, usart};
-use stm32l476rg::pin::util::{
-    check_rw_is_low, check_valid_register_status, send_reset_signal_if_not_nop,
-};
+use stm32l476rg::pin::util::*;
 use {defmt_rtt as _, panic_probe as _};
 
 bind_interrupts!(struct Irqs {
@@ -26,30 +24,15 @@ fn main() -> ! {
     .unwrap();
     let rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
-    let mut buf = [0x0u8; 1];
     send_reset_signal_if_not_nop(&mut usart, &nop);
-    buf[0] = CpuMode::Debug as u8;
-    usart.blocking_write(&buf).unwrap();
-    info!("write cpu operation mode.");
-    buf[0] = OpeMode::Inst as u8;
-    usart.blocking_write(&buf).unwrap();
-    info!("write operation mode.");
-    buf[0] = 0xa2;
-    usart.blocking_write(&buf).unwrap();
-    info!("write instruction.");
-    buf[0] = 0xaa;
-    usart.blocking_write(&buf).unwrap();
-    info!("write store value to x.");
+    usart_write(
+        &mut usart,
+        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xa2, 0xaa],
+    );
     check_valid_register_status(&mut usart, TxReg::P, &[0b10000000]);
-    buf[0] = OpeMode::Inst as u8;
-    usart.blocking_write(&buf).unwrap();
-    info!("write operation mode.");
-    buf[0] = 0x86;
-    usart.blocking_write(&buf).unwrap();
-    info!("write instruction.");
+    usart_write(&mut usart, &[OpeMode::Inst as u8, 0x86]);
     check_rw_is_low(rw);
-    buf[0] = 0x45;
-    usart.blocking_write(&buf).unwrap();
+    usart.blocking_write(&[0x45]).unwrap();
     info!("write zero page value.");
     let mut read_buf = [0x0u8; 1];
     usart.blocking_read(&mut read_buf).unwrap();
@@ -71,12 +54,10 @@ fn main() -> ! {
         }
     }
     mock_memory[read_buf[0] as usize] = data_buf[0];
-    buf[0] = OpeMode::RegisterTransfer as u8;
-    usart.blocking_write(&buf).unwrap();
-    info!("write operation mode.");
-    buf[0] = TxReg::P as u8;
-    usart.blocking_write(&buf).unwrap();
-    info!("write tx reg.");
+    usart_write(
+        &mut usart,
+        &[OpeMode::RegisterTransfer as u8, TxReg::P as u8],
+    );
     let mut read_buf = [0x0u8; 1];
     usart.blocking_read(&mut read_buf).unwrap();
     match read_buf {

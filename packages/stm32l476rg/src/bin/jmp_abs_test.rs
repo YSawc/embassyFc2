@@ -7,9 +7,7 @@ use embassy_stm32::dma::NoDma;
 use embassy_stm32::gpio::{Input, Pull};
 use embassy_stm32::usart::{Config, Uart};
 use embassy_stm32::{bind_interrupts, peripherals, usart};
-use stm32l476rg::pin::util::{
-    check_rw_is_high, check_valid_register_status, send_reset_signal_if_not_nop,
-};
+use stm32l476rg::pin::util::*;
 use {defmt_rtt as _, panic_probe as _};
 
 bind_interrupts!(struct Irqs {
@@ -26,24 +24,13 @@ fn main() -> ! {
     .unwrap();
     let rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
-    let mut buf = [0x0u8; 1];
     send_reset_signal_if_not_nop(&mut usart, &nop);
-    buf[0] = CpuMode::Debug as u8;
-    usart.blocking_write(&buf).unwrap();
-    info!("write cpu operation mode.");
-    buf[0] = OpeMode::Inst as u8;
-    usart.blocking_write(&buf).unwrap();
-    info!("write operation mode.");
-    buf[0] = 0x4c;
-    usart.blocking_write(&buf).unwrap();
-    info!("write instruction.");
+    usart_write(
+        &mut usart,
+        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0x4c],
+    );
     check_rw_is_high(rw);
-    buf[0] = 0xf5;
-    usart.blocking_write(&buf).unwrap();
-    info!("write target memory row.");
-    buf[0] = 0xc5;
-    usart.blocking_write(&buf).unwrap();
-    info!("write target memory high.");
+    usart_write(&mut usart, &[0xf5, 0xc5]);
     check_valid_register_status(&mut usart, TxReg::PC, &[0xf5, 0xc5]);
     check_valid_register_status(&mut usart, TxReg::P, &[0b00000000]);
     info!("test passed!");
