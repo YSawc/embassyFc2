@@ -1,0 +1,207 @@
+module AddrHandler (
+    CLK             : input  logic                    ,
+    RST             : input  logic                    ,
+    EN              : input  logic                    ,
+    WE              : input  logic                    ,
+    DATA_IN         : input  logic                    ,
+    addr_mode       : input  OperatorsPkg::AddrMode   ,
+    a_a             : input  logic                 <8>,
+    a_x             : input  logic                 <8>,
+    a_y             : input  logic                 <8>,
+    target_low_addr : output logic                 <8>,
+    target_high_addr: output logic                 <8>,
+    tx_data_out     : output logic                    ,
+    RTS             : output logic                    ,
+    busy            : output logic                    ,
+    finish          : output logic                    ,
+) {
+    enum Status: logic<3> {
+        Ready,
+        ReadTargetLowAddr,
+        ReadTargetHighAddr,
+        ReadLowMemory,
+        ReadHighMemory,
+        Finish,
+    }
+
+    var n_target_low_addr : logic<8>;
+    var n_target_high_addr: logic<8>;
+    var n_tx_data_out     : logic   ;
+    var n_RTS             : logic   ;
+
+    var target_low_addr_read_en      : logic    = status == Status::ReadTargetLowAddr;
+    var target_low_addr_read_data_out: logic<8>;
+    var target_low_addr_read_busy    : logic   ;
+    var target_low_addr_read_finish  : logic   ;
+    inst target_low_addr_read_rx: uarty::Rx (
+        CLK                                    ,
+        RST                                    ,
+        DATA_IN                                ,
+        RE      : target_low_addr_read_en      ,
+        data_out: target_low_addr_read_data_out,
+        busy    : target_low_addr_read_busy    ,
+        finish  : target_low_addr_read_finish  ,
+    );
+
+    var target_high_addr_read_en      : logic    = status == Status::ReadTargetHighAddr;
+    var target_high_addr_read_data_out: logic<8>;
+    var target_high_addr_read_busy    : logic   ;
+    var target_high_addr_read_finish  : logic   ;
+    inst target_high_addr_read_rx: uarty::Rx (
+        CLK                                     ,
+        RST                                     ,
+        DATA_IN                                 ,
+        RE      : target_high_addr_read_en      ,
+        data_out: target_high_addr_read_data_out,
+        busy    : target_high_addr_read_busy    ,
+        finish  : target_high_addr_read_finish  ,
+    );
+
+    var read_low_memory_en         : logic    = status == Status::ReadLowMemory;
+    var read_low_memory_target_data: logic<8>;
+    var read_low_memory_tx_data_out: logic   ;
+    var read_low_memory_rts        : logic   ;
+    var read_low_memory_busy       : logic   ;
+    var read_low_memory_finish     : logic   ;
+    inst read_low_memory: ReadMemory (
+        CLK                                          ,
+        RST                                          ,
+        EN              : read_low_memory_en         ,
+        WE                                           ,
+        DATA_IN                                      ,
+        target_low_addr                              ,
+        target_high_addr: 0                          ,
+        target_data     : read_low_memory_target_data,
+        tx_data_out     : read_low_memory_tx_data_out,
+        RTS             : read_low_memory_rts        ,
+        busy            : read_low_memory_busy       ,
+        finish          : read_low_memory_finish     ,
+    );
+
+    var read_high_memory_en         : logic    = status == Status::ReadHighMemory;
+    var read_high_memory_target_data: logic<8>;
+    var read_high_memory_tx_data_out: logic   ;
+    var read_high_memory_rts        : logic   ;
+    var read_high_memory_busy       : logic   ;
+    var read_high_memory_finish     : logic   ;
+    inst read_high_memory: ReadMemory (
+        CLK                                           ,
+        RST                                           ,
+        EN              : read_high_memory_en         ,
+        WE                                            ,
+        DATA_IN                                       ,
+        target_low_addr : target_high_addr            ,
+        target_high_addr: 0                           ,
+        target_data     : read_high_memory_target_data,
+        tx_data_out     : read_high_memory_tx_data_out,
+        RTS             : read_high_memory_rts        ,
+        busy            : read_high_memory_busy       ,
+        finish          : read_high_memory_finish     ,
+    );
+
+    var status  : Status;
+    var n_status: Status;
+    var n_busy  : logic ;
+    var n_finish: logic ;
+
+    always_comb {
+        n_status           = status;
+        n_finish           = finish;
+        n_target_low_addr  = target_low_addr;
+        n_target_high_addr = target_high_addr;
+        n_RTS              = RTS;
+        n_tx_data_out      = tx_data_out;
+        if EN {
+            case status {
+                Status::Ready: {
+                    n_finish = 0;
+                    if addr_mode == OperatorsPkg::AddrMode::Impl || addr_mode == OperatorsPkg::AddrMode::Acc {
+                        n_status = Status::Finish;
+                    } else {
+                        n_status = Status::ReadTargetLowAddr;
+                    }
+                }
+                Status::ReadTargetLowAddr: {
+                    n_tx_data_out = 1;
+                    n_RTS         = ~target_low_addr_read_en;
+                    if target_low_addr_read_finish {
+                        if addr_mode == OperatorsPkg::AddrMode::ZpX {
+                            n_target_low_addr = utilPkg::wrapping_add(target_low_addr_read_data_out, a_x);
+                        } else if addr_mode == OperatorsPkg::AddrMode::ZpY {
+                            n_target_low_addr = utilPkg::wrapping_add(target_low_addr_read_data_out, a_y);
+                        } else {
+                            n_target_low_addr = target_low_addr_read_data_out;
+                        }
+
+                        if addr_mode == OperatorsPkg::AddrMode::Imm || addr_mode == OperatorsPkg::AddrMode::Zp || addr_mode == OperatorsPkg::AddrMode::ZpX || addr_mode == OperatorsPkg::AddrMode::ZpY {
+                            n_status = Status::Finish;
+                        } else if addr_mode == OperatorsPkg::AddrMode::IndX || addr_mode == OperatorsPkg::AddrMode::IndY {
+                            n_status = Status::ReadLowMemory;
+                        } else {
+                            n_status = Status::ReadTargetHighAddr;
+                        }
+                    }
+                }
+                Status::ReadTargetHighAddr: {
+                    n_tx_data_out = 1;
+                    n_RTS         = ~target_high_addr_read_en;
+                    if target_high_addr_read_finish {
+                        n_target_high_addr = target_high_addr_read_data_out;
+                        if addr_mode == OperatorsPkg::AddrMode::Ind {
+                            n_status = Status::ReadLowMemory;
+                        } else {
+                            n_status = Status::Finish;
+                        }
+                    }
+                }
+                Status::ReadLowMemory: {
+                    n_tx_data_out = read_low_memory_tx_data_out;
+                    n_RTS         = read_low_memory_rts;
+                    if read_low_memory_finish {
+                        if addr_mode == OperatorsPkg::AddrMode::Ind || addr_mode == OperatorsPkg::AddrMode::IndX || addr_mode == OperatorsPkg::AddrMode::IndY {
+                            n_target_low_addr = read_low_memory_target_data;
+                        }
+
+                        if addr_mode == OperatorsPkg::AddrMode::Ind {
+                            n_status = Status::ReadHighMemory;
+                        } else {
+                            n_status = Status::Finish;
+                        }
+                    }
+                }
+                Status::ReadHighMemory: {
+                    n_tx_data_out = read_high_memory_tx_data_out;
+                    n_RTS         = read_high_memory_rts;
+                    if read_high_memory_finish {
+                        n_target_high_addr = read_high_memory_target_data;
+                        n_status           = Status::Finish;
+                    }
+                }
+                Status::Finish: {
+                    n_finish = 1;
+                    n_status = Status::Ready;
+                }
+            }
+        }
+    }
+
+    always_ff (posedge CLK, async_high RST) {
+        if_reset {
+            status           = Status::Ready;
+            target_low_addr  = 0;
+            target_high_addr = 0;
+            tx_data_out      = 0;
+            RTS              = 0;
+            busy             = 0;
+            finish           = 0;
+        } else {
+            status           = n_status;
+            target_low_addr  = n_target_low_addr;
+            target_high_addr = n_target_high_addr;
+            tx_data_out      = n_tx_data_out;
+            RTS              = n_RTS;
+            busy             = n_busy;
+            finish           = n_finish;
+        }
+    }
+}
