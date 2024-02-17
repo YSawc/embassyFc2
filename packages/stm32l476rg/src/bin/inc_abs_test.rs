@@ -23,32 +23,14 @@ fn main() -> ! {
     )
     .unwrap();
     let nop = Input::new(p.PA1, Pull::None);
-    let mut buf = [0x0u8; 1];
     send_reset_signal_if_not_nop(&mut usart, &nop);
     usart_write(
         &mut usart,
         &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xee, 0x00, 0x04],
     );
-    let mut read_buf = [0x0u8; 2];
-    usart.blocking_read(&mut read_buf).unwrap();
-    match read_buf {
-        [0x00, 0x04] => info!("6502 access valid memory."),
-        v => {
-            info!("test failed. return value is {:?}", v);
-            loop {}
-        }
-    }
-    buf[0] = 0x40;
-    usart.blocking_write(&buf).unwrap();
-    let mut read_buf = [0x0u8; 1];
-    usart.blocking_read(&mut read_buf).unwrap();
-    match read_buf {
-        [0x41] => info!("6502 calcurate valid data."),
-        v => {
-            info!("test failed. return value is {:?}", v);
-            loop {}
-        }
-    }
+    usart_read_with_check(&mut usart, &mut [0x0u8; 2], &[0x00, 0x04]);
+    usart.blocking_write(&[0x40]).unwrap();
+    usart_read_with_check(&mut usart, &mut [0x0u8; 1], &[0x41]);
     check_valid_register_status(&mut usart, TxReg::P, &[0b00000000]);
     info!("test passed!");
     loop {}

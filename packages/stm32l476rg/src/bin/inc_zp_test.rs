@@ -23,25 +23,9 @@ pub fn test_inc_zp_without_triger_of_p<T: BasicInstance, P: Pin>(
         usart,
         &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xe6, 0x2c],
     );
-    let mut read_buf = [0x0u8; 2];
-    usart.blocking_read(&mut read_buf).unwrap();
-    match read_buf {
-        [0x2c, 0x00] => info!("6502 access valid memory."),
-        v => {
-            info!("test failed. return value is {:?}", v);
-            loop {}
-        }
-    }
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x2C, 0x00]);
     usart.blocking_write(&[0x7e]).unwrap();
-    let mut read_buf = [0x0u8; 1];
-    usart.blocking_read(&mut read_buf).unwrap();
-    match read_buf {
-        [0x7f] => info!("6502 calcurate valid data."),
-        v => {
-            info!("test failed. return value is {:?}", v);
-            loop {}
-        }
-    }
+    usart_read_with_check(usart, &mut [0x0u8; 1], &[0x7F]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     info!("test_inc_zp_without_triger_of_p passed!");
 }
@@ -55,25 +39,9 @@ pub fn test_inc_zp_with_over_flow_and_zero_flag<T: BasicInstance, P: Pin>(
         usart,
         &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xe6, 0x2c],
     );
-    let mut read_buf = [0x0u8; 2];
-    usart.blocking_read(&mut read_buf).unwrap();
-    match read_buf {
-        [0x2c, 0x00] => info!("6502 access valid memory."),
-        v => {
-            info!("test failed. return value is {:?}", v);
-            loop {}
-        }
-    }
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x2C, 0x00]);
     usart.blocking_write(&[0xff]).unwrap();
-    let mut read_buf = [0x0u8; 1];
-    usart.blocking_read(&mut read_buf).unwrap();
-    match read_buf {
-        [0x00] => info!("6502 calcurate valid data."),
-        v => {
-            info!("test failed. return value is {:?}", v);
-            loop {}
-        }
-    }
+    usart_read_with_check(usart, &mut [0x0u8; 1], &[0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b01000010]);
     info!("test_inc_zp_with_zero_flag passed!");
 }
@@ -87,25 +55,9 @@ pub fn test_inc_zp_with_negative_flag<T: BasicInstance, P: Pin>(
         usart,
         &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xe6, 0x2c],
     );
-    let mut read_buf = [0x0u8; 2];
-    usart.blocking_read(&mut read_buf).unwrap();
-    match read_buf {
-        [0x2c, 0x00] => info!("6502 access valid memory."),
-        v => {
-            info!("test failed. return value is {:?}", v);
-            loop {}
-        }
-    }
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x2C, 0x00]);
     usart.blocking_write(&[0x7f]).unwrap();
-    let mut read_buf = [0x0u8; 1];
-    usart.blocking_read(&mut read_buf).unwrap();
-    match read_buf {
-        [0x80] => info!("6502 calcurate valid data."),
-        v => {
-            info!("test failed. return value is {:?}", v);
-            loop {}
-        }
-    }
+    usart_read_with_check(usart, &mut [0x0u8; 1], &[0x80]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
     info!("test_inc_zp_with_over_flow_and_zero_flag passed!");
 }

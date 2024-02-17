@@ -33,27 +33,7 @@ fn main() -> ! {
     usart_write(&mut usart, &[OpeMode::Inst as u8, 0x84]);
     check_rw_is_low(rw);
     usart.blocking_write(&[0x45]).unwrap();
-    info!("write target address.");
-    let mut read_buf = [0x0u8; 1];
-    usart.blocking_read(&mut read_buf).unwrap();
-    match read_buf {
-        [0x45] => info!("valid memory low!"),
-        v => {
-            info!("test failed. return value is {:?}", v);
-            loop {}
-        }
-    }
-    let mut mock_memory = [0x0u8; 0xff];
-    let mut data_buf = [0x0u8; 1];
-    usart.blocking_read(&mut data_buf).unwrap();
-    match data_buf {
-        [0x2c] => info!("receive stored data."),
-        v => {
-            info!("test failed. return value is {:?}", v);
-            loop {}
-        }
-    }
-    mock_memory[read_buf[0] as usize] = data_buf[0];
+    usart_read_with_check(&mut usart, &mut [0x0u8; 2], &[0x45, 0x2C]);
     check_valid_register_status(&mut usart, TxReg::P, &[0b00000000]);
     info!("test passed!");
     loop {}

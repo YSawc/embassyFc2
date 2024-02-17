@@ -47,6 +47,23 @@ pub fn usart_write<T: BasicInstance>(usart: &mut Uart<T>, send_data: &[u8]) {
     }
 }
 
+pub fn usart_read_with_check<T: BasicInstance>(
+    usart: &mut Uart<T>,
+    read_buf: &mut [u8],
+    expect_data: &[u8],
+) {
+    usart.blocking_read(read_buf).unwrap();
+    if read_buf == expect_data {
+        info!("6502 receive expece data.");
+    } else {
+        info!(
+            "test failed. receive data should be {:?}, but exact is {:?}",
+            expect_data, read_buf
+        );
+        loop {}
+    }
+}
+
 pub fn send_reset_signal_if_not_nop<T: BasicInstance, P: Pin>(usart: &mut Uart<T>, nop: &Input<P>) {
     // if fpga is not nop, send reset signal
     let mut buf = [0x0u8; 1];

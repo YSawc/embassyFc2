@@ -23,25 +23,9 @@ pub fn test_inc_abs_x_without_carry<T: BasicInstance, P: Pin>(usart: &mut Uart<T
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
 
     usart_write(usart, &[OpeMode::Inst as u8, 0xFE, 0x30, 0x40]);
-    let mut read_buf = [0x0u8; 2];
-    usart.blocking_read(&mut read_buf).unwrap();
-    match read_buf {
-        [0x60, 0x40] => info!("6502 access valid memory!"),
-        v => {
-            info!("test failed. return value is {:?}", v);
-            loop {}
-        }
-    }
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x60, 0x40]);
     usart_write(usart, &[0x60]);
-    let mut data_buf = [0x0u8; 1];
-    usart.blocking_read(&mut data_buf).unwrap();
-    match data_buf {
-        [0x61] => info!("receive valid data."),
-        v => {
-            info!("test failed. return value is {:?}", v);
-            loop {}
-        }
-    }
+    usart_read_with_check(usart, &mut [0x0u8; 1], &[0x61]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
 }
 
@@ -54,25 +38,9 @@ pub fn test_inc_abs_x_with_carry<T: BasicInstance, P: Pin>(usart: &mut Uart<T>, 
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
 
     usart_write(usart, &[OpeMode::Inst as u8, 0xFE, 0x30, 0x40]);
-    let mut read_buf = [0x0u8; 2];
-    usart.blocking_read(&mut read_buf).unwrap();
-    match read_buf {
-        [0x2F, 0x41] => info!("6502 access valid memory!"),
-        v => {
-            info!("test failed. return value is {:?}", v);
-            loop {}
-        }
-    }
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x2F, 0x41]);
     usart_write(usart, &[0x60]);
-    let mut data_buf = [0x0u8; 1];
-    usart.blocking_read(&mut data_buf).unwrap();
-    match data_buf {
-        [0x61] => info!("receive valid data."),
-        v => {
-            info!("test failed. return value is {:?}", v);
-            loop {}
-        }
-    }
+    usart_read_with_check(usart, &mut [0x0u8; 1], &[0x61]);
     check_valid_register_status(usart, TxReg::P, &[0b00000001]);
 }
 

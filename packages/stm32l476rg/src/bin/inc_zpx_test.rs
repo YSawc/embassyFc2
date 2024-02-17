@@ -32,26 +32,9 @@ fn main() -> ! {
     check_valid_register_status(&mut usart, TxReg::P, &[0b00000000]);
 
     usart_write(&mut usart, &[OpeMode::Inst as u8, 0xf6, 0x67]);
-    info!("write target memory row.");
-    let mut read_buf = [0x0u8; 2];
-    usart.blocking_read(&mut read_buf).unwrap();
-    match read_buf {
-        [0xb7, 0x00] => info!("6502 access valid memory."),
-        v => {
-            info!("test failed. return value is {:?}", v);
-            loop {}
-        }
-    }
+    usart_read_with_check(&mut usart, &mut [0x0u8; 2], &[0xB7, 0x00]);
     usart.blocking_write(&[0xa0]).unwrap();
-    let mut read_buf = [0x0u8; 1];
-    usart.blocking_read(&mut read_buf).unwrap();
-    match read_buf {
-        [0xa1] => info!("6502 calcurate valid data."),
-        v => {
-            info!("test failed. return value is {:?}", v);
-            loop {}
-        }
-    }
+    usart_read_with_check(&mut usart, &mut [0x0u8; 1], &[0xA1]);
     check_valid_register_status(&mut usart, TxReg::P, &[0b10000000]);
     info!("test passed!");
     loop {}
