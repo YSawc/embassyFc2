@@ -8,7 +8,7 @@ package utilPkg {
         int_buffer  = l + r;
         is_overflow = int_buffer >= 16'h100;
         if is_overflow {
-            return (l + r - 8'hff);
+            return (l + r - 16'h100);
         } else {
             return (l + r);
         }

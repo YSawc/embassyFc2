@@ -8,6 +8,17 @@ package RegisterPkg {
         pc: logic  <7>,
     }
 
+    function set_c (
+        current_p: ref   logic<8> ,
+        byte_buf : input logic<16>,
+    ) {
+        current_p = if byte_buf >= 16'h100 {
+            current_p | 8'b00000001
+        } else {
+            current_p & 8'b11111110
+        };
+    }
+
     function set_n (
         current_p : ref   logic<8>,
         input_data: input logic<8>,
@@ -50,6 +61,30 @@ package RegisterPkg {
         };
         set_nz(current_p, output_data);
         return output_data;
+    }
+
+    function add_three_with_carry (
+        current_p: ref   logic<8>,
+        input_1  : ref   logic<8>,
+        input_2  : ref   logic<8>,
+        input_3  : input logic<8>,
+    ) {
+        tmp_add_three_with_carry(0, current_p, input_1, input_2, input_3);
+    }
+
+    function tmp_add_three_with_carry (
+        byte_buf : input logic<16>,
+        current_p: ref   logic<8> ,
+        input_1  : ref   logic<8> ,
+        input_2  : ref   logic<8> ,
+        input_3  : input logic<8> ,
+    ) {
+        byte_buf = input_2 + input_3;
+        input_2  = utilPkg::wrapping_add(input_2, input_3);
+        set_c   (current_p, byte_buf);
+        if byte_buf >= 16'h100 {
+            input_1 = utilPkg::wrapping_add(input_1, 1);
+        }
     }
 
     function set_z (

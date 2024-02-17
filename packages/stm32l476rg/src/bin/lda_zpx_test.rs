@@ -36,7 +36,7 @@ fn main() -> ! {
     check_rw_is_high(rw);
     usart.blocking_write(&[0xb5]).unwrap();
     info!("write target address.");
-    check_valid_register_status(&mut usart, TxReg::A, &[0x06]);
+    check_valid_register_status(&mut usart, TxReg::A, &[0x05]);
     check_valid_register_status(&mut usart, TxReg::P, &[0b00000000]);
     info!("test passed!");
     loop {}

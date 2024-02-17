@@ -442,6 +442,7 @@ module Debug (
     var addr_handler_rts        : logic   ;
     var addr_handler_busy       : logic   ;
     var addr_handler_finish     : logic   ;
+    var addr_handler_p          : logic<8>;
     var target_low_addr         : logic<8>;
     var target_high_addr        : logic<8>;
     var addr_handler_tx_data_out: logic   ;
@@ -455,6 +456,8 @@ module Debug (
         a_a                                       ,
         a_x                                       ,
         a_y                                       ,
+        a_p                                       ,
+        p               : addr_handler_p          ,
         target_low_addr                           ,
         target_high_addr                          ,
         tx_data_out     : addr_handler_tx_data_out,
@@ -630,6 +633,7 @@ module Debug (
                 }
             } else if seq_status == SeqStatus::OpeReady {
                 if ope_splitter_finish {
+                    n_p = addr_handler_p;
                     if ope_mode == ModePkg::OpeMode::ReadAndStoreMemory {
                         n_seq_status = SeqStatus::OpeReadAndStoreToMemory;
                     } else if ope_mode == ModePkg::OpeMode::StoreMemory {
