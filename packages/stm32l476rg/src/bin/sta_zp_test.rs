@@ -53,7 +53,7 @@ fn main() -> ! {
         }
     }
     mock_memory[read_buf[0] as usize] = data_buf[0];
-    // check_valid_register_status(&mut usart, TxReg::P, &[0b10000000]);
+    check_valid_register_status(&mut usart, TxReg::P, &[0b10000000]);
     info!("test passed!");
     loop {}
 }

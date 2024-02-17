@@ -115,79 +115,80 @@ module AddrHandler (
         n_RTS              = RTS;
         n_tx_data_out      = tx_data_out;
         n_p                = p;
-        if EN {
-            case status {
-                Status::Ready: {
-                    n_finish = 0;
+        case status {
+            Status::Ready: {
+                n_p      = a_p;
+                n_finish = 0;
+                if EN {
                     if addr_mode == OperatorsPkg::AddrMode::Impl || addr_mode == OperatorsPkg::AddrMode::Acc {
                         n_status = Status::Finish;
                     } else {
                         n_status = Status::ReadTargetLowAddr;
                     }
                 }
-                Status::ReadTargetLowAddr: {
-                    n_tx_data_out = 1;
-                    n_RTS         = ~target_low_addr_read_en;
-                    if target_low_addr_read_finish {
-                        if addr_mode == OperatorsPkg::AddrMode::ZpX {
-                            n_target_low_addr = utilPkg::wrapping_add(target_low_addr_read_data_out, a_x);
-                        } else if addr_mode == OperatorsPkg::AddrMode::ZpY {
-                            n_target_low_addr = utilPkg::wrapping_add(target_low_addr_read_data_out, a_y);
-                        } else {
-                            n_target_low_addr = target_low_addr_read_data_out;
-                        }
+            }
+            Status::ReadTargetLowAddr: {
+                n_tx_data_out = 1;
+                n_RTS         = ~target_low_addr_read_en;
+                if target_low_addr_read_finish {
+                    if addr_mode == OperatorsPkg::AddrMode::ZpX {
+                        n_target_low_addr = utilPkg::wrapping_add(target_low_addr_read_data_out, a_x);
+                    } else if addr_mode == OperatorsPkg::AddrMode::ZpY {
+                        n_target_low_addr = utilPkg::wrapping_add(target_low_addr_read_data_out, a_y);
+                    } else {
+                        n_target_low_addr = target_low_addr_read_data_out;
+                    }
 
-                        if addr_mode == OperatorsPkg::AddrMode::Imm || addr_mode == OperatorsPkg::AddrMode::Zp || addr_mode == OperatorsPkg::AddrMode::ZpX || addr_mode == OperatorsPkg::AddrMode::ZpY {
-                            n_status = Status::Finish;
-                        } else if addr_mode == OperatorsPkg::AddrMode::IndX || addr_mode == OperatorsPkg::AddrMode::IndY {
-                            n_status = Status::ReadLowMemory;
-                        } else {
-                            n_status = Status::ReadTargetHighAddr;
-                        }
+                    if addr_mode == OperatorsPkg::AddrMode::Imm || addr_mode == OperatorsPkg::AddrMode::Zp || addr_mode == OperatorsPkg::AddrMode::ZpX || addr_mode == OperatorsPkg::AddrMode::ZpY {
+                        n_status = Status::Finish;
+                    } else if addr_mode == OperatorsPkg::AddrMode::IndX || addr_mode == OperatorsPkg::AddrMode::IndY {
+                        n_status = Status::ReadLowMemory;
+                    } else {
+                        n_status = Status::ReadTargetHighAddr;
                     }
                 }
-                Status::ReadTargetHighAddr: {
-                    n_tx_data_out = 1;
-                    n_RTS         = ~target_high_addr_read_en;
-                    if target_high_addr_read_finish {
-                        n_target_high_addr = target_high_addr_read_data_out;
-                        if addr_mode == OperatorsPkg::AddrMode::Ind {
-                            n_status = Status::ReadLowMemory;
-                        } else {
-                            n_status = Status::Finish;
-                        }
+            }
+            Status::ReadTargetHighAddr: {
+                n_tx_data_out = 1;
+                n_RTS         = ~target_high_addr_read_en;
+                if target_high_addr_read_finish {
+                    n_target_high_addr = target_high_addr_read_data_out;
+                    if addr_mode == OperatorsPkg::AddrMode::Ind {
+                        n_status = Status::ReadLowMemory;
+                    } else {
+                        n_status = Status::Finish;
                     }
                 }
-                Status::ReadLowMemory: {
-                    n_tx_data_out = read_low_memory_tx_data_out;
-                    n_RTS         = read_low_memory_rts;
-                    if read_low_memory_finish {
-                        n_target_low_addr = read_low_memory_target_data;
+            }
+            Status::ReadLowMemory: {
+                n_tx_data_out = read_low_memory_tx_data_out;
+                n_RTS         = read_low_memory_rts;
+                if read_low_memory_finish {
+                    n_target_low_addr = read_low_memory_target_data;
 
-                        if addr_mode == OperatorsPkg::AddrMode::Ind {
-                            n_status = Status::ReadHighMemory;
-                        } else {
-                            n_status = Status::Finish;
-                        }
+                    if addr_mode == OperatorsPkg::AddrMode::Ind {
+                        n_status = Status::ReadHighMemory;
+                    } else {
+                        n_status = Status::Finish;
                     }
                 }
-                Status::ReadHighMemory: {
-                    n_tx_data_out = read_high_memory_tx_data_out;
-                    n_RTS         = read_high_memory_rts;
-                    if read_high_memory_finish {
-                        n_target_high_addr = read_high_memory_target_data;
-                        n_status           = Status::Finish;
-                    }
+            }
+            Status::ReadHighMemory: {
+                n_tx_data_out = read_high_memory_tx_data_out;
+                n_RTS         = read_high_memory_rts;
+                if read_high_memory_finish {
+                    n_target_high_addr = read_high_memory_target_data;
+                    n_status           = Status::Finish;
                 }
-                Status::Finish: {
-                    n_finish = 1;
-                    n_status = Status::Ready;
+            }
+            Status::Finish: {
+                n_finish = 1;
+                n_status = Status::Ready;
 
-                    if addr_mode == OperatorsPkg::AddrMode::AbsX {
-                        RegisterPkg::add_three_with_carry(n_p, n_target_high_addr, n_target_low_addr, a_x);
-                    } else if addr_mode == OperatorsPkg::AddrMode::AbsY {
-                        RegisterPkg::add_three_with_carry(n_p, n_target_high_addr, n_target_low_addr, a_y);
-                    }
+                if addr_mode == OperatorsPkg::AddrMode::AbsX {
+                    RegisterPkg::add_three_with_carry(n_p, n_target_high_addr, n_target_low_addr, a_x);
+                } else if addr_mode == OperatorsPkg::AddrMode::AbsY {
+                    RegisterPkg::add_three_with_carry(n_p, n_target_high_addr, n_target_low_addr, a_y);
                 }
             }
         }

@@ -5,6 +5,10 @@ module OpeOther (
     ope_kind : input  OperatorsPkg::OpeKind    ,
     addr_low : input  logic                <8> ,
     addr_high: input  logic                <8> ,
+    a_a      : input  logic                <8> ,
+    a_x      : input  logic                <8> ,
+    a_y      : input  logic                <8> ,
+    a_p      : input  logic                <8> ,
     a        : output logic                <8> ,
     x        : output logic                <8> ,
     y        : output logic                <8> ,
@@ -46,6 +50,10 @@ module OpeOther (
             Status::idle: {
                 if EN {
                     n_busy   = 1;
+                    n_a      = a_a;
+                    n_x      = a_x;
+                    n_y      = a_y;
+                    n_p      = a_p;
                     n_status = Status::work;
                 }
             }

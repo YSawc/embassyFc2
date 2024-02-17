@@ -539,6 +539,10 @@ module Debug (
         ope_kind : inst_casted_ope_kind,
         addr_low : target_low_addr     ,
         addr_high: target_high_addr    ,
+        a_a                            ,
+        a_x                            ,
+        a_y                            ,
+        a_p                            ,
         a        : ope_other_a         ,
         x        : ope_other_x         ,
         y        : ope_other_y         ,
@@ -629,11 +633,11 @@ module Debug (
                 }
             } else if seq_status == SeqStatus::AddrHandler {
                 if addr_handler_finish {
+                    n_p          = addr_handler_p;
                     n_seq_status = SeqStatus::OpeReady;
                 }
             } else if seq_status == SeqStatus::OpeReady {
                 if ope_splitter_finish {
-                    n_p = addr_handler_p;
                     if ope_mode == ModePkg::OpeMode::ReadAndStoreMemory {
                         n_seq_status = SeqStatus::OpeReadAndStoreToMemory;
                     } else if ope_mode == ModePkg::OpeMode::StoreMemory {
