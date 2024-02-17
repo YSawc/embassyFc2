@@ -7,6 +7,7 @@ module OpeReadAndStoreToMemory (
     ope_kind        : input  OperatorsPkg::OpeKind   ,
     target_low_addr : input  logic                <8>,
     target_high_addr: input  logic                <8>,
+    a_p             : input  logic                <8>,
     p               : output logic                <8>,
     tx_data_out     : output logic                   ,
     RTS             : output logic                   ,
@@ -78,6 +79,7 @@ module OpeReadAndStoreToMemory (
         if EN {
             if status == Status::Ready {
                 n_finish = 0;
+                n_p      = a_p;
                 n_status = Status::ReadMemory;
             } else if status == Status::ReadMemory {
                 if read_memory_finish {

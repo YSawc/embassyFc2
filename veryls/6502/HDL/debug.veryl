@@ -495,6 +495,7 @@ module Debug (
         ope_kind        : inst_casted_ope_kind                    ,
         target_low_addr : target_low_addr                         ,
         target_high_addr: target_high_addr                        ,
+        a_p                                                       ,
         p               : ope_read_and_store_to_memory_p          ,
         tx_data_out     : ope_read_and_store_to_memory_tx_data_out,
         RTS             : ope_read_and_store_to_memory_rts        ,
