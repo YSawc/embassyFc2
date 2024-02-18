@@ -18,7 +18,6 @@ module Debug (
     y          : output logic<8> ,
     p          : output logic<8> ,
     pc         : output logic<16>,
-    reset      : output logic    ,
 ) {
     var n_a : logic<8> ;
     var n_x : logic<8> ;
@@ -311,7 +310,6 @@ module Debug (
     enum OpeMode: logic<2> {
         Inst,
         RegisterTransfer,
-        Reset,
     }
     var raw_operator_mode: logic<8>;
     var ope_read_busy    : logic   ;
@@ -327,14 +325,8 @@ module Debug (
         busy    : ope_read_busy    ,
         finish  : ope_mode_finish  ,
     );
-    var casted_ope_mode: OpeMode;
-    assign casted_ope_mode = raw_operator_mode as OpeMode;
-    var n_reset        : logic = if casted_ope_mode == OpeMode::Reset {
-        1
-    } else {
-        0
-    };
-
+    var casted_ope_mode          : OpeMode;
+    assign casted_ope_mode           = raw_operator_mode as OpeMode;
     var tx_reg_detect_rx_en      : logic    = seq_status == SeqStatus::TxRegisterDetect;
     var tx_reg_detect_rx_data_out: logic<8>;
     var tx_reg_detect_rx_busy    : logic   ;
@@ -697,7 +689,6 @@ module Debug (
             seq_status               = SeqStatus::Ready;
             register_transfer_finish = 0;
             finish                   = 0;
-            reset                    = 0;
         } else {
             a                        = n_a;
             x                        = n_x;
@@ -709,7 +700,6 @@ module Debug (
             register_transfer_finish = n_register_transfer_finish;
             seq_status               = n_seq_status;
             finish                   = n_finish;
-            reset                    = n_reset;
         }
     }
 }

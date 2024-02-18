@@ -9,7 +9,6 @@ pub enum CpuMode {
 pub enum OpeMode {
     Inst,
     RegisterTransfer,
-    Reset,
 }
 
 #[derive(Clone, Copy, Debug)]

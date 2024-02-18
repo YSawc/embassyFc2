@@ -53,7 +53,6 @@ module main (
     var tmp_p            : logic<8> ;
     var tmp_pc           : logic<16>;
     var debug_rts        : logic    ;
-    var debug_reset      : logic    ;
     inst debug: Debug (
         CLK                           ,
         RST        : reset            ,
@@ -74,7 +73,6 @@ module main (
         y          : tmp_y            ,
         p          : tmp_p            ,
         pc         : tmp_pc           ,
-        reset      : debug_reset      ,
     );
 
     assign a  = tmp_a;
