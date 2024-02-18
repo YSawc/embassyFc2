@@ -30,7 +30,7 @@ fn main() -> ! {
         &mut usart,
         &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0x6c],
     );
-    check_rw_is_high(rw);
+    check_rw_is_high(&rw);
     usart_write(&mut usart, &[0x00, 0x02]);
     usart_read_with_check(&mut usart, &mut [0x0u8; 2], &[0x00, 0x00]);
     usart.blocking_write(&[0x7e]).unwrap();

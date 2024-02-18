@@ -30,7 +30,7 @@ fn main() -> ! {
         &mut usart,
         &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xa6],
     );
-    check_rw_is_high(rw);
+    check_rw_is_high(&rw);
     usart.blocking_write(&[0x90]).unwrap();
     info!("write target address.");
     check_valid_register_status(&mut usart, TxReg::X, &[0x90]);

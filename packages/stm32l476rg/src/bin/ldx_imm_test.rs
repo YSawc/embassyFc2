@@ -31,7 +31,7 @@ fn main() -> ! {
         &mut usart,
         &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xa2],
     );
-    check_rw_is_high(rw);
+    check_rw_is_high(&rw);
     usart.blocking_write(&[0x45]).unwrap();
     info!("write callback value.");
     check_valid_register_status(&mut usart, TxReg::X, &[0x45]);

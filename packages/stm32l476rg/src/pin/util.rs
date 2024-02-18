@@ -84,7 +84,7 @@ pub fn send_reset_signal_if_not_nop<P: Pin, P2: Pin>(nop: &Input<P>, resb: &mut 
     }
 }
 
-pub fn check_rw_is_high<P: Pin>(rw: Input<P>) {
+pub fn check_rw_is_high<P: Pin>(rw: &Input<P>) {
     match rw.is_high() {
         true => info!("rw flag is high"),
         false => {

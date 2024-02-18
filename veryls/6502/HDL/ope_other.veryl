@@ -61,7 +61,11 @@ module OpeOther (
                 n_status = Status::idle;
                 n_busy   = 0;
                 n_finish = 1;
-                if ope_kind == OperatorsPkg::OpeKind::Lda {
+                if ope_kind == OperatorsPkg::OpeKind::Inx {
+                    n_x = RegisterPkg::plus_within_vnz(n_p, n_x, 1);
+                } else if ope_kind == OperatorsPkg::OpeKind::Iny {
+                    n_y = RegisterPkg::plus_within_vnz(n_p, n_y, 1);
+                } else if ope_kind == OperatorsPkg::OpeKind::Lda {
                     n_a                 = addr_low;
                     RegisterPkg::set_nz(n_p, n_a);
                 } else if ope_kind == OperatorsPkg::OpeKind::Ldx {
