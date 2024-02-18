@@ -30,6 +30,28 @@ package RegisterPkg {
         };
     }
 
+    function set_i (
+        current_p: ref   logic<8>,
+        flag     : input logic   ,
+    ) {
+        current_p = if flag {
+            current_p | 8'b00000100
+        } else {
+            current_p & 8'b11111011
+        };
+    }
+
+    function set_d (
+        current_p: ref   logic<8>,
+        flag     : input logic   ,
+    ) {
+        current_p = if flag {
+            current_p | 8'b00001000
+        } else {
+            current_p & 8'b11110111
+        };
+    }
+
     function plus_within_vnz (
         current_p: ref   logic<8>,
         input_l  : input logic<8>,

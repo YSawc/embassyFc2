@@ -25,6 +25,10 @@ fn exe_testcase(testcase: String, timeout: u8) {
 }
 
 fn main() {
+    exe_testcase("clc_impl_test".to_string(), 6);
+    exe_testcase("cld_impl_test".to_string(), 6);
+    exe_testcase("cli_impl_test".to_string(), 6);
+    exe_testcase("clv_impl_test".to_string(), 6);
     exe_testcase("inc_abs_test".to_string(), 6);
     exe_testcase("inc_absx_test".to_string(), 6);
     exe_testcase("inc_zp_test".to_string(), 6);
@@ -40,6 +44,9 @@ fn main() {
     exe_testcase("ldx_zpy_test".to_string(), 6);
     exe_testcase("ldy_imm_test".to_string(), 6);
     exe_testcase("ldy_zp_test".to_string(), 6);
+    exe_testcase("sec_impl_test".to_string(), 6);
+    exe_testcase("sed_impl_test".to_string(), 6);
+    exe_testcase("sei_impl_test".to_string(), 6);
     exe_testcase("sta_zp_test".to_string(), 6);
     exe_testcase("sta_zpx_test".to_string(), 6);
     exe_testcase("stx_zp_test".to_string(), 6);

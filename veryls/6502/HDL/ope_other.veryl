@@ -70,6 +70,20 @@ module OpeOther (
                 } else if ope_kind == OperatorsPkg::OpeKind::Ldy {
                     n_y                 = addr_low;
                     RegisterPkg::set_nz(n_p, n_y);
+                } else if ope_kind == OperatorsPkg::OpeKind::Clc {
+                    RegisterPkg::set_c(n_p, 0);
+                } else if ope_kind == OperatorsPkg::OpeKind::Sec {
+                    RegisterPkg::set_c(n_p, 1);
+                } else if ope_kind == OperatorsPkg::OpeKind::Cli {
+                    RegisterPkg::set_i(n_p, 0);
+                } else if ope_kind == OperatorsPkg::OpeKind::Sei {
+                    RegisterPkg::set_i(n_p, 1);
+                } else if ope_kind == OperatorsPkg::OpeKind::Cld {
+                    RegisterPkg::set_d(n_p, 0);
+                } else if ope_kind == OperatorsPkg::OpeKind::Sed {
+                    RegisterPkg::set_d(n_p, 1);
+                } else if ope_kind == OperatorsPkg::OpeKind::Clv {
+                    RegisterPkg::set_v(n_p, 0);
                 } else if ope_kind == OperatorsPkg::OpeKind::Jmp {
                     n_pc = (addr_high << 8) + addr_low;
                 }

@@ -31,7 +31,7 @@ pub fn test_inc_zp_without_triger_of_p<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_inc_zp_without_triger_of_p passed!");
 }
 
-pub fn test_inc_zp_with_over_flow_and_zero_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_inc_zp_with_overflow_and_zero_flag<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -62,7 +62,7 @@ pub fn test_inc_zp_with_negative_flag<T: BasicInstance, P: Pin, P2: Pin>(
     usart.blocking_write(&[0x7f]).unwrap();
     usart_read_with_check(usart, &mut [0x0u8; 1], &[0x80]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
-    info!("test_inc_zp_with_over_flow_and_zero_flag passed!");
+    info!("test_inc_zp_with_overflow_and_zero_flag passed!");
 }
 
 #[cortex_m_rt::entry]
@@ -76,7 +76,7 @@ fn main() -> ! {
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
     test_inc_zp_without_triger_of_p(&mut usart, &nop, &mut resb);
-    test_inc_zp_with_over_flow_and_zero_flag(&mut usart, &nop, &mut resb);
+    test_inc_zp_with_overflow_and_zero_flag(&mut usart, &nop, &mut resb);
     test_inc_zp_with_negative_flag(&mut usart, &nop, &mut resb);
     info!("all test passed!");
     loop {}
