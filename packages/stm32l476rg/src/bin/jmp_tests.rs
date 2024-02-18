@@ -14,7 +14,7 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
-pub fn jmp_abs_test<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_jmp_abs<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -26,10 +26,10 @@ pub fn jmp_abs_test<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart_write(usart, &[0xf5, 0xc5]);
     check_valid_register_status(usart, TxReg::PC, &[0xf5, 0xc5]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("jmp_abs_test passed!");
+    info!("test_jmp_abs passed!");
 }
 
-pub fn jmp_ind_test<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_jmp_ind<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -45,7 +45,7 @@ pub fn jmp_ind_test<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart.blocking_write(&[0xdb]).unwrap();
     check_valid_register_status(usart, TxReg::PC, &[0x7e, 0xdb]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("jmp_ind_test passed!");
+    info!("test_jmp_ind passed!");
 }
 
 #[cortex_m_rt::entry]
@@ -59,8 +59,8 @@ fn main() -> ! {
     let rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
-    jmp_abs_test(&mut usart, &nop, &rw, &mut resb);
-    jmp_ind_test(&mut usart, &nop, &rw, &mut resb);
-    info!("all tests passed!");
+    test_jmp_abs(&mut usart, &nop, &rw, &mut resb);
+    test_jmp_ind(&mut usart, &nop, &rw, &mut resb);
+    info!("all test passed!");
     loop {}
 }

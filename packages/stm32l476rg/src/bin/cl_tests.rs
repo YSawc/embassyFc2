@@ -14,7 +14,7 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
-pub fn clc_impl_test<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_clc_impl<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -26,10 +26,10 @@ pub fn clc_impl_test<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::P, &[0b00000001]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x18]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("clc_impl_test passed!");
+    info!("test_clc_impl passed!");
 }
 
-pub fn cld_impl_test<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_cld_impl<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -41,10 +41,10 @@ pub fn cld_impl_test<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::P, &[0b00001000]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xD8]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("cld_impl_test passed!");
+    info!("test_cld_impl passed!");
 }
 
-pub fn cli_impl_test<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_cli_impl<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -56,10 +56,10 @@ pub fn cli_impl_test<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::P, &[0b00000100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x58]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("cli_impl_test passed!");
+    info!("test_cli_impl passed!");
 }
 
-pub fn clv_impl_test<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_clv_impl<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -79,7 +79,7 @@ pub fn clv_impl_test<T: BasicInstance, P: Pin, P2: Pin>(
 
     usart_write(usart, &[OpeMode::Inst as u8, 0xB8]);
     check_valid_register_status(usart, TxReg::P, &[0b00000010]);
-    info!("clv_impl_test passed!");
+    info!("test_clv_impl passed!");
 }
 
 #[cortex_m_rt::entry]
@@ -93,10 +93,10 @@ fn main() -> ! {
     let _rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
-    clc_impl_test(&mut usart, &nop, &mut resb);
-    cld_impl_test(&mut usart, &nop, &mut resb);
-    cli_impl_test(&mut usart, &nop, &mut resb);
-    clv_impl_test(&mut usart, &nop, &mut resb);
-    info!("all tests passed!");
+    test_clc_impl(&mut usart, &nop, &mut resb);
+    test_cld_impl(&mut usart, &nop, &mut resb);
+    test_cli_impl(&mut usart, &nop, &mut resb);
+    test_clv_impl(&mut usart, &nop, &mut resb);
+    info!("all test passed!");
     loop {}
 }
