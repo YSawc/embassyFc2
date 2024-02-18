@@ -97,6 +97,6 @@ fn main() -> ! {
     cld_impl_test(&mut usart, &nop, &mut resb);
     cli_impl_test(&mut usart, &nop, &mut resb);
     clv_impl_test(&mut usart, &nop, &mut resb);
-    info!("test passed!");
+    info!("all tests passed!");
     loop {}
 }

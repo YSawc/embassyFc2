@@ -14,43 +14,38 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
-pub fn sec_impl_test<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn jmp_abs_test<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
-    resb: &mut Output<P2>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0x4c]);
+    check_rw_is_high(&rw);
+    usart_write(usart, &[0xf5, 0xc5]);
+    check_valid_register_status(usart, TxReg::PC, &[0xf5, 0xc5]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    usart_write(usart, &[OpeMode::Inst as u8, 0x38]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000001]);
-    info!("sec_impl_test passed!");
+    info!("jmp_abs_test passed!");
 }
 
-pub fn sed_impl_test<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn jmp_ind_test<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
-    resb: &mut Output<P2>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0x6c]);
+    check_rw_is_high(&rw);
+    usart_write(usart, &[0x00, 0x02]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x00, 0x00]);
+    usart.blocking_write(&[0x7e]).unwrap();
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x02, 0x00]);
+    usart.blocking_write(&[0xdb]).unwrap();
+    check_valid_register_status(usart, TxReg::PC, &[0x7e, 0xdb]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    usart_write(usart, &[OpeMode::Inst as u8, 0xF8]);
-    check_valid_register_status(usart, TxReg::P, &[0b00001000]);
-    info!("sed_impl_test passed!");
-}
-
-pub fn sei_impl_test<T: BasicInstance, P: Pin, P2: Pin>(
-    usart: &mut Uart<T>,
-    nop: &Input<P>,
-    resb: &mut Output<P2>,
-) {
-    send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    usart_write(usart, &[OpeMode::Inst as u8, 0x78]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000100]);
-    info!("sei_impl_test passed!");
+    info!("jmp_ind_test passed!");
 }
 
 #[cortex_m_rt::entry]
@@ -61,12 +56,11 @@ fn main() -> ! {
         p.USART1, p.PA10, p.PA9, Irqs, p.PA12, p.PA11, NoDma, NoDma, config,
     )
     .unwrap();
-    let _rw = Input::new(p.PA0, Pull::None);
+    let rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
-    sec_impl_test(&mut usart, &nop, &mut resb);
-    sed_impl_test(&mut usart, &nop, &mut resb);
-    sei_impl_test(&mut usart, &nop, &mut resb);
+    jmp_abs_test(&mut usart, &nop, &rw, &mut resb);
+    jmp_ind_test(&mut usart, &nop, &rw, &mut resb);
     info!("all tests passed!");
     loop {}
 }

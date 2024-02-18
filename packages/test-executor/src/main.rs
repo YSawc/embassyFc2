@@ -32,8 +32,8 @@ fn main() {
     exe_testcase("inc_zpx_test".to_string(), 6);
     exe_testcase("inx_impl_test".to_string(), 6);
     exe_testcase("iny_impl_test".to_string(), 6);
-    exe_testcase("jmp_abs_test".to_string(), 6);
-    exe_testcase("jmp_ind_test".to_string(), 6);
+    exe_testcase("jmp_test".to_string(), 6);
+    exe_testcase("lda_imm_test".to_string(), 6);
     exe_testcase("lda_zp_test".to_string(), 6);
     exe_testcase("lda_zpx_test".to_string(), 6);
     exe_testcase("ldx_imm_test".to_string(), 6);
