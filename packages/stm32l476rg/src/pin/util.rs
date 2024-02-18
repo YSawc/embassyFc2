@@ -24,7 +24,10 @@ pub fn check_valid_register_status<T: BasicInstance>(
             if read_buf == expect_data {
                 info!("valid register status.");
             } else {
-                info!("test failed. return value is {:?}", read_buf);
+                info!(
+                    "test failed. expect value is {:?}, but return value is {:?}",
+                    expect_data, read_buf
+                );
                 loop {}
             }
         }
@@ -34,7 +37,10 @@ pub fn check_valid_register_status<T: BasicInstance>(
             if read_buf == expect_data {
                 info!("valid register status.");
             } else {
-                info!("test failed. return value is {:?}", read_buf);
+                info!(
+                    "test failed. expect value is {:?}, but return value is {:?}",
+                    expect_data, read_buf
+                );
                 loop {}
             }
         }
@@ -58,7 +64,7 @@ pub fn usart_read_with_check<T: BasicInstance>(
         info!("6502 receive expece data.");
     } else {
         info!(
-            "test failed. receive data should be {:?}, but exact is {:?}",
+            "test failed. expect value is {:?}, but return value is {:?}",
             expect_data, read_buf
         );
         loop {}
