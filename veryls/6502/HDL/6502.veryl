@@ -4,18 +4,20 @@ module main (
     KEY     : input  logic<3>,
     GPIO_0_1: input  logic   , // RX
     GPIO_0_3: input  logic   , // CTS
+    GPIO_0_6: input  logic   , // RESB
     GPIO_0_0: output logic   , // TX
     GPIO_0_2: output logic   , // RTS
     GPIO_0_4: output logic   , // RW
     GPIO_0_5: output logic   , // Nop(Low if cpumode is not nop)
 ) {
     var CTS  : logic     = GPIO_0_3;
+    var RESB : logic     = GPIO_0_6;
     var a    : logic<8> ;
     var x    : logic<8> ;
     var y    : logic<8> ;
     var p    : logic<8> ;
     var pc   : logic<16>;
-    var reset: logic     = RST || debug_reset;
+    var reset: logic     = RST || RESB;
 
     var mode               : ModePkg::CpuMode;
     var tmp_mode           : ModePkg::CpuMode;

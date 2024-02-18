@@ -4,7 +4,7 @@
 use defmt::*;
 use embassy_fc2_app::middleware::mode::{CpuMode, OpeMode, TxReg};
 use embassy_stm32::dma::NoDma;
-use embassy_stm32::gpio::{Input, Pull};
+use embassy_stm32::gpio::{Input, Level, Output, Pull, Speed};
 use embassy_stm32::usart::{Config, Uart};
 use embassy_stm32::{bind_interrupts, peripherals, usart};
 use stm32l476rg::pin::util::*;
@@ -24,7 +24,8 @@ fn main() -> ! {
     .unwrap();
     let rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
-    send_reset_signal_if_not_nop(&mut usart, &nop);
+    let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
+    send_reset_signal_if_not_nop(&nop, &mut resb);
     usart_write(
         &mut usart,
         &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xa6],

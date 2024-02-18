@@ -4,7 +4,7 @@
 use defmt::*;
 use embassy_fc2_app::middleware::mode::{CpuMode, OpeMode, TxReg};
 use embassy_stm32::dma::NoDma;
-use embassy_stm32::gpio::{Input, Pin, Pull};
+use embassy_stm32::gpio::{Input, Level, Output, Pin, Pull, Speed};
 use embassy_stm32::usart::{BasicInstance, Config, Uart};
 use embassy_stm32::{bind_interrupts, peripherals, usart};
 use stm32l476rg::pin::util::*;
@@ -14,8 +14,12 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
-pub fn test_inc_abs_x_without_carry<T: BasicInstance, P: Pin>(usart: &mut Uart<T>, nop: &Input<P>) {
-    send_reset_signal_if_not_nop(usart, &nop);
+pub fn test_inc_abs_x_without_carry<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
     usart.blocking_write(&[CpuMode::Debug as u8]).unwrap();
 
     // store 0x30 to x
@@ -29,8 +33,12 @@ pub fn test_inc_abs_x_without_carry<T: BasicInstance, P: Pin>(usart: &mut Uart<T
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
 }
 
-pub fn test_inc_abs_x_with_carry<T: BasicInstance, P: Pin>(usart: &mut Uart<T>, nop: &Input<P>) {
-    send_reset_signal_if_not_nop(usart, &nop);
+pub fn test_inc_abs_x_with_carry<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
     usart.blocking_write(&[CpuMode::Debug as u8]).unwrap();
 
     // store 0xff to x
@@ -54,8 +62,9 @@ fn main() -> ! {
     .unwrap();
     let _rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
-    test_inc_abs_x_without_carry(&mut usart, &nop);
-    test_inc_abs_x_with_carry(&mut usart, &nop);
+    let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
+    test_inc_abs_x_without_carry(&mut usart, &nop, &mut resb);
+    test_inc_abs_x_with_carry(&mut usart, &nop, &mut resb);
 
     info!("test passed!");
     loop {}
