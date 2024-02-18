@@ -9,22 +9,21 @@ package RegisterPkg {
     }
 
     function set_c (
-        current_p: ref   logic<8> ,
-        byte_buf : input logic<16>,
+        current_p: ref   logic<8>,
+        flag     : input logic   ,
     ) {
-        current_p = if byte_buf >= 16'h100 {
+        current_p = if flag {
             current_p | 8'b00000001
         } else {
             current_p & 8'b11111110
         };
     }
 
-    function set_n (
-        current_p : ref   logic<8>,
-        input_data: input logic<8>,
+    function set_z (
+        current_p: ref   logic<8>,
+        flag     : input logic   ,
     ) {
-        var is_zero  : logic = (input_data == 0);
-        current_p = if is_zero {
+        current_p = if flag {
             current_p | 8'b00000010
         } else {
             current_p & 8'b11111101
@@ -49,11 +48,7 @@ package RegisterPkg {
     ) -> logic<8>  {
         byte_buf    = input_l + input_r;
         is_overflow = byte_buf >= 16'h100;
-        current_p   = if is_overflow {
-            current_p | 8'b01000000
-        } else {
-            current_p & 8'b10111111
-        };
+        set_v      (current_p, is_overflow);
         output_data = if is_overflow {
             input_l + input_r - 16'h100
         } else {
@@ -81,18 +76,30 @@ package RegisterPkg {
     ) {
         byte_buf = input_2 + input_3;
         input_2  = utilPkg::wrapping_add(input_2, input_3);
-        set_c   (current_p, byte_buf);
         if byte_buf >= 16'h100 {
+            set_c  (current_p, 1);
             input_1 = utilPkg::wrapping_add(input_1, 1);
+        } else {
+            set_c(current_p, 0);
         }
     }
 
-    function set_z (
-        current_p : ref   logic<8>,
-        input_data: input logic<8>,
+    function set_v (
+        current_p: ref   logic<8>,
+        flag     : input logic   ,
     ) {
-        var is_negative: logic = (input_data >= 8'h80);
-        current_p   = if is_negative {
+        current_p = if flag {
+            current_p | 8'b01000000
+        } else {
+            current_p & 8'b10111111
+        };
+    }
+
+    function set_n (
+        current_p: ref   logic<8>,
+        flag     : input logic   ,
+    ) {
+        current_p = if flag {
             current_p | 8'b10000000
         } else {
             current_p & 8'b01111111
@@ -103,8 +110,8 @@ package RegisterPkg {
         current_p : ref   logic<8>,
         input_data: input logic<8>,
     ) {
-        set_n(current_p, input_data);
-        set_z(current_p, input_data);
+        set_z(current_p, input_data == 0);
+        set_n(current_p, input_data >= 8'h80);
     }
 
     // var register: Register;
