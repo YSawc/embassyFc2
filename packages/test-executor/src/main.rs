@@ -36,6 +36,6 @@ fn main() {
     exe_testcase("se_tests".to_string(), 6);
     exe_testcase("sta_tests".to_string(), 6);
     exe_testcase("stx_tests".to_string(), 6);
-    exe_testcase("sty_zp_test".to_string(), 6);
+    exe_testcase("sty_tests".to_string(), 6);
     println!("all test passed.");
 }
