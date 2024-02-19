@@ -82,6 +82,6 @@ fn main() -> ! {
     test_lda_imm(&mut usart, &nop, &rw, &mut resb);
     test_lda_zp(&mut usart, &nop, &rw, &mut resb);
     test_lda_zpx(&mut usart, &nop, &rw, &mut resb);
-    info!("all test passed!");
+    info!("all tests passed!");
     loop {}
 }

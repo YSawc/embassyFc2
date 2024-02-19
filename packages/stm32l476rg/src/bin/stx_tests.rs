@@ -72,6 +72,6 @@ fn main() -> ! {
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
     test_stx_zp(&mut usart, &nop, &rw, &mut resb);
     test_stx_zpy(&mut usart, &nop, &rw, &mut resb);
-    info!("all test passed!");
+    info!("all tests passed!");
     loop {}
 }

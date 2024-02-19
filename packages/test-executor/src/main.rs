@@ -14,7 +14,7 @@ fn exe_testcase(testcase: String, timeout: u8) {
         Ok(output) => {
             if !std::str::from_utf8(&output.stdout)
                 .unwrap()
-                .contains("test pass")
+                .contains("all tests passed")
             {
                 panic!("{} failed.", testcase);
             }

@@ -67,6 +67,6 @@ fn main() -> ! {
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
     test_inx_impl_without_flag(&mut usart, &rw, &nop, &mut resb);
     test_inx_impl_with_zero(&mut usart, &rw, &nop, &mut resb);
-    info!("test passed!");
+    info!("all tests passed!");
     loop {}
 }

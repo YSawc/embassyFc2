@@ -161,6 +161,6 @@ fn main() -> ! {
     test_inc_zp_with_overflow_and_zero_flag(&mut usart, &nop, &mut resb);
     test_inc_zp_with_negative_flag(&mut usart, &nop, &mut resb);
     test_inc_zpx(&mut usart, &nop, &mut resb);
-    info!("all test passed!");
+    info!("all tests passed!");
     loop {}
 }

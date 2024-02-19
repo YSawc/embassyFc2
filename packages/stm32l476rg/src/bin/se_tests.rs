@@ -67,6 +67,6 @@ fn main() -> ! {
     test_sec_impl(&mut usart, &nop, &mut resb);
     test_sed_impl(&mut usart, &nop, &mut resb);
     test_sei_impl(&mut usart, &nop, &mut resb);
-    info!("all test passed!");
+    info!("all tests passed!");
     loop {}
 }
