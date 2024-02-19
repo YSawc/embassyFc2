@@ -4,7 +4,8 @@ module OpeStoreToMemory (
     EN                     : input  logic                   ,
     WE                     : input  logic                   ,
     ope_kind               : input  OperatorsPkg::OpeKind   ,
-    target_addr            : input  logic                <8>,
+    target_low_addr        : input  logic                <8>,
+    target_high_addr       : input  logic                <8>,
     a                      : input  logic                <8>,
     x                      : input  logic                <8>,
     y                      : input  logic                <8>,
@@ -15,7 +16,8 @@ module OpeStoreToMemory (
 ) {
     enum Status: logic<5> {
         Ready,
-        TargettingAddr,
+        TargetLowAddr,
+        TargetHighAddr,
         StoreToMemory,
     }
     var n_status     : Status;
@@ -34,18 +36,32 @@ module OpeStoreToMemory (
         0
     };
 
-    var targetting_addr_tx_en      : logic = WE && status == Status::TargettingAddr;
-    var targetting_addr_tx_data_out: logic;
-    var targetting_addr_tx_busy    : logic;
-    var targetting_addr_tx_finish  : logic;
-    inst targetting_addr_tx: uarty::Tx (
+    var target_low_addr_tx_en      : logic = WE && status == Status::TargetLowAddr;
+    var target_low_addr_tx_data_out: logic;
+    var target_low_addr_tx_busy    : logic;
+    var target_low_addr_tx_finish  : logic;
+    inst target_low_addr_tx: uarty::Tx (
         CLK                                  ,
         RST                                  ,
-        WE      : targetting_addr_tx_en      ,
-        DATA_IN : target_addr                ,
-        data_out: targetting_addr_tx_data_out,
-        busy    : targetting_addr_tx_busy    ,
-        finish  : targetting_addr_tx_finish  ,
+        WE      : target_low_addr_tx_en      ,
+        DATA_IN : target_low_addr            ,
+        data_out: target_low_addr_tx_data_out,
+        busy    : target_low_addr_tx_busy    ,
+        finish  : target_low_addr_tx_finish  ,
+    );
+
+    var target_high_addr_tx_en      : logic = WE && status == Status::TargetHighAddr;
+    var target_high_addr_tx_data_out: logic;
+    var target_high_addr_tx_busy    : logic;
+    var target_high_addr_tx_finish  : logic;
+    inst target_high_addr_tx: uarty::Tx (
+        CLK                                   ,
+        RST                                   ,
+        WE      : target_high_addr_tx_en      ,
+        DATA_IN : target_high_addr            ,
+        data_out: target_high_addr_tx_data_out,
+        busy    : target_high_addr_tx_busy    ,
+        finish  : target_high_addr_tx_finish  ,
     );
 
     var store_to_memory_tx_en      : logic = WE && status == Status::StoreToMemory;
@@ -69,12 +85,16 @@ module OpeStoreToMemory (
         if EN {
             if status == Status::Ready {
                 n_finish = 0;
-                n_status = Status::TargettingAddr;
-            } else if status == Status::TargettingAddr {
-                if targetting_addr_tx_finish {
+                n_status = Status::TargetLowAddr;
+            } else if status == Status::TargetLowAddr {
+                n_tx_data_out = target_low_addr_tx_data_out;
+                if target_low_addr_tx_finish {
+                    n_status = Status::TargetHighAddr;
+                }
+            } else if status == Status::TargetHighAddr {
+                n_tx_data_out = target_high_addr_tx_data_out;
+                if target_high_addr_tx_finish {
                     n_status = Status::StoreToMemory;
-                } else {
-                    n_tx_data_out = targetting_addr_tx_data_out;
                 }
             } else if status == Status::StoreToMemory {
                 if store_to_memory_tx_finish {

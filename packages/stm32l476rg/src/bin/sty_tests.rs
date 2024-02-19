@@ -29,7 +29,7 @@ pub fn test_sty_zp<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart_write(usart, &[OpeMode::Inst as u8, 0x84]);
     check_rw_is_low(&rw);
     usart.blocking_write(&[0x45]).unwrap();
-    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x45, 0x2C]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0x45, 0x00, 0x2C]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     info!("test_sty_zp passed!");
 }

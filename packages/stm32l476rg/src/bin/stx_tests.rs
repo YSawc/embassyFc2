@@ -29,7 +29,7 @@ pub fn test_stx_zp<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart_write(usart, &[OpeMode::Inst as u8, 0x86]);
     check_rw_is_low(&rw);
     usart.blocking_write(&[0x45]).unwrap();
-    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x45, 0xAA]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0x45, 0x00, 0xAA]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
     info!("test_stx_zp passed!");
 }
@@ -53,7 +53,7 @@ pub fn test_stx_zpy<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart_write(usart, &[OpeMode::Inst as u8, 0x96]);
     check_rw_is_low(&rw);
     usart.blocking_write(&[0x22]).unwrap();
-    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x56, 0x6C]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0x56, 0x00, 0x6C]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
 
     info!("test_stx_zpy passed!");

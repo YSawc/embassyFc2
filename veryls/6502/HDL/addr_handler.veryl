@@ -135,6 +135,9 @@ module AddrHandler (
                         n_target_low_addr = utilPkg::wrapping_add(target_low_addr_read_data_out, a_x);
                     } else if addr_mode == OperatorsPkg::AddrMode::ZpY {
                         n_target_low_addr = utilPkg::wrapping_add(target_low_addr_read_data_out, a_y);
+                    } else if addr_mode == OperatorsPkg::AddrMode::IndX {
+                        n_target_low_addr  = utilPkg::wrapping_add(target_low_addr_read_data_out, a_x);
+                        n_target_high_addr = utilPkg::wrapping_add(target_low_addr_read_data_out, a_x + 1);
                     } else {
                         n_target_low_addr = target_low_addr_read_data_out;
                     }
@@ -165,8 +168,7 @@ module AddrHandler (
                 n_RTS         = read_low_memory_rts;
                 if read_low_memory_finish {
                     n_target_low_addr = read_low_memory_target_data;
-
-                    if addr_mode == OperatorsPkg::AddrMode::Ind {
+                    if addr_mode == OperatorsPkg::AddrMode::Ind || addr_mode == OperatorsPkg::AddrMode::IndX || addr_mode == OperatorsPkg::AddrMode::IndY {
                         n_status = Status::ReadHighMemory;
                     } else {
                         n_status = Status::Finish;
