@@ -32,7 +32,7 @@ fn main() -> ! {
     );
     check_valid_register_status(&mut usart, TxReg::P, &[0b10000000]);
     usart_write(&mut usart, &[OpeMode::Inst as u8, 0x86]);
-    check_rw_is_low(rw);
+    check_rw_is_low(&rw);
     usart.blocking_write(&[0x45]).unwrap();
     usart_read_with_check(&mut usart, &mut [0x0u8; 2], &[0x45, 0xAA]);
     check_valid_register_status(&mut usart, TxReg::P, &[0b10000000]);

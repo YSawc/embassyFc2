@@ -36,7 +36,7 @@ fn main() -> ! {
     check_valid_register_status(&mut usart, TxReg::P, &[0b00000000]);
 
     usart_write(&mut usart, &[OpeMode::Inst as u8, 0x96]);
-    check_rw_is_low(rw);
+    check_rw_is_low(&rw);
     usart.blocking_write(&[0x22]).unwrap();
     usart_read_with_check(&mut usart, &mut [0x0u8; 2], &[0x56, 0x6C]);
     check_valid_register_status(&mut usart, TxReg::P, &[0b00000000]);

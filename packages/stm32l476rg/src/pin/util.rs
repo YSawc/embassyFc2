@@ -100,7 +100,7 @@ pub fn check_rw_is_high<P: Pin>(rw: &Input<P>) {
     }
 }
 
-pub fn check_rw_is_low<P: Pin>(rw: Input<P>) {
+pub fn check_rw_is_low<P: Pin>(rw: &Input<P>) {
     match rw.is_low() {
         true => info!("rw flag is low"),
         false => {
