@@ -14,6 +14,35 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
+pub fn test_lda_indx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA2]);
+    check_rw_is_high(&rw);
+    usart.blocking_write(&[0x18]).unwrap();
+    check_valid_register_status(usart, TxReg::X, &[0x18]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9]);
+    usart.blocking_write(&[0x40]).unwrap();
+    check_valid_register_status(usart, TxReg::A, &[0x40]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA1]);
+    usart.blocking_write(&[0x1B]).unwrap();
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x33, 0x00]);
+    usart.blocking_write(&[0xFF]).unwrap();
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x34, 0x00]);
+    usart.blocking_write(&[0xF0]).unwrap();
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0xFF, 0xF0]);
+    usart.blocking_write(&[0xCF]).unwrap();
+    check_valid_register_status(usart, TxReg::A, &[0xCF]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_lda_indx passed!");
+}
+
 pub fn test_lda_imm<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
@@ -79,6 +108,7 @@ fn main() -> ! {
         &mut usart,
         &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xa9],
     );
+    test_lda_indx(&mut usart, &nop, &rw, &mut resb);
     test_lda_imm(&mut usart, &nop, &rw, &mut resb);
     test_lda_zp(&mut usart, &nop, &rw, &mut resb);
     test_lda_zpx(&mut usart, &nop, &rw, &mut resb);
