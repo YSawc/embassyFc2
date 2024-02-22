@@ -102,27 +102,6 @@ module AddrHandler (
         finish          : read_high_memory_finish     ,
     );
 
-    var read_word_memory_en         : logic    = status == Status::ReadWordMemory;
-    var read_word_memory_target_data: logic<8>;
-    var read_word_memory_tx_data_out: logic   ;
-    var read_word_memory_rts        : logic   ;
-    var read_word_memory_busy       : logic   ;
-    var read_word_memory_finish     : logic   ;
-    inst read_word_memory: ReadMemory (
-        CLK                                           ,
-        RST                                           ,
-        EN              : read_word_memory_en         ,
-        WE                                            ,
-        DATA_IN                                       ,
-        target_low_addr                               ,
-        target_high_addr                              ,
-        target_data     : read_word_memory_target_data,
-        tx_data_out     : read_word_memory_tx_data_out,
-        RTS             : read_word_memory_rts        ,
-        busy            : read_word_memory_busy       ,
-        finish          : read_word_memory_finish     ,
-    );
-
     var status  : Status   ;
     var n_status: Status   ;
     var n_busy  : logic    ;
@@ -202,19 +181,6 @@ module AddrHandler (
                 n_RTS         = read_high_memory_rts;
                 if read_high_memory_finish {
                     n_target_high_addr = read_high_memory_target_data;
-                    if addr_mode == OperatorsPkg::AddrMode::IndX {
-                        n_status = Status::ReadWordMemory;
-                    } else {
-                        n_status = Status::Finish;
-                    }
-                }
-            }
-            Status::ReadWordMemory: {
-                n_tx_data_out = read_word_memory_tx_data_out;
-                n_RTS         = read_word_memory_rts;
-                if read_word_memory_finish {
-                    n_target_low_addr  = read_word_memory_target_data;
-                    n_target_high_addr = 0;
                     n_status           = Status::Finish;
                 }
             }

@@ -5,9 +5,10 @@ package ModePkg {
         debug, // [mode, subcommand]
     }
 
-    enum OpeMode: logic<2> {
+    enum OpeMode: logic<3> {
         Nop,
         ReadAndStoreMemory,
+        ReadAndStoreToRegister,
         StoreMemory,
         Other,
     }

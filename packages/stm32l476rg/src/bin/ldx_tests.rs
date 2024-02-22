@@ -38,6 +38,8 @@ pub fn test_ldx_zp<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     send_reset_signal_if_not_nop(&nop, resb);
     usart_write(usart, &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xa6]);
     check_rw_is_high(&rw);
+    usart.blocking_write(&[0xF0]).unwrap();
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0xF0, 0x00]);
     usart.blocking_write(&[0x90]).unwrap();
     check_valid_register_status(usart, TxReg::X, &[0x90]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
@@ -52,14 +54,14 @@ pub fn test_ldx_zpy<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
     usart.blocking_write(&[CpuMode::Debug as u8]).unwrap();
-
-    // store 0xc0 to y
-    usart_write(usart, &[OpeMode::Inst as u8, 0xa0, 0xc0]);
-
-    usart_write(usart, &[OpeMode::Inst as u8, 0xb6]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0xC0]);
+    check_valid_register_status(usart, TxReg::Y, &[0xC0]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xB6]);
     check_rw_is_high(&rw);
     usart.blocking_write(&[0x91]).unwrap();
-    check_valid_register_status(usart, TxReg::X, &[0x51]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x51, 0x00]);
+    usart.blocking_write(&[0x3B]).unwrap();
+    check_valid_register_status(usart, TxReg::X, &[0x3B]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     info!("test_ldx_zpy passed!");
 }

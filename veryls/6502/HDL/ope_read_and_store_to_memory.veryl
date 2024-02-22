@@ -32,7 +32,7 @@ module OpeReadAndStoreToMemory (
     var read_memory_rts        : logic   ;
     var read_memory_busy       : logic   ;
     var read_memory_finish     : logic   ;
-    inst ind_read_high_memory: ReadMemory (
+    inst read_memory: ReadMemory (
         CLK                                      ,
         RST                                      ,
         EN              : read_memory_en         ,

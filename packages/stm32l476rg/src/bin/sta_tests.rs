@@ -37,9 +37,7 @@ pub fn test_sta_indx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart.blocking_write(&[0x59]).unwrap();
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x0A, 0x00]);
     usart.blocking_write(&[0xBA]).unwrap();
-    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x59, 0xBA]);
-    usart.blocking_write(&[0x49]).unwrap();
-    usart_read_with_check(usart, &mut [0x0u8; 3], &[0x49, 0x00, 0x03]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0x59, 0xBA, 0x03]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     info!("test_sta_indx passed!");
 }

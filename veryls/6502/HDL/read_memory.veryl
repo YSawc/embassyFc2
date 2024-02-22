@@ -12,12 +12,12 @@ module ReadMemory (
     busy            : output logic   ,
     finish          : output logic   ,
 ) {
-    var n_RTS       : logic       ;
-    var n_busy      : logic       ;
-    var n_finish    : logic       ;
-    var seq_status  : SeqStatus   ;
-    var n_seq_status: SeqStatus   ;
-    enum SeqStatus: logic    <3> {
+    var n_RTS   : logic    ;
+    var n_busy  : logic    ;
+    var n_finish: logic    ;
+    var status  : Status   ;
+    var n_status: Status   ;
+    enum Status: logic <3> {
         Ready,
         LowTx,
         HighTx,
@@ -26,7 +26,7 @@ module ReadMemory (
         Finish,
     }
 
-    var low_tx_en      : logic    = WE && seq_status == SeqStatus::LowTx;
+    var low_tx_en      : logic    = WE && status == Status::LowTx;
     var low_tx_data_in : logic<8> = target_low_addr;
     var low_tx_data_out: logic   ;
     var low_tx_busy    : logic   ;
@@ -41,7 +41,7 @@ module ReadMemory (
         finish  : low_tx_finish  ,
     );
 
-    var high_tx_en      : logic    = WE && seq_status == SeqStatus::HighTx;
+    var high_tx_en      : logic    = WE && status == Status::HighTx;
     var high_tx_data_in : logic<8> = target_high_addr;
     var high_tx_data_out: logic   ;
     var high_tx_busy    : logic   ;
@@ -56,7 +56,7 @@ module ReadMemory (
         finish  : high_tx_finish  ,
     );
 
-    var memory_rx_en      : logic    = seq_status == SeqStatus::MemoryRx;
+    var memory_rx_en      : logic    = status == Status::MemoryRx;
     var memory_rx_data_out: logic<8>;
     var memory_rx_busy    : logic   ;
     var memory_rx_finish  : logic   ;
@@ -85,44 +85,48 @@ module ReadMemory (
     };
 
     always_comb {
-        n_seq_status = seq_status;
-        n_finish     = finish;
-        if EN {
-            if seq_status == SeqStatus::Ready {
-                n_finish     = 0;
-                n_seq_status = SeqStatus::LowTx;
-            } else if seq_status == SeqStatus::LowTx {
+        n_status = status;
+        n_finish = finish;
+        case status {
+            Status::Ready: {
+                n_finish = 0;
+                if EN {
+                    n_status = Status::LowTx;
+                }
+            }
+            Status::LowTx: {
                 if low_tx_finish {
-                    n_seq_status = SeqStatus::HighTx;
+                    n_status = Status::HighTx;
                 }
-            } else if seq_status == SeqStatus::HighTx {
+            }
+            Status::HighTx: {
                 if high_tx_finish {
-                    n_seq_status = SeqStatus::MemoryRx;
+                    n_status = Status::MemoryRx;
                 }
-            } else if seq_status == SeqStatus::MemoryRx {
+            }
+            Status::MemoryRx: {
                 if memory_rx_finish {
-                    n_seq_status = SeqStatus::Finish;
+                    n_status = Status::Finish;
                 }
-            } else if seq_status == SeqStatus::Finish {
-                n_finish     = 1;
-                n_seq_status = SeqStatus::Ready;
-            } else {
-                n_seq_status = SeqStatus::Ready;
+            }
+            Status::Finish: {
+                n_finish = 1;
+                n_status = Status::Ready;
             }
         }
     }
 
     always_ff (posedge CLK, async_high RST) {
         if_reset {
-            busy       = 0;
-            finish     = 0;
-            seq_status = SeqStatus::Ready;
-            RTS        = 1;
+            busy   = 0;
+            finish = 0;
+            status = Status::Ready;
+            RTS    = 1;
         } else {
-            busy       = n_busy;
-            finish     = n_finish;
-            seq_status = n_seq_status;
-            RTS        = n_RTS;
+            busy   = n_busy;
+            finish = n_finish;
+            status = n_status;
+            RTS    = n_RTS;
         }
     }
 }

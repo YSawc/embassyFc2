@@ -36,6 +36,8 @@ module OpeSplitter (
                 n_finish = 1;
                 if ope_kind == OperatorsPkg::OpeKind::Inc || ope_kind == OperatorsPkg::OpeKind::Dec {
                     n_ope_mode = ModePkg::OpeMode::ReadAndStoreMemory;
+                } else if ope_kind == OperatorsPkg::OpeKind::Lda || ope_kind == OperatorsPkg::OpeKind::Ldx || ope_kind == OperatorsPkg::OpeKind::Ldy {
+                    n_ope_mode = ModePkg::OpeMode::ReadAndStoreToRegister;
                 } else if ope_kind == OperatorsPkg::OpeKind::Sta || ope_kind == OperatorsPkg::OpeKind::Stx || ope_kind == OperatorsPkg::OpeKind::Sty {
                     n_ope_mode = ModePkg::OpeMode::StoreMemory;
                 } else {

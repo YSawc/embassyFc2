@@ -36,10 +36,12 @@ pub fn test_ldy_zp<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xa4]);
+    usart_write(usart, &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA4]);
     check_rw_is_high(&rw);
-    usart.blocking_write(&[0xc3]).unwrap();
-    check_valid_register_status(usart, TxReg::Y, &[0xc3]);
+    usart.blocking_write(&[0xC3]).unwrap();
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0xC3, 0x00]);
+    usart.blocking_write(&[0xDD]).unwrap();
+    check_valid_register_status(usart, TxReg::Y, &[0xDD]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
     info!("test_ldy_zp passed!");
 }

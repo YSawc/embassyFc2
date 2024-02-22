@@ -55,7 +55,7 @@ pub fn test_lda_imm<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart.blocking_write(&[0x34]).unwrap();
     check_valid_register_status(usart, TxReg::A, &[0x34]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_jmp_abs passed!");
+    info!("test_lda_imm passed!");
 }
 
 pub fn test_lda_zp<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
@@ -67,10 +67,12 @@ pub fn test_lda_zp<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     send_reset_signal_if_not_nop(&nop, resb);
     usart_write(usart, &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xa5]);
     check_rw_is_high(&rw);
+    usart.blocking_write(&[0x25]).unwrap();
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x25, 0x00]);
     usart.blocking_write(&[0x45]).unwrap();
     check_valid_register_status(usart, TxReg::A, &[0x45]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_lda_imm passed!");
+    info!("test_lda_zp passed!");
 }
 
 pub fn test_lda_zpx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
@@ -80,16 +82,16 @@ pub fn test_lda_zpx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart.blocking_write(&[CpuMode::Debug as u8]).unwrap();
-    usart
-        .blocking_write(&[OpeMode::Inst as u8, 0xa2, 0x50])
-        .unwrap();
-    usart_write(usart, &[OpeMode::Inst as u8, 0xb5]);
+    usart_write(usart, &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA2]);
     check_rw_is_high(&rw);
-    usart.blocking_write(&[0xb5]).unwrap();
-    check_valid_register_status(usart, TxReg::A, &[0x05]);
+    usart.blocking_write(&[0x05]).unwrap();
+    check_valid_register_status(usart, TxReg::X, &[0x05]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xB5, 0x60]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x65, 0x00]);
+    usart.blocking_write(&[0x0C]).unwrap();
+    check_valid_register_status(usart, TxReg::A, &[0x0C]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_lda_imm passed!");
+    info!("test_lda_zpx passed!");
 }
 
 #[cortex_m_rt::entry]
