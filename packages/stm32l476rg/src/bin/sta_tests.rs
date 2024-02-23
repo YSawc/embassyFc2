@@ -62,6 +62,26 @@ pub fn test_sta_zp<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_sta_zp passed!");
 }
 
+pub fn test_sta_abs<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(
+        usart,
+        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA9, 0x2A],
+    );
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D]);
+    check_rw_is_low(&rw);
+    usart_write(usart, &[0x11, 0x33]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0x11, 0x33, 0x2A]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    info!("test_sta_abs passed!");
+}
+
 pub fn test_sta_zpx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
@@ -87,6 +107,56 @@ pub fn test_sta_zpx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_sta_zpx passed!");
 }
 
+pub fn test_sta_absy<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(
+        usart,
+        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA0, 0xF0],
+    );
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(
+        usart,
+        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA9, 0x2A],
+    );
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x99]);
+    check_rw_is_low(&rw);
+    usart_write(usart, &[0x23, 0x34]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0x13, 0x35, 0x2A]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000001]);
+    info!("test_sta_absy passed!");
+}
+
+pub fn test_sta_absx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(
+        usart,
+        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA2, 0x7B],
+    );
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(
+        usart,
+        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA9, 0xA7],
+    );
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x9D]);
+    check_rw_is_low(&rw);
+    usart_write(usart, &[0x80, 0x20]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFB, 0x20, 0xA7]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_sta_absx passed!");
+}
+
 #[cortex_m_rt::entry]
 fn main() -> ! {
     let p = embassy_stm32::init(Default::default());
@@ -100,7 +170,10 @@ fn main() -> ! {
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
     test_sta_indx(&mut usart, &nop, &rw, &mut resb);
     test_sta_zp(&mut usart, &nop, &rw, &mut resb);
+    test_sta_abs(&mut usart, &nop, &rw, &mut resb);
     test_sta_zpx(&mut usart, &nop, &rw, &mut resb);
+    test_sta_absy(&mut usart, &nop, &rw, &mut resb);
+    test_sta_absx(&mut usart, &nop, &rw, &mut resb);
     info!("all tests passed!");
     loop {}
 }

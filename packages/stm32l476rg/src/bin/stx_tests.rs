@@ -34,6 +34,26 @@ pub fn test_stx_zp<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_stx_zp passed!");
 }
 
+pub fn test_stx_abs<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(
+        usart,
+        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA2, 0xA0],
+    );
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8E]);
+    check_rw_is_low(&rw);
+    usart_write(usart, &[0xBB, 0x03]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xBB, 0x03, 0xA0]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_stx_abs passed!");
+}
+
 pub fn test_stx_zpy<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
@@ -71,6 +91,7 @@ fn main() -> ! {
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
     test_stx_zp(&mut usart, &nop, &rw, &mut resb);
+    test_stx_abs(&mut usart, &nop, &rw, &mut resb);
     test_stx_zpy(&mut usart, &nop, &rw, &mut resb);
     info!("all tests passed!");
     loop {}

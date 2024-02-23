@@ -34,6 +34,50 @@ pub fn test_sty_zp<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_sty_zp passed!");
 }
 
+pub fn test_sty_abs<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(
+        usart,
+        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA0, 0x44],
+    );
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8C]);
+    check_rw_is_low(&rw);
+    usart_write(usart, &[0x00, 0xA9]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0x00, 0xA9, 0x44]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    info!("test_sty_zpx passed!");
+}
+
+pub fn test_sty_zpx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(
+        usart,
+        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA2, 0xCC],
+    );
+    usart_write(
+        usart,
+        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA0, 0x90],
+    );
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x94]);
+    check_rw_is_low(&rw);
+    usart.blocking_write(&[0x45]).unwrap();
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0x11, 0x00, 0x90]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_sty_zpx passed!");
+}
+
 #[cortex_m_rt::entry]
 fn main() -> ! {
     let p = embassy_stm32::init(Default::default());
@@ -46,6 +90,8 @@ fn main() -> ! {
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
     test_sty_zp(&mut usart, &nop, &rw, &mut resb);
+    test_sty_abs(&mut usart, &nop, &rw, &mut resb);
+    test_sty_zpx(&mut usart, &nop, &rw, &mut resb);
     info!("all tests passed!");
     loop {}
 }
