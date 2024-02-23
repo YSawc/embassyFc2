@@ -625,11 +625,14 @@ module Debug (
         n_pc                       = pc;
         n_seq_status               = seq_status;
         n_register_transfer_finish = register_transfer_finish;
-        if EN {
-            if seq_status == SeqStatus::Ready {
+        case seq_status {
+            SeqStatus::Ready: {
                 n_register_transfer_finish = 0;
-                n_seq_status               = SeqStatus::OpeRead;
-            } else if seq_status == SeqStatus::OpeRead {
+                if EN {
+                    n_seq_status = SeqStatus::OpeRead;
+                }
+            }
+            SeqStatus::OpeRead: {
                 if ope_mode_finish {
                     if casted_ope_mode == OpeMode::Inst {
                         n_seq_status = SeqStatus::InstRead;
@@ -637,11 +640,13 @@ module Debug (
                         n_seq_status = SeqStatus::TxRegisterDetect;
                     }
                 }
-            } else if seq_status == SeqStatus::TxRegisterDetect {
+            }
+            SeqStatus::TxRegisterDetect: {
                 if tx_reg_detect_rx_finish {
                     n_seq_status = SeqStatus::RegisterLowTransfer;
                 }
-            } else if seq_status == SeqStatus::RegisterLowTransfer {
+            }
+            SeqStatus::RegisterLowTransfer: {
                 if register_row_tx_finish {
                     if tmp_high_tx_en {
                         n_seq_status = SeqStatus::RegisterHighTransfer;
@@ -650,25 +655,30 @@ module Debug (
                         n_seq_status               = SeqStatus::Ready;
                     }
                 }
-            } else if seq_status == SeqStatus::RegisterHighTransfer {
+            }
+            SeqStatus::RegisterHighTransfer: {
                 if register_high_tx_finish {
                     n_register_transfer_finish = 1;
                     n_seq_status               = SeqStatus::Ready;
                 }
-            } else if seq_status == SeqStatus::InstRead {
+            }
+            SeqStatus::InstRead: {
                 if inst_read_finish {
                     n_seq_status = SeqStatus::RWHandler;
                 }
-            } else if seq_status == SeqStatus::RWHandler {
+            }
+            SeqStatus::RWHandler: {
                 if rw_handler_finish {
                     n_seq_status = SeqStatus::AddrHandler;
                 }
-            } else if seq_status == SeqStatus::AddrHandler {
+            }
+            SeqStatus::AddrHandler: {
                 if addr_handler_finish {
                     n_p          = addr_handler_p;
                     n_seq_status = SeqStatus::OpeReady;
                 }
-            } else if seq_status == SeqStatus::OpeReady {
+            }
+            SeqStatus::OpeReady: {
                 if ope_splitter_finish {
                     if ope_mode == ModePkg::OpeMode::ReadAndStoreMemory {
                         n_seq_status = SeqStatus::OpeReadAndStoreToMemory;
@@ -680,12 +690,14 @@ module Debug (
                         n_seq_status = SeqStatus::OpeOther;
                     }
                 }
-            } else if seq_status == SeqStatus::OpeReadAndStoreToMemory {
+            }
+            SeqStatus::OpeReadAndStoreToMemory: {
                 if ope_read_and_store_to_memory_finish {
                     n_p          = ope_read_and_store_to_memory_p;
                     n_seq_status = SeqStatus::Ready;
                 }
-            } else if seq_status == SeqStatus::OpeReadAndStoreToRegister {
+            }
+            SeqStatus::OpeReadAndStoreToRegister: {
                 if ope_read_and_store_to_register_finish {
                     n_a          = ope_read_and_store_to_register_a;
                     n_x          = ope_read_and_store_to_register_x;
@@ -693,11 +705,13 @@ module Debug (
                     n_p          = ope_read_and_store_to_register_p;
                     n_seq_status = SeqStatus::Ready;
                 }
-            } else if seq_status == SeqStatus::OpeStoreToMemory {
+            }
+            SeqStatus::OpeStoreToMemory: {
                 if ope_store_to_memory_finish {
                     n_seq_status = SeqStatus::Ready;
                 }
-            } else if seq_status == SeqStatus::OpeOther {
+            }
+            SeqStatus::OpeOther: {
                 if ope_other_finish {
                     n_a          = ope_other_a;
                     n_x          = ope_other_x;
@@ -706,8 +720,6 @@ module Debug (
                     n_pc         = ope_other_pc;
                     n_seq_status = SeqStatus::Ready;
                 }
-            } else {
-                n_seq_status = SeqStatus::Ready;
             }
         }
     }

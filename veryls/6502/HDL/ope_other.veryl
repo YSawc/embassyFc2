@@ -43,17 +43,15 @@ module OpeOther (
         n_y      = y;
         n_p      = p;
         n_pc     = pc;
-        if finish {
-            n_finish = 0;
-        }
         case status {
             Status::idle: {
+                n_finish = 0;
+                n_busy   = 1;
+                n_a      = a_a;
+                n_x      = a_x;
+                n_y      = a_y;
+                n_p      = a_p;
                 if EN {
-                    n_busy   = 1;
-                    n_a      = a_a;
-                    n_x      = a_x;
-                    n_y      = a_y;
-                    n_p      = a_p;
                     n_status = Status::work;
                 }
             }

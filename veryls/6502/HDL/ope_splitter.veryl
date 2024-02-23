@@ -23,11 +23,10 @@ module OpeSplitter (
         n_ope_mode = ope_mode;
         case status {
             Status::idle: {
+                n_finish = 0;
                 if EN {
                     n_busy   = 1;
                     n_status = Status::work;
-                } else {
-                    n_finish = 0;
                 }
             }
             Status::work: {

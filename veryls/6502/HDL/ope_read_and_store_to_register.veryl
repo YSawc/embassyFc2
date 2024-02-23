@@ -82,11 +82,11 @@ module OpeReadAndStoreToRegister (
         case status {
             Status::Ready: {
                 n_finish = 0;
+                n_a      = a_a;
+                n_x      = a_x;
+                n_y      = a_y;
+                n_p      = a_p;
                 if EN {
-                    n_a = a_a;
-                    n_x = a_x;
-                    n_y = a_y;
-                    n_p = a_p;
                     if addr_mode == OperatorsPkg::AddrMode::Imm {
                         n_register_data = target_low_addr;
                         n_status        = Status::WriteRegister;

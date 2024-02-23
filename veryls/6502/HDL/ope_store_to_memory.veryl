@@ -82,29 +82,32 @@ module OpeStoreToMemory (
         n_tx_data_out = tx_data_out;
         n_status      = status;
         n_finish      = finish;
-        if EN {
-            if status == Status::Ready {
+        case status {
+            Status::Ready: {
                 n_finish = 0;
-                n_status = Status::TargetLowAddr;
-            } else if status == Status::TargetLowAddr {
+                if EN {
+                    n_status = Status::TargetLowAddr;
+                }
+            }
+            Status::TargetLowAddr: {
                 n_tx_data_out = target_low_addr_tx_data_out;
                 if target_low_addr_tx_finish {
                     n_status = Status::TargetHighAddr;
                 }
-            } else if status == Status::TargetHighAddr {
+            }
+            Status::TargetHighAddr: {
                 n_tx_data_out = target_high_addr_tx_data_out;
                 if target_high_addr_tx_finish {
                     n_status = Status::StoreToMemory;
                 }
-            } else if status == Status::StoreToMemory {
+            }
+            Status::StoreToMemory: {
                 if store_to_memory_tx_finish {
                     n_status = Status::Ready;
                     n_finish = 1;
                 } else {
                     n_tx_data_out = store_to_memory_tx_data_out;
                 }
-            } else {
-                n_status = Status::Ready;
             }
         }
     }

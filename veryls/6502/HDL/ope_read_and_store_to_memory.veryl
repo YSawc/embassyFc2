@@ -76,25 +76,28 @@ module OpeReadAndStoreToMemory (
         n_status      = status;
         n_finish      = finish;
         n_assign_data = assign_data;
-        if EN {
-            if status == Status::Ready {
+        case status {
+            Status::Ready: {
                 n_finish = 0;
                 n_p      = a_p;
-                n_status = Status::ReadMemory;
-            } else if status == Status::ReadMemory {
+                if EN {
+                    n_status = Status::ReadMemory;
+                }
+            }
+            Status::ReadMemory: {
                 if read_memory_finish {
                     n_status = Status::PreWrite;
                 }
-            } else if status == Status::PreWrite {
+            }
+            Status::PreWrite: {
                 n_assign_data = RegisterPkg::plus_within_vnz(n_p, read_memory_target_data, 1);
                 n_status      = Status::MemoryWrite;
-            } else if status == Status::MemoryWrite {
+            }
+            Status::MemoryWrite: {
                 if memory_tx_finish {
                     n_status = Status::Ready;
                     n_finish = 1;
                 }
-            } else {
-                n_status = Status::Ready;
             }
         }
     }
