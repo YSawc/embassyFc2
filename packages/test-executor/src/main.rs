@@ -26,6 +26,9 @@ fn exe_testcase(testcase: String, timeout: u8) {
 
 fn main() {
     exe_testcase("cl_tests".to_string(), 6);
+    exe_testcase("cmp_tests".to_string(), 6);
+    exe_testcase("cpx_tests".to_string(), 6);
+    exe_testcase("cpy_tests".to_string(), 6);
     exe_testcase("inc_tests".to_string(), 6);
     exe_testcase("inx_impl_test".to_string(), 6);
     exe_testcase("iny_impl_test".to_string(), 6);

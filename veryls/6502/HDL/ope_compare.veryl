@@ -1,0 +1,114 @@
+module OpeCompare (
+    CLK             : input  logic                    ,
+    RST             : input  logic                    ,
+    EN              : input  logic                    ,
+    WE              : input  logic                    ,
+    DATA_IN         : input  logic                    ,
+    ope_kind        : input  OperatorsPkg::OpeKind    ,
+    addr_mode       : input  OperatorsPkg::AddrMode   ,
+    target_low_addr : input  logic                 <8>,
+    target_high_addr: input  logic                 <8>,
+    a_a             : input  logic                 <8>,
+    a_x             : input  logic                 <8>,
+    a_y             : input  logic                 <8>,
+    a_p             : input  logic                 <8>,
+    p               : output logic                 <8>,
+    tx_data_out     : output logic                    ,
+    RTS             : output logic                    ,
+    busy            : output logic                    ,
+    finish          : output logic                    ,
+) {
+    enum Status: logic<2> {
+        Ready,
+        ReadMemory,
+        Compare,
+    }
+    var n_status      : Status   ;
+    var status        : Status   ;
+    var n_p           : logic <8>;
+    var n_busy        : logic    ;
+    var n_finish      : logic    ;
+    var compare_data  : logic <8>;
+    var n_compare_data: logic <8>;
+
+    var read_memory_en         : logic    = status == Status::ReadMemory;
+    var read_memory_target_data: logic<8>;
+    var read_memory_tx_data_out: logic   ;
+    var read_memory_rts        : logic   ;
+    var read_memory_busy       : logic   ;
+    var read_memory_finish     : logic   ;
+    inst read_memory: ReadMemory (
+        CLK                                      ,
+        RST                                      ,
+        EN              : read_memory_en         ,
+        WE                                       ,
+        DATA_IN                                  ,
+        target_low_addr                          ,
+        target_high_addr                         ,
+        target_data     : read_memory_target_data,
+        tx_data_out     : read_memory_tx_data_out,
+        RTS             : read_memory_rts        ,
+        busy            : read_memory_busy       ,
+        finish          : read_memory_finish     ,
+    );
+
+    assign tx_data_out = if status == Status::ReadMemory {
+        read_memory_tx_data_out
+    } else {
+        1
+    };
+
+    always_comb {
+        n_p            = p;
+        n_status       = status;
+        n_finish       = finish;
+        n_compare_data = compare_data;
+        case status {
+            Status::Ready: {
+                n_finish = 0;
+                n_p      = a_p;
+                if EN {
+                    if addr_mode == OperatorsPkg::AddrMode::Imm {
+                        n_compare_data = target_low_addr;
+                        n_status       = Status::Compare;
+                    } else {
+                        n_status = Status::ReadMemory;
+                    }
+                }
+            }
+            Status::ReadMemory: {
+                if read_memory_finish {
+                    n_compare_data = read_memory_target_data;
+                    n_status       = Status::Compare;
+                }
+            }
+            Status::Compare: {
+                if ope_kind == OperatorsPkg::OpeKind::Cmp {
+                    RegisterPkg::compare_with_nzc(n_p, a_a - compare_data);
+                } else if ope_kind == OperatorsPkg::OpeKind::Cpx {
+                    RegisterPkg::compare_with_nzc(n_p, a_x - compare_data);
+                } else if ope_kind == OperatorsPkg::OpeKind::Cpy {
+                    RegisterPkg::compare_with_nzc(n_p, a_y - compare_data);
+                }
+                n_status = Status::Ready;
+                n_finish = 1;
+            }
+        }
+    }
+
+    always_ff (posedge CLK, async_high RST) {
+        if_reset {
+            compare_data = 0;
+            p            = 0;
+            status       = Status::Ready;
+            busy         = 0;
+            finish       = 0;
+        } else {
+            compare_data = n_compare_data;
+            p            = n_p;
+            status       = n_status;
+            busy         = n_busy;
+            finish       = n_finish;
+        }
+    }
+}

@@ -135,4 +135,13 @@ package RegisterPkg {
         set_z(current_p, input_data == 0);
         set_n(current_p, input_data >= 8'h80);
     }
+
+    function compare_with_nzc (
+        current_p : ref   logic<8>,
+        input_data: input logic<8>,
+    ) {
+        set_c(current_p, input_data >= 0);
+        set_z(current_p, input_data == 0);
+        set_n(current_p, input_data >= 8'h80);
+    }
 }
