@@ -19,24 +19,20 @@ module Debug (
     p          : output logic<8> ,
     pc         : output logic<16>,
 ) {
-    var n_a : logic<8> ;
-    var n_x : logic<8> ;
-    var n_y : logic<8> ;
-    var n_p : logic<8> ;
-    var n_pc: logic<16>;
+    var n_tx_data_out: logic    ;
+    var n_a          : logic<8> ;
+    var n_x          : logic<8> ;
+    var n_y          : logic<8> ;
+    var n_p          : logic<8> ;
+    var n_pc         : logic<16>;
 
     var n_busy  : logic;
     var n_RTS   : logic;
     var n_finish: logic;
 
-    enum Status: logic {
-        idle,
-        work,
-    }
-
-    var seq_status  : SeqStatus   ;
-    var n_seq_status: SeqStatus   ;
-    enum SeqStatus: logic    <5> {
+    var status  : Status   ;
+    var n_status: Status   ;
+    enum Status: logic <5> {
         Ready,
         OpeRead,
         TxRegisterDetect,
@@ -315,7 +311,7 @@ module Debug (
     var raw_operator_mode: logic<8>;
     var ope_read_busy    : logic   ;
     var ope_read_en      : logic   ;
-    assign ope_read_en       = seq_status == SeqStatus::OpeRead;
+    assign ope_read_en       = status == Status::OpeRead;
     var ope_mode_finish  : logic;
     inst ope_mode_rx: uarty::Rx (
         CLK                        ,
@@ -328,7 +324,7 @@ module Debug (
     );
     var casted_ope_mode          : OpeMode;
     assign casted_ope_mode           = raw_operator_mode as OpeMode;
-    var tx_reg_detect_rx_en      : logic    = seq_status == SeqStatus::TxRegisterDetect;
+    var tx_reg_detect_rx_en      : logic    = status == Status::TxRegisterDetect;
     var tx_reg_detect_rx_data_out: logic<8>;
     var tx_reg_detect_rx_busy    : logic   ;
     var tx_reg_detect_rx_finish  : logic   ;
@@ -352,7 +348,7 @@ module Debug (
     var casted_tx_reg : TxReg = tx_reg_detect_rx_data_out as TxReg;
     var tmp_high_tx_en: logic = casted_tx_reg == TxReg::PC;
 
-    var register_row_tx_en     : logic    = WE && seq_status == SeqStatus::RegisterLowTransfer;
+    var register_row_tx_en     : logic    = WE && status == Status::RegisterLowTransfer;
     var register_row_tx_data_in: logic<8> = if casted_tx_reg == TxReg::A {
         a
     } else if casted_tx_reg == TxReg::X {
@@ -381,7 +377,7 @@ module Debug (
         finish  : register_row_tx_finish  ,
     );
 
-    var register_high_tx_en     : logic    = WE && seq_status == SeqStatus::RegisterHighTransfer;
+    var register_high_tx_en     : logic    = WE && status == Status::RegisterHighTransfer;
     var register_high_tx_data_in: logic<8> = if casted_tx_reg == TxReg::PC {
         (pc & 16'hff00) >> 8
     } else {
@@ -403,7 +399,7 @@ module Debug (
     var raw_inst_mode   : logic<8>;
     var inst_read_busy  : logic   ;
     var inst_read_en    : logic   ;
-    assign inst_read_en     = seq_status == SeqStatus::InstRead;
+    assign inst_read_en     = status == Status::InstRead;
     var inst_read_finish: logic;
     inst inst_mode_rx: uarty::Rx (
         CLK                       ,
@@ -417,7 +413,7 @@ module Debug (
     var inst_casted_ope_kind : OperatorsPkg::OpeKind  = operators[raw_inst_mode].ope_kind;
     var inst_casted_addr_mode: OperatorsPkg::AddrMode = operators[raw_inst_mode].addr_mode;
 
-    var rw_handler_en    : logic = seq_status == SeqStatus::RWHandler;
+    var rw_handler_en    : logic = status == Status::RWHandler;
     var rw_handler_rw    : logic;
     var rw_handler_busy  : logic;
     var rw_handler_finish: logic;
@@ -431,7 +427,7 @@ module Debug (
         finish  : rw_handler_finish   ,
     );
 
-    var addr_handler_en         : logic    = seq_status == SeqStatus::AddrHandler;
+    var addr_handler_en         : logic    = status == Status::AddrHandler;
     var addr_handler_rts        : logic   ;
     var addr_handler_busy       : logic   ;
     var addr_handler_finish     : logic   ;
@@ -459,7 +455,7 @@ module Debug (
         finish          : addr_handler_finish     ,
     );
 
-    var ope_splitter_en    : logic            = seq_status == SeqStatus::OpeReady;
+    var ope_splitter_en    : logic            = status == Status::OpeReady;
     var ope_splitter_busy  : logic           ;
     var ope_splitter_finish: logic           ;
     var ope_mode           : ModePkg::OpeMode;
@@ -473,7 +469,7 @@ module Debug (
         finish  : ope_splitter_finish ,
     );
 
-    var ope_read_and_store_to_memory_en         : logic    = seq_status == SeqStatus::OpeReadAndStoreToMemory;
+    var ope_read_and_store_to_memory_en         : logic    = status == Status::OpeReadAndStoreToMemory;
     var ope_read_and_store_to_memory_p          : logic<8>;
     var ope_read_and_store_to_memory_tx_data_out: logic   ;
     var ope_read_and_store_to_memory_rts        : logic   ;
@@ -496,7 +492,7 @@ module Debug (
         finish          : ope_read_and_store_to_memory_finish     ,
     );
 
-    var ope_read_and_store_to_register_en         : logic    = seq_status == SeqStatus::OpeReadAndStoreToRegister;
+    var ope_read_and_store_to_register_en         : logic    = status == Status::OpeReadAndStoreToRegister;
     var ope_read_and_store_to_register_a          : logic<8>;
     var ope_read_and_store_to_register_x          : logic<8>;
     var ope_read_and_store_to_register_y          : logic<8>;
@@ -529,7 +525,7 @@ module Debug (
         finish          : ope_read_and_store_to_register_finish     ,
     );
 
-    var ope_store_to_memory_en         : logic    = seq_status == SeqStatus::OpeStoreToMemory;
+    var ope_store_to_memory_en         : logic    = status == Status::OpeStoreToMemory;
     var zp_adding_without_carry        : logic   ;
     var ope_store_to_memory_tx_data_out: logic<8>;
     var ope_store_to_memory_busy       : logic   ;
@@ -559,7 +555,7 @@ module Debug (
     var ope_other_busy  : logic    ;
     var ope_other_finish: logic    ;
     var ope_other_en    : logic    ;
-    assign ope_other_en     = seq_status == SeqStatus::OpeOther;
+    assign ope_other_en     = status == Status::OpeOther;
     inst ope_other: OpeOther (
         CLK                            ,
         RST                            ,
@@ -584,13 +580,13 @@ module Debug (
     var n_register_transfer_finish: logic;
     var register_transfer_finish  : logic;
     assign n_busy                     = if casted_ope_mode == OpeMode::Inst {
-        if seq_status == SeqStatus::OpeReadAndStoreToMemory {
+        if status == Status::OpeReadAndStoreToMemory {
             ~ope_read_and_store_to_memory_finish
-        } else if seq_status == SeqStatus::OpeReadAndStoreToRegister {
+        } else if status == Status::OpeReadAndStoreToRegister {
             ~ope_read_and_store_to_register_finish
-        } else if seq_status == SeqStatus::OpeStoreToMemory {
+        } else if status == Status::OpeStoreToMemory {
             ~ope_store_to_memory_finish
-        } else if seq_status == SeqStatus::OpeOther {
+        } else if status == Status::OpeOther {
             ~ope_other_finish
         } else {
             1
@@ -618,130 +614,124 @@ module Debug (
     };
 
     always_comb {
+        n_tx_data_out              = tx_data_out;
         n_a                        = a;
         n_x                        = x;
         n_y                        = y;
         n_p                        = p;
         n_pc                       = pc;
-        n_seq_status               = seq_status;
+        n_status                   = status;
         n_register_transfer_finish = register_transfer_finish;
-        case seq_status {
-            SeqStatus::Ready: {
+        case status {
+            Status::Ready: {
+                n_tx_data_out              = 1;
                 n_register_transfer_finish = 0;
                 if EN {
-                    n_seq_status = SeqStatus::OpeRead;
+                    n_status = Status::OpeRead;
                 }
             }
-            SeqStatus::OpeRead: {
+            Status::OpeRead: {
                 if ope_mode_finish {
                     if casted_ope_mode == OpeMode::Inst {
-                        n_seq_status = SeqStatus::InstRead;
+                        n_status = Status::InstRead;
                     } else if casted_ope_mode == OpeMode::RegisterTransfer {
-                        n_seq_status = SeqStatus::TxRegisterDetect;
+                        n_status = Status::TxRegisterDetect;
                     }
                 }
             }
-            SeqStatus::TxRegisterDetect: {
+            Status::TxRegisterDetect: {
                 if tx_reg_detect_rx_finish {
-                    n_seq_status = SeqStatus::RegisterLowTransfer;
+                    n_status = Status::RegisterLowTransfer;
                 }
             }
-            SeqStatus::RegisterLowTransfer: {
+            Status::RegisterLowTransfer: {
+                n_tx_data_out = register_row_tx_data_out;
                 if register_row_tx_finish {
                     if tmp_high_tx_en {
-                        n_seq_status = SeqStatus::RegisterHighTransfer;
+                        n_status = Status::RegisterHighTransfer;
                     } else {
                         n_register_transfer_finish = 1;
-                        n_seq_status               = SeqStatus::Ready;
+                        n_status                   = Status::Ready;
                     }
                 }
             }
-            SeqStatus::RegisterHighTransfer: {
+            Status::RegisterHighTransfer: {
+                n_tx_data_out = register_high_tx_data_out;
                 if register_high_tx_finish {
                     n_register_transfer_finish = 1;
-                    n_seq_status               = SeqStatus::Ready;
+                    n_status                   = Status::Ready;
                 }
             }
-            SeqStatus::InstRead: {
+            Status::InstRead: {
                 if inst_read_finish {
-                    n_seq_status = SeqStatus::RWHandler;
+                    n_status = Status::RWHandler;
                 }
             }
-            SeqStatus::RWHandler: {
+            Status::RWHandler: {
                 if rw_handler_finish {
-                    n_seq_status = SeqStatus::AddrHandler;
+                    n_status = Status::AddrHandler;
                 }
             }
-            SeqStatus::AddrHandler: {
+            Status::AddrHandler: {
+                n_tx_data_out = addr_handler_tx_data_out;
                 if addr_handler_finish {
-                    n_p          = addr_handler_p;
-                    n_seq_status = SeqStatus::OpeReady;
+                    n_p      = addr_handler_p;
+                    n_status = Status::OpeReady;
                 }
             }
-            SeqStatus::OpeReady: {
+            Status::OpeReady: {
                 if ope_splitter_finish {
                     if ope_mode == ModePkg::OpeMode::ReadAndStoreMemory {
-                        n_seq_status = SeqStatus::OpeReadAndStoreToMemory;
+                        n_status = Status::OpeReadAndStoreToMemory;
                     } else if ope_mode == ModePkg::OpeMode::ReadAndStoreToRegister {
-                        n_seq_status = SeqStatus::OpeReadAndStoreToRegister;
+                        n_status = Status::OpeReadAndStoreToRegister;
                     } else if ope_mode == ModePkg::OpeMode::StoreMemory {
-                        n_seq_status = SeqStatus::OpeStoreToMemory;
+                        n_status = Status::OpeStoreToMemory;
                     } else {
-                        n_seq_status = SeqStatus::OpeOther;
+                        n_status = Status::OpeOther;
                     }
                 }
             }
-            SeqStatus::OpeReadAndStoreToMemory: {
+            Status::OpeReadAndStoreToMemory: {
+                n_tx_data_out = ope_read_and_store_to_memory_tx_data_out;
                 if ope_read_and_store_to_memory_finish {
-                    n_p          = ope_read_and_store_to_memory_p;
-                    n_seq_status = SeqStatus::Ready;
+                    n_p      = ope_read_and_store_to_memory_p;
+                    n_status = Status::Ready;
                 }
             }
-            SeqStatus::OpeReadAndStoreToRegister: {
+            Status::OpeReadAndStoreToRegister: {
+                n_tx_data_out = ope_read_and_store_to_register_tx_data_out;
                 if ope_read_and_store_to_register_finish {
-                    n_a          = ope_read_and_store_to_register_a;
-                    n_x          = ope_read_and_store_to_register_x;
-                    n_y          = ope_read_and_store_to_register_y;
-                    n_p          = ope_read_and_store_to_register_p;
-                    n_seq_status = SeqStatus::Ready;
+                    n_a      = ope_read_and_store_to_register_a;
+                    n_x      = ope_read_and_store_to_register_x;
+                    n_y      = ope_read_and_store_to_register_y;
+                    n_p      = ope_read_and_store_to_register_p;
+                    n_status = Status::Ready;
                 }
             }
-            SeqStatus::OpeStoreToMemory: {
+            Status::OpeStoreToMemory: {
+                n_tx_data_out = ope_store_to_memory_tx_data_out;
                 if ope_store_to_memory_finish {
-                    n_seq_status = SeqStatus::Ready;
+                    n_status = Status::Ready;
                 }
             }
-            SeqStatus::OpeOther: {
+            Status::OpeOther: {
                 if ope_other_finish {
-                    n_a          = ope_other_a;
-                    n_x          = ope_other_x;
-                    n_y          = ope_other_y;
-                    n_p          = ope_other_p;
-                    n_pc         = ope_other_pc;
-                    n_seq_status = SeqStatus::Ready;
+                    n_a      = ope_other_a;
+                    n_x      = ope_other_x;
+                    n_y      = ope_other_y;
+                    n_p      = ope_other_p;
+                    n_pc     = ope_other_pc;
+                    n_status = Status::Ready;
                 }
             }
         }
     }
 
-    assign tx_data_out = if register_row_tx_en {
-        register_row_tx_data_out
-    } else if register_high_tx_en {
-        register_high_tx_data_out
-    } else if addr_handler_en {
-        addr_handler_tx_data_out
-    } else if ope_read_and_store_to_memory_en {
-        ope_read_and_store_to_memory_tx_data_out
-    } else if ope_read_and_store_to_register_en {
-        ope_read_and_store_to_register_tx_data_out
-    } else if ope_store_to_memory_en {
-        ope_store_to_memory_tx_data_out
-    } else {
-        1
-    };
     assign rw = rw_handler_rw;
     always_ff (posedge CLK, async_high RST) {
         if_reset {
+            tx_data_out              = 1;
             a                        = 0;
             x                        = 0;
             y                        = 0;
@@ -749,10 +739,11 @@ module Debug (
             pc                       = 0;
             busy                     = 0;
             RTS                      = 1;
-            seq_status               = SeqStatus::Ready;
+            status                   = Status::Ready;
             register_transfer_finish = 0;
             finish                   = 0;
         } else {
+            tx_data_out              = n_tx_data_out;
             a                        = n_a;
             x                        = n_x;
             y                        = n_y;
@@ -761,7 +752,7 @@ module Debug (
             busy                     = n_busy;
             RTS                      = n_RTS;
             register_transfer_finish = n_register_transfer_finish;
-            seq_status               = n_seq_status;
+            status                   = n_status;
             finish                   = n_finish;
         }
     }

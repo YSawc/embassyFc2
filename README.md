@@ -6,8 +6,8 @@ Currently software is used to send signals for cpu test.
 #### examples
 
 Before run below samples, there are some step needs.
-1. run veryls/6502 in simulator
-2. connect stm32l476rg and DE0-CV with usart.(default pin function is below.)
+1. program FPGA with veryls/6502 HDL files.
+2. connect stm32l476rg and FPGA with usart.(default pin function is below.)
 3. run software
 
 ##### single test runner
@@ -49,7 +49,7 @@ lda_zp_test passed
 
 #### default pin function.
 
-|stm32|de0-cv|description|
+|stm32|FPGA|description|
 |-|-|-|
 |A0|GPIO4|RW(LOW=write, HIGH=read)|
 |A1|GPIO5|Nop(Low if cpumode in fpga is not nop)|
