@@ -43,21 +43,6 @@ pub fn test_lda_indx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_lda_indx passed!");
 }
 
-pub fn test_lda_imm<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
-    usart: &mut Uart<T>,
-    nop: &Input<P>,
-    rw: &Input<P2>,
-    resb: &mut Output<P3>,
-) {
-    send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xa9]);
-    check_rw_is_high(&rw);
-    usart.blocking_write(&[0x34]).unwrap();
-    check_valid_register_status(usart, TxReg::A, &[0x34]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_lda_imm passed!");
-}
-
 pub fn test_lda_zp<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
@@ -73,6 +58,48 @@ pub fn test_lda_zp<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     check_valid_register_status(usart, TxReg::A, &[0x45]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     info!("test_lda_zp passed!");
+}
+
+pub fn test_lda_imm<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xa9]);
+    check_rw_is_high(&rw);
+    usart.blocking_write(&[0x34]).unwrap();
+    check_valid_register_status(usart, TxReg::A, &[0x34]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    info!("test_lda_imm passed!");
+}
+
+pub fn test_lda_indy<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(
+        usart,
+        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA0, 0x00],
+    );
+    check_valid_register_status(usart, TxReg::Y, &[0x00]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000010]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xB1]);
+    check_rw_is_high(&rw);
+    usart_write(usart, &[0x89]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x89, 0x00]);
+    usart_write(usart, &[0x00]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x8A, 0x00]);
+    usart_write(usart, &[0x03]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x00, 0x03]);
+    usart_write(usart, &[0x89]);
+    check_valid_register_status(usart, TxReg::A, &[0x89]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_lda_indy passed!");
 }
 
 pub fn test_lda_zpx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
@@ -111,8 +138,9 @@ fn main() -> ! {
         &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xa9],
     );
     test_lda_indx(&mut usart, &nop, &rw, &mut resb);
-    test_lda_imm(&mut usart, &nop, &rw, &mut resb);
     test_lda_zp(&mut usart, &nop, &rw, &mut resb);
+    test_lda_imm(&mut usart, &nop, &rw, &mut resb);
+    test_lda_indy(&mut usart, &nop, &rw, &mut resb);
     test_lda_zpx(&mut usart, &nop, &rw, &mut resb);
     info!("all tests passed!");
     loop {}

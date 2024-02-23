@@ -139,6 +139,9 @@ module AddrHandler (
                     } else if addr_mode == OperatorsPkg::AddrMode::IndX {
                         n_target_low_addr  = utilPkg::wrapping_add(target_low_addr_read_data_out, a_x);
                         n_target_high_addr = utilPkg::wrapping_add(target_low_addr_read_data_out, a_x + 1);
+                    } else if addr_mode == OperatorsPkg::AddrMode::IndY {
+                        n_target_low_addr  = target_low_addr_read_data_out;
+                        n_target_high_addr = utilPkg::wrapping_add(target_low_addr_read_data_out, 1);
                     } else {
                         n_target_low_addr = target_low_addr_read_data_out;
                     }
@@ -190,7 +193,7 @@ module AddrHandler (
 
                 if addr_mode == OperatorsPkg::AddrMode::AbsX {
                     RegisterPkg::add_three_with_carry(n_p, n_target_high_addr, n_target_low_addr, a_x);
-                } else if addr_mode == OperatorsPkg::AddrMode::AbsY {
+                } else if addr_mode == OperatorsPkg::AddrMode::AbsY || addr_mode == OperatorsPkg::AddrMode::IndY {
                     RegisterPkg::add_three_with_carry(n_p, n_target_high_addr, n_target_low_addr, a_y);
                 }
             }

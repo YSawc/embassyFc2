@@ -82,6 +82,33 @@ pub fn test_sta_abs<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_sta_abs passed!");
 }
 
+pub fn test_sta_indy<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(
+        usart,
+        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA9, 0xFF],
+    );
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0x34]);
+    check_valid_register_status(usart, TxReg::Y, &[0x34]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x91]);
+    check_rw_is_low(&rw);
+    usart_write(usart, &[0x97]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x97, 0x00]);
+    usart_write(usart, &[0xFF]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x98, 0x00]);
+    usart_write(usart, &[0xFF]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0x33, 0x00, 0xFF]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000001]);
+    info!("test_sta_indy passed!");
+}
+
 pub fn test_sta_zpx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
@@ -171,6 +198,7 @@ fn main() -> ! {
     test_sta_indx(&mut usart, &nop, &rw, &mut resb);
     test_sta_zp(&mut usart, &nop, &rw, &mut resb);
     test_sta_abs(&mut usart, &nop, &rw, &mut resb);
+    test_sta_indy(&mut usart, &nop, &rw, &mut resb);
     test_sta_zpx(&mut usart, &nop, &rw, &mut resb);
     test_sta_absy(&mut usart, &nop, &rw, &mut resb);
     test_sta_absx(&mut usart, &nop, &rw, &mut resb);
