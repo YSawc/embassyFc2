@@ -14,21 +14,169 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
+pub fn test_cmp_indx<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(
+        usart,
+        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA9, 0x40],
+    );
+    check_valid_register_status(usart, TxReg::A, &[0x40]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xC1, 0x80]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x80, 0x00]);
+    usart.blocking_write(&[0x00]).unwrap();
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x81, 0x00]);
+    usart.blocking_write(&[0x02]).unwrap();
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x00, 0x02]);
+    usart.blocking_write(&[0x41]).unwrap();
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_cmp_indx passed!");
+}
+
+pub fn test_cmp_zp<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(
+        usart,
+        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA9, 0x80],
+    );
+    check_valid_register_status(usart, TxReg::A, &[0x80]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xC5, 0x78]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x78, 0x00]);
+    usart.blocking_write(&[0x7F]).unwrap();
+    check_valid_register_status(usart, TxReg::P, &[0b00000001]);
+    info!("test_cmp_zp passed!");
+}
+
 pub fn test_cmp_imm<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA9, 0x6F]);
-    check_valid_register_status(usart, TxReg::A, &[0x6F]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     usart_write(
         usart,
-        &[OpeMode::Inst as u8, 0xC9, 0x6F],
+        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA9, 0x6F],
     );
+    check_valid_register_status(usart, TxReg::A, &[0x6F]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xC9, 0x6F]);
     check_valid_register_status(usart, TxReg::P, &[0b00000011]);
     info!("test_cmp_imm passed!");
+}
+
+pub fn test_cmp_abs<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(
+        usart,
+        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA9, 0x80],
+    );
+    check_valid_register_status(usart, TxReg::A, &[0x80]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xCD, 0x78, 0x06]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x78, 0x06]);
+    usart.blocking_write(&[0x80]).unwrap();
+    check_valid_register_status(usart, TxReg::P, &[0b00000011]);
+    info!("test_cmp_abs passed!");
+}
+
+pub fn test_cmp_indy<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(
+        usart,
+        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA0, 0x02],
+    );
+    check_valid_register_status(usart, TxReg::Y, &[0x02]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x40]);
+    check_valid_register_status(usart, TxReg::A, &[0x40]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xD1, 0x33]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x33, 0x00]);
+    usart.blocking_write(&[0x00]).unwrap();
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x34, 0x00]);
+    usart.blocking_write(&[0x04]).unwrap();
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x02, 0x04]);
+    usart.blocking_write(&[0x40]).unwrap();
+    check_valid_register_status(usart, TxReg::P, &[0b00000011]);
+    info!("test_cmp_indy passed!");
+}
+
+pub fn test_cmp_zpx<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(
+        usart,
+        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA2, 0x78],
+    );
+    check_valid_register_status(usart, TxReg::X, &[0x78]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x40]);
+    check_valid_register_status(usart, TxReg::A, &[0x40]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xD5, 0x00]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x78, 0x00]);
+    usart.blocking_write(&[0x78]).unwrap();
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_cmp_zpx passed!");
+}
+
+pub fn test_cmp_absy<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x80]);
+    check_valid_register_status(usart, TxReg::A, &[0x80]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xD9, 0x00, 0x04]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x00, 0x04]);
+    usart.blocking_write(&[0x80]).unwrap();
+    check_valid_register_status(usart, TxReg::P, &[0b00000011]);
+    info!("test_cmp_absy passed!");
+}
+
+pub fn test_cmp_absx<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(
+        usart,
+        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA2, 0x78],
+    );
+    check_valid_register_status(usart, TxReg::X, &[0x78]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x40]);
+    check_valid_register_status(usart, TxReg::A, &[0x40]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xDD, 0x00, 0x06]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x78, 0x06]);
+    usart.blocking_write(&[0x41]).unwrap();
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_cmp_absx passed!");
 }
 
 #[cortex_m_rt::entry]
@@ -41,7 +189,14 @@ fn main() -> ! {
     .unwrap();
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
+    test_cmp_indx(&mut usart, &nop, &mut resb);
+    test_cmp_zp(&mut usart, &nop, &mut resb);
     test_cmp_imm(&mut usart, &nop, &mut resb);
+    test_cmp_abs(&mut usart, &nop, &mut resb);
+    test_cmp_indy(&mut usart, &nop, &mut resb);
+    test_cmp_zpx(&mut usart, &nop, &mut resb);
+    test_cmp_absy(&mut usart, &nop, &mut resb);
+    test_cmp_absx(&mut usart, &nop, &mut resb);
     info!("all tests passed!");
     loop {}
 }

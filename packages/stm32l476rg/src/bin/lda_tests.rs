@@ -145,7 +145,10 @@ pub fn test_lda_absy<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA0, 0x44]);
+    usart_write(
+        usart,
+        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA0, 0x44],
+    );
     check_valid_register_status(usart, TxReg::Y, &[0x44]);
     usart_write(usart, &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xB9]);
     check_rw_is_high(&rw);
@@ -164,7 +167,10 @@ pub fn test_lda_absx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA2, 0x75]);
+    usart_write(
+        usart,
+        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA2, 0x75],
+    );
     check_valid_register_status(usart, TxReg::X, &[0x75]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     usart_write(usart, &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xBD]);

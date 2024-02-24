@@ -84,11 +84,11 @@ module OpeCompare (
             }
             Status::Compare: {
                 if ope_kind == OperatorsPkg::OpeKind::Cmp {
-                    RegisterPkg::compare_with_nzc(n_p, a_a - compare_data);
+                    RegisterPkg::compare_with_nzc(n_p, a_a, compare_data);
                 } else if ope_kind == OperatorsPkg::OpeKind::Cpx {
-                    RegisterPkg::compare_with_nzc(n_p, a_x - compare_data);
+                    RegisterPkg::compare_with_nzc(n_p, a_x, compare_data);
                 } else if ope_kind == OperatorsPkg::OpeKind::Cpy {
-                    RegisterPkg::compare_with_nzc(n_p, a_y - compare_data);
+                    RegisterPkg::compare_with_nzc(n_p, a_y, compare_data);
                 }
                 n_status = Status::Ready;
                 n_finish = 1;
