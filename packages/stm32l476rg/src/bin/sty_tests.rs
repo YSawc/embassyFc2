@@ -65,10 +65,7 @@ pub fn test_sty_zpx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
         usart,
         &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA2, 0xCC],
     );
-    usart_write(
-        usart,
-        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA0, 0x90],
-    );
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0x90]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x94]);
     check_rw_is_low(&rw);

@@ -95,7 +95,7 @@ pub fn test_ldy_absx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x8A]);
     check_valid_register_status(usart, TxReg::X, &[0x8A]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
-    usart_write(usart, &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xBC]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xBC]);
     check_rw_is_high(&rw);
     usart.blocking_write(&[0xFF, 0x05]).unwrap();
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x89, 0x06]);

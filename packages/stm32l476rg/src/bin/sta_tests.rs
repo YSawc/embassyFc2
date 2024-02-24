@@ -146,10 +146,7 @@ pub fn test_sta_absy<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
         &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA0, 0xF0],
     );
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
-    usart_write(
-        usart,
-        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA9, 0x2A],
-    );
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x2A]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x99]);
     check_rw_is_low(&rw);
@@ -171,10 +168,7 @@ pub fn test_sta_absx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
         &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA2, 0x7B],
     );
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    usart_write(
-        usart,
-        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA9, 0xA7],
-    );
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0xA7]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x9D]);
     check_rw_is_low(&rw);

@@ -67,11 +67,7 @@ pub fn test_clv_impl<T: BasicInstance, P: Pin, P2: Pin>(
     send_reset_signal_if_not_nop(&nop, resb);
     usart_write(usart, &[CpuMode::Debug as u8]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-
-    usart_write(
-        usart,
-        &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xe6, 0x2c],
-    );
+    usart_write(usart, &[OpeMode::Inst as u8, 0xe6, 0x2c]);
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x2C, 0x00]);
     usart.blocking_write(&[0xff]).unwrap();
     usart_read_with_check(usart, &mut [0x0u8; 1], &[0x00]);

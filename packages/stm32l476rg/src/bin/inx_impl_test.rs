@@ -23,7 +23,7 @@ pub fn test_inx_impl_without_flag<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     send_reset_signal_if_not_nop(&nop, resb);
     usart_write(usart, &[CpuMode::Debug as u8]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    usart_write(usart, &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA2]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA2]);
     check_rw_is_high(&rw);
     usart.blocking_write(&[0x59]).unwrap();
     check_valid_register_status(usart, TxReg::X, &[0x59]);
@@ -43,7 +43,7 @@ pub fn test_inx_impl_with_zero<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     send_reset_signal_if_not_nop(&nop, resb);
     usart_write(usart, &[CpuMode::Debug as u8]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    usart_write(usart, &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xA2]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA2]);
     check_rw_is_high(&rw);
     usart.blocking_write(&[0xFF]).unwrap();
     check_valid_register_status(usart, TxReg::X, &[0xFF]);
