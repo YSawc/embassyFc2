@@ -1,44 +1,57 @@
-use std::{env, path::Path, process::Command};
+use std::time::Duration;
+use std::{
+    env,
+    io::{BufRead, BufReader},
+    path::Path,
+    process::{Command, Stdio},
+};
+use tokio::time::timeout;
 
-fn exe_testcase(testcase: String, timeout: u8) {
+async fn exe_testcase(testcase: String) {
     let root = Path::new("../stm32l476rg/");
     assert!(env::set_current_dir(&root).is_ok());
-    match Command::new("timeout")
-        .arg(format!("{}", timeout))
-        .arg("cargo")
+    let mut test_process = Command::new("cargo")
         .arg("run")
         .arg("--bin")
         .arg(format!("{}", testcase))
-        .output()
-    {
-        Ok(output) => {
-            if !std::str::from_utf8(&output.stdout)
-                .unwrap()
-                .contains("all tests passed")
-            {
-                panic!("{} failed.", testcase);
-            }
-        }
-        Err(e) => println!("child error occured. {}", e),
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+    let reader = BufReader::new(test_process.stdout.as_mut().unwrap());
+    let line = reader
+        .lines()
+        .filter_map(|line| line.ok())
+        .find(|line| line.contains("all tests passed"));
+    if line.is_some() {
+        println!("{} passed.", testcase);
+        test_process.kill().unwrap();
+        return;
     }
-    println!("{} passed.", testcase);
+    panic!("{} failed", testcase);
 }
 
-fn main() {
-    exe_testcase("cl_tests".to_string(), 6);
-    exe_testcase("cmp_tests".to_string(), 6);
-    exe_testcase("cpx_tests".to_string(), 6);
-    exe_testcase("cpy_tests".to_string(), 6);
-    exe_testcase("inc_tests".to_string(), 6);
-    exe_testcase("inx_impl_test".to_string(), 6);
-    exe_testcase("iny_impl_test".to_string(), 6);
-    exe_testcase("jmp_tests".to_string(), 6);
-    exe_testcase("lda_tests".to_string(), 6);
-    exe_testcase("ldx_tests".to_string(), 6);
-    exe_testcase("ldy_tests".to_string(), 6);
-    exe_testcase("se_tests".to_string(), 6);
-    exe_testcase("sta_tests".to_string(), 6);
-    exe_testcase("stx_tests".to_string(), 6);
-    exe_testcase("sty_tests".to_string(), 6);
+#[tokio::main]
+async fn main() {
+    let timelimit = Duration::from_secs(8);
+    let testcases = [
+        "cl_tests".to_string(),
+        "cmp_tests".to_string(),
+        "cpx_tests".to_string(),
+        "cpy_tests".to_string(),
+        "inc_tests".to_string(),
+        "inx_impl_test".to_string(),
+        "iny_impl_test".to_string(),
+        "jmp_tests".to_string(),
+        "lda_tests".to_string(),
+        "ldx_tests".to_string(),
+        "ldy_tests".to_string(),
+        "se_tests".to_string(),
+        "sta_tests".to_string(),
+        "stx_tests".to_string(),
+        "sty_tests".to_string(),
+    ];
+    for testcase in testcases {
+        timeout(timelimit, exe_testcase(testcase)).await.unwrap();
+    }
     println!("all test passed.");
 }
