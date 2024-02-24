@@ -34,15 +34,28 @@ INFO  test passed!
 ```
 
 ##### multiple test runner
-Package prepared to run many test once.
+To check tests at once, run test-executor.
 ```
-cd packages/test-executor
-cargo run
-...
-    Finished dev [unoptimized + debuginfo] target(s) in 0.00s                           Running `target/debug/test-executor`
-jmp_abs_test passed.
-jmp_ind_test passed.
-lda_zp_test passed
+> cd packages/test-executor
+> cargo run
+   Compiling test-executor v0.1.0 (/home/ys/workspace/Rust/embassyFc2/packages/test-executor)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.45s
+     Running `target/debug/test-executor`
+   Compiling stm32l476rg v0.1.0 (/home/ys/workspace/Rust/embassyFc2/packages/stm32l476rg)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.33s
+     Running `probe-run --chip STM32L476rg target/thumbv7em-none-eabi/debug/cl_tests`
+(HOST) INFO  flashing program (83 pages / 83.00 KiB)
+(HOST) INFO  success!
+(HOST) WARN  `defmt::timestamp!` implementation was found, but timestamp is not part of the log format; consider adding the timestamp `{t}` argument to the log format
+────────────────────────────────────────────────────────────────────────────────
+cl_tests passed.
+    Finished dev [unoptimized + debuginfo] target(s) in 0.05s
+     Running `probe-run --chip STM32L476rg target/thumbv7em-none-eabi/debug/cmp_tests`
+(HOST) INFO  flashing program (83 pages / 83.00 KiB)
+(HOST) INFO  success!
+(HOST) WARN  `defmt::timestamp!` implementation was found, but timestamp is not part of the log format; consider adding the timestamp `{t}` argument to the log format
+────────────────────────────────────────────────────────────────────────────────
+cmp_tests passed.
 ...
 
 ```
