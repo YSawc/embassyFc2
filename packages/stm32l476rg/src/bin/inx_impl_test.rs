@@ -45,13 +45,12 @@ pub fn test_inx_impl_with_zero<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2]);
     check_rw_is_high(&rw);
-    usart.blocking_write(&[0xFF]).unwrap();
-    check_valid_register_status(usart, TxReg::X, &[0xFF]);
-    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
-
+    usart.blocking_write(&[0x7F]).unwrap();
+    check_valid_register_status(usart, TxReg::X, &[0x7F]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xE8]);
-    check_valid_register_status(usart, TxReg::X, &[0x00]);
-    check_valid_register_status(usart, TxReg::P, &[0b01000010]);
+    check_valid_register_status(usart, TxReg::X, &[0x80]);
+    check_valid_register_status(usart, TxReg::P, &[0b11000000]);
 }
 
 #[cortex_m_rt::entry]

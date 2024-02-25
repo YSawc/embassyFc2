@@ -48,7 +48,7 @@ pub fn test_inc_absx_without_carry<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[0x60]);
     usart_read_with_check(usart, &mut [0x0u8; 1], &[0x61]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_inc_abs_x_without_carry passed!");
+    info!("test_inc_absx_without_carry passed!");
 }
 
 pub fn test_inc_absx_with_carry<T: BasicInstance, P: Pin, P2: Pin>(
@@ -68,7 +68,7 @@ pub fn test_inc_absx_with_carry<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[0x60]);
     usart_read_with_check(usart, &mut [0x0u8; 1], &[0x61]);
     check_valid_register_status(usart, TxReg::P, &[0b00000001]);
-    info!("test_inc_abs_x_with_carry passed!");
+    info!("test_inc_absx_with_carry passed!");
 }
 
 pub fn test_inc_zp_without_triger_of_p<T: BasicInstance, P: Pin, P2: Pin>(
@@ -88,7 +88,7 @@ pub fn test_inc_zp_without_triger_of_p<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_inc_zp_without_triger_of_p passed!");
 }
 
-pub fn test_inc_zp_with_overflow_and_zero_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_inc_zp_with_zero_flag<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -101,7 +101,7 @@ pub fn test_inc_zp_with_overflow_and_zero_flag<T: BasicInstance, P: Pin, P2: Pin
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x2C, 0x00]);
     usart.blocking_write(&[0xff]).unwrap();
     usart_read_with_check(usart, &mut [0x0u8; 1], &[0x00]);
-    check_valid_register_status(usart, TxReg::P, &[0b01000010]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000010]);
     info!("test_inc_zp_with_zero_flag passed!");
 }
 
@@ -118,8 +118,8 @@ pub fn test_inc_zp_with_negative_flag<T: BasicInstance, P: Pin, P2: Pin>(
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x2C, 0x00]);
     usart.blocking_write(&[0x7f]).unwrap();
     usart_read_with_check(usart, &mut [0x0u8; 1], &[0x80]);
-    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
-    info!("test_inc_zp_with_overflow_and_zero_flag passed!");
+    check_valid_register_status(usart, TxReg::P, &[0b11000000]);
+    info!("test_inc_zp_with_negative_flag passed!");
 }
 
 pub fn test_inc_zpx<T: BasicInstance, P: Pin, P2: Pin>(
@@ -158,7 +158,7 @@ fn main() -> ! {
     test_inc_absx_without_carry(&mut usart, &nop, &mut resb);
     test_inc_absx_with_carry(&mut usart, &nop, &mut resb);
     test_inc_zp_without_triger_of_p(&mut usart, &nop, &mut resb);
-    test_inc_zp_with_overflow_and_zero_flag(&mut usart, &nop, &mut resb);
+    test_inc_zp_with_zero_flag(&mut usart, &nop, &mut resb);
     test_inc_zp_with_negative_flag(&mut usart, &nop, &mut resb);
     test_inc_zpx(&mut usart, &nop, &mut resb);
     info!("all tests passed!");
