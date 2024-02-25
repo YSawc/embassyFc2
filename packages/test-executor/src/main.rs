@@ -34,6 +34,7 @@ async fn exe_testcase(testcase: String) {
 async fn main() {
     let timelimit = Duration::from_secs(8);
     let testcases = [
+        "adc_tests".to_string(),
         "cl_tests".to_string(),
         "cmp_tests".to_string(),
         "cpx_tests".to_string(),

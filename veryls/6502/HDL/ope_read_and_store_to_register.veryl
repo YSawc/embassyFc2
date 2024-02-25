@@ -103,7 +103,9 @@ module OpeReadAndStoreToRegister (
             }
             Status::WriteRegister: {
                 n_status = Status::Finish;
-                if ope_kind == OperatorsPkg::OpeKind::Lda {
+                if ope_kind == OperatorsPkg::OpeKind::Adc {
+                    n_a = RegisterPkg::plus_with_vnzc(n_p, n_a, register_data);
+                } else if ope_kind == OperatorsPkg::OpeKind::Lda {
                     n_a                 = register_data;
                     RegisterPkg::set_nz(n_p, n_a);
                 } else if ope_kind == OperatorsPkg::OpeKind::Ldx {
