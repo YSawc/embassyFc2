@@ -52,15 +52,15 @@ package RegisterPkg {
         };
     }
 
-    function plus_with_vnzc (
+    function plus_with_vnzc_and_plus_carry (
         current_p: ref   logic<8>,
         input_l  : input logic<8>,
         input_r  : input logic<8>,
     ) -> logic<8> {
-        return tmp_plus_with_vnzc(0, 0, 0, 0, 0, current_p, input_l, input_r);
+        return tmp_plus_with_vnzc_and_plus_carry(0, 0, 0, 0, 0, current_p, input_l, input_r);
     }
 
-    function tmp_plus_with_vnzc (
+    function tmp_plus_with_vnzc_and_plus_carry (
         byte_buf    : input logic<16>,
         is_overflow : input logic    ,
         output_data : input logic<8> ,
@@ -70,6 +70,7 @@ package RegisterPkg {
         input_l     : input logic<8> ,
         input_r     : input logic<8> ,
     ) -> logic<8>  {
+        input_r  = input_r + ((current_p & 8'b00000001) != 0);
         byte_buf = input_l + input_r;
         is_carry = byte_buf >= 16'h100;
         set_c   (current_p, is_carry);

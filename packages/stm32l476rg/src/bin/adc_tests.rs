@@ -46,6 +46,33 @@ pub fn test_adc_imm_with_carry<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_adc_imm_with_carry passed!");
 }
 
+pub fn test_adc_imm_plus_carry<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0xFF]);
+    check_valid_register_status(usart, TxReg::X, &[0xFF]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xFE, 0x30, 0x40]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x2F, 0x41]);
+    usart_write(usart, &[0x60]);
+    usart_read_with_check(usart, &mut [0x0u8; 1], &[0x61]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000001]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x7F]);
+    check_valid_register_status(usart, TxReg::X, &[0x7F]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000001]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x7F]);
+    check_valid_register_status(usart, TxReg::A, &[0x7F]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000001]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x69, 0x7F]);
+    check_valid_register_status(usart, TxReg::A, &[0xFF]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_adc_imm_plus_carry passed!");
+}
+
 pub fn test_adc_imm_with_overflow<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
@@ -75,6 +102,7 @@ fn main() -> ! {
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
     test_adc_imm_without_carry(&mut usart, &nop, &mut resb);
     test_adc_imm_with_carry(&mut usart, &nop, &mut resb);
+    test_adc_imm_plus_carry(&mut usart, &nop, &mut resb);
     test_adc_imm_with_overflow(&mut usart, &nop, &mut resb);
     info!("all tests passed!");
     loop {}
