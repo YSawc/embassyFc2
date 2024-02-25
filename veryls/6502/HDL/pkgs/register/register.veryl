@@ -143,6 +143,10 @@ package RegisterPkg {
     ) {
         set_c(current_p, left_data >= right_data);
         set_z(current_p, left_data == right_data);
-        set_n(current_p, left_data <: right_data);
+        if left_data <: right_data || left_data - right_data >= 8'h80 {
+            set_n(current_p, 1);
+        } else {
+            set_n(current_p, 0);
+        }
     }
 }
