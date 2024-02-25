@@ -192,9 +192,9 @@ module AddrHandler (
                 n_status = Status::Ready;
 
                 if addr_mode == OperatorsPkg::AddrMode::AbsX {
-                    RegisterPkg::add_three_with_carry(n_p, n_target_high_addr, n_target_low_addr, a_x);
+                    RegisterPkg::add_three_without_adding_carry(n_target_high_addr, n_target_low_addr, a_x);
                 } else if addr_mode == OperatorsPkg::AddrMode::AbsY || addr_mode == OperatorsPkg::AddrMode::IndY {
-                    RegisterPkg::add_three_with_carry(n_p, n_target_high_addr, n_target_low_addr, a_y);
+                    RegisterPkg::add_three_without_adding_carry(n_target_high_addr, n_target_low_addr, a_y);
                 }
             }
         }

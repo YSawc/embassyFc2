@@ -57,7 +57,7 @@ package RegisterPkg {
         input_l  : input logic<8>,
         input_r  : input logic<8>,
     ) -> logic<8> {
-        return tmp_plus_with_vnzc_and_plus_carry(0, 0, 0, 0, 0, current_p, input_l, input_r);
+        return tmp_plus_with_vnzc_and_plus_carry(0, 0, 0, 0, 0, 0, current_p, input_l, input_r);
     }
 
     function tmp_plus_with_vnzc_and_plus_carry (
@@ -66,15 +66,15 @@ package RegisterPkg {
         output_data : input logic<8> ,
         is_data_plus: input logic    ,
         is_carry    : input logic    ,
+        old_carry   : input logic    ,
         current_p   : ref   logic<8> ,
         input_l     : input logic<8> ,
         input_r     : input logic<8> ,
     ) -> logic<8>  {
-        input_r  = input_r + ((current_p & 8'b00000001) != 0);
-        byte_buf = input_l + input_r;
-        is_carry = byte_buf >= 16'h100;
-        set_c   (current_p, is_carry);
-        return tmp_plus_with_vnz(0, 0, 0, 0, 0, 0, 0, current_p, input_l, input_r);
+        old_carry = (current_p & 8'b00000001) != 0;
+        is_carry  = ((input_l + input_r) >= 16'h100) || (input_l + input_r + old_carry) >= 16'h100;
+        set_c    (current_p, is_carry);
+        return tmp_plus_with_vnz(0, 0, 0, 0, 0, 0, 0, current_p, input_l, input_r + old_carry);
     }
 
     function plus_with_vnz (
@@ -113,29 +113,53 @@ package RegisterPkg {
         return output_data;
     }
 
-    function add_three_with_carry (
+    function add_three_with_adding_carry (
         current_p: ref   logic<8>,
         input_1  : ref   logic<8>,
         input_2  : ref   logic<8>,
         input_3  : input logic<8>,
     ) {
-        tmp_add_three_with_carry(0, current_p, input_1, input_2, input_3);
+        tmp_add_three_with_adding_carry(0, 0, current_p, input_1, input_2, input_3);
     }
 
-    function tmp_add_three_with_carry (
+    function tmp_add_three_with_adding_carry (
         byte_buf : input logic<16>,
+        old_carry: input logic    ,
         current_p: ref   logic<8> ,
         input_1  : ref   logic<8> ,
         input_2  : ref   logic<8> ,
         input_3  : input logic<8> ,
     ) {
-        byte_buf = input_2 + input_3;
-        input_2  = utilPkg::wrapping_add(input_2, input_3);
+        old_carry =  (current_p & 8'b00000001) != 0;
+        input_3   += old_carry;
+        byte_buf  =  input_2 + input_3;
+        input_2   =  utilPkg::wrapping_add(input_2, input_3);
         if byte_buf >= 16'h100 {
             set_c  (current_p, 1);
             input_1 = utilPkg::wrapping_add(input_1, 1);
         } else {
             set_c(current_p, 0);
+        }
+    }
+
+    function add_three_without_adding_carry (
+        input_1: ref   logic<8>,
+        input_2: ref   logic<8>,
+        input_3: input logic<8>,
+    ) {
+        tmp_add_three_without_adding_carry(0, input_1, input_2, input_3);
+    }
+
+    function tmp_add_three_without_adding_carry (
+        byte_buf: input logic<16>,
+        input_1 : ref   logic<8> ,
+        input_2 : ref   logic<8> ,
+        input_3 : input logic<8> ,
+    ) {
+        byte_buf = input_2 + input_3;
+        input_2  = utilPkg::wrapping_add(input_2, input_3);
+        if byte_buf >= 16'h100 {
+            input_1 = utilPkg::wrapping_add(input_1, 1);
         }
     }
 

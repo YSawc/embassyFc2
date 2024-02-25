@@ -105,7 +105,7 @@ pub fn test_sta_indy<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x98, 0x00]);
     usart_write(usart, &[0xFF]);
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0x33, 0x00, 0xFF]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000001]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     info!("test_sta_indy passed!");
 }
 
@@ -152,7 +152,7 @@ pub fn test_sta_absy<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     check_rw_is_low(&rw);
     usart_write(usart, &[0x23, 0x34]);
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0x13, 0x35, 0x2A]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000001]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     info!("test_sta_absy passed!");
 }
 

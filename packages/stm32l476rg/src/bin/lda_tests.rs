@@ -179,7 +179,7 @@ pub fn test_lda_absx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x1C, 0x0A]);
     usart_write(usart, &[0xD4]);
     check_valid_register_status(usart, TxReg::A, &[0xD4]);
-    check_valid_register_status(usart, TxReg::P, &[0b10000001]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
     info!("test_lda_absx passed!");
 }
 

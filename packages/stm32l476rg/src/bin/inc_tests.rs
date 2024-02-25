@@ -58,16 +58,13 @@ pub fn test_inc_absx_with_carry<T: BasicInstance, P: Pin, P2: Pin>(
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
     usart.blocking_write(&[CpuMode::Debug as u8]).unwrap();
-
-    // store 0xff to x
     usart_write(usart, &[OpeMode::Inst as u8, 0xa2, 0xff]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
-
     usart_write(usart, &[OpeMode::Inst as u8, 0xFE, 0x30, 0x40]);
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x2F, 0x41]);
     usart_write(usart, &[0x60]);
     usart_read_with_check(usart, &mut [0x0u8; 1], &[0x61]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000001]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     info!("test_inc_absx_with_carry passed!");
 }
 

@@ -101,7 +101,7 @@ pub fn test_ldy_absx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x89, 0x06]);
     usart.blocking_write(&[0x00]).unwrap();
     check_valid_register_status(usart, TxReg::Y, &[0x00]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000011]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000010]);
     info!("test_ldy_absx passed!");
 }
 
