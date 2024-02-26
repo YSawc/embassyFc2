@@ -46,6 +46,7 @@ async fn main() {
         "lda_tests".to_string(),
         "ldx_tests".to_string(),
         "ldy_tests".to_string(),
+        "sbc_tests".to_string(),
         "se_tests".to_string(),
         "sta_tests".to_string(),
         "stx_tests".to_string(),

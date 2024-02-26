@@ -104,7 +104,9 @@ module OpeReadAndStoreToRegister (
             Status::WriteRegister: {
                 n_status = Status::Finish;
                 if ope_kind == OperatorsPkg::OpeKind::Adc {
-                    n_a = RegisterPkg::plus_with_vnzc_and_plus_carry(n_p, n_a, register_data);
+                    n_a = RegisterPkg::add_with_vnzc_and_adding_carry(n_p, n_a, register_data);
+                } else if ope_kind == OperatorsPkg::OpeKind::Sbc {
+                    n_a = RegisterPkg::sub_with_vnzc_and_adding_neg_carry(n_p, n_a, register_data);
                 } else if ope_kind == OperatorsPkg::OpeKind::Lda {
                     n_a                 = register_data;
                     RegisterPkg::set_nz(n_p, n_a);
