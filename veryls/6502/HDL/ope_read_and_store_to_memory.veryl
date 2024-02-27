@@ -90,8 +90,12 @@ module OpeReadAndStoreToMemory (
                 }
             }
             Status::PreWrite: {
-                n_assign_data = RegisterPkg::add_with_vnz(n_p, read_memory_target_data, 1);
-                n_status      = Status::MemoryWrite;
+                if ope_kind == OperatorsPkg::OpeKind::Inc {
+                    n_assign_data = RegisterPkg::add_with_nz(n_p, read_memory_target_data, 1);
+                } else if ope_kind == OperatorsPkg::OpeKind::Dec {
+                    n_assign_data = RegisterPkg::sub_with_nz(n_p, read_memory_target_data, 1);
+                }
+                n_status = Status::MemoryWrite;
             }
             Status::MemoryWrite: {
                 if memory_tx_finish {

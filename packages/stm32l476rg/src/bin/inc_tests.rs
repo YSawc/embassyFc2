@@ -115,7 +115,7 @@ pub fn test_inc_zp_with_negative_flag<T: BasicInstance, P: Pin, P2: Pin>(
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x2C, 0x00]);
     usart.blocking_write(&[0x7f]).unwrap();
     usart_read_with_check(usart, &mut [0x0u8; 1], &[0x80]);
-    check_valid_register_status(usart, TxReg::P, &[0b11000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
     info!("test_inc_zp_with_negative_flag passed!");
 }
 

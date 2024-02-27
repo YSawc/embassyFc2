@@ -713,7 +713,7 @@ module Debug (
             }
             Status::OpeReady: {
                 if ope_splitter_finish {
-                    if ope_mode == ModePkg::OpeMode::ReadAndStoreMemory {
+                    if ope_mode == ModePkg::OpeMode::ReadAndStoreToMemory {
                         n_status = Status::OpeReadAndStoreToMemory;
                     } else if ope_mode == ModePkg::OpeMode::ReadAndStoreToRegister {
                         n_status = Status::OpeReadAndStoreToRegister;

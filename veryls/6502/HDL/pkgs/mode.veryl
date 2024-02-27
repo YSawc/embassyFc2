@@ -7,7 +7,7 @@ package ModePkg {
 
     enum OpeMode: logic<3> {
         Nop,
-        ReadAndStoreMemory,
+        ReadAndStoreToMemory,
         ReadAndStoreToRegister,
         StoreMemory,
         Compare,
