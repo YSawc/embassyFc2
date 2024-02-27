@@ -8,8 +8,6 @@ use std::{
 use tokio::time::timeout;
 
 async fn exe_testcase(testcase: String) {
-    let root = Path::new("../stm32l476rg/");
-    assert!(env::set_current_dir(&root).is_ok());
     let mut test_process = Command::new("cargo")
         .arg("run")
         .arg("--bin")
@@ -32,28 +30,22 @@ async fn exe_testcase(testcase: String) {
 
 #[tokio::main]
 async fn main() {
+    let root = Path::new("../stm32l476rg/src/bin");
+    env::set_current_dir(&root).unwrap();
+    let stdout = Command::new("ls").output().unwrap().stdout;
+    let raw_stdout = String::from_utf8_lossy(&stdout);
+    let testcases: Vec<&str> = raw_stdout
+        .split(".rs\n")
+        .filter(|testcase| !testcase.is_empty())
+        .collect();
+    let root = Path::new("../");
+    env::set_current_dir(&root).unwrap();
+
     let timelimit = Duration::from_secs(8);
-    let testcases = [
-        "adc_tests".to_string(),
-        "cl_tests".to_string(),
-        "cmp_tests".to_string(),
-        "cpx_tests".to_string(),
-        "cpy_tests".to_string(),
-        "inc_tests".to_string(),
-        "inx_impl_test".to_string(),
-        "iny_impl_test".to_string(),
-        "jmp_tests".to_string(),
-        "lda_tests".to_string(),
-        "ldx_tests".to_string(),
-        "ldy_tests".to_string(),
-        "sbc_tests".to_string(),
-        "se_tests".to_string(),
-        "sta_tests".to_string(),
-        "stx_tests".to_string(),
-        "sty_tests".to_string(),
-    ];
     for testcase in testcases {
-        timeout(timelimit, exe_testcase(testcase)).await.unwrap();
+        timeout(timelimit, exe_testcase(testcase.to_string()))
+            .await
+            .unwrap();
     }
     println!("all test passed.");
 }

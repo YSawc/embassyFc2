@@ -40,7 +40,7 @@ pub fn test_dec_abs<T: BasicInstance, P: Pin, P2: Pin>(
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x78, 0x06]);
     usart.blocking_write(&[0x80]).unwrap();
     usart_read_with_check(usart, &mut [0x0u8; 1], &[0x7F]);
-    check_valid_register_status(usart, TxReg::P, &[0b01000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     info!("test_dec_abs passed!");
 }
 
