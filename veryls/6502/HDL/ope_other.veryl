@@ -61,8 +61,12 @@ module OpeOther (
                 n_finish = 1;
                 if ope_kind == OperatorsPkg::OpeKind::Inx {
                     n_x = RegisterPkg::add_with_vnz(n_p, n_x, 1);
+                } else if ope_kind == OperatorsPkg::OpeKind::Dex {
+                    n_x = RegisterPkg::sub_with_nz(n_p, n_x, 1);
                 } else if ope_kind == OperatorsPkg::OpeKind::Iny {
                     n_y = RegisterPkg::add_with_vnz(n_p, n_y, 1);
+                } else if ope_kind == OperatorsPkg::OpeKind::Dey {
+                    n_y = RegisterPkg::sub_with_nz(n_p, n_y, 1);
                 } else if ope_kind == OperatorsPkg::OpeKind::Clc {
                     RegisterPkg::set_c(n_p, 0);
                 } else if ope_kind == OperatorsPkg::OpeKind::Sec {
