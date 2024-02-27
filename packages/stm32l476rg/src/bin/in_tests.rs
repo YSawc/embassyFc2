@@ -141,6 +141,85 @@ pub fn test_inc_zpx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_inc_zpx passed!");
 }
 
+pub fn test_inx_impl_without_flag<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    rw: &Input<P>,
+    nop: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::Debug as u8]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA2]);
+    check_rw_is_high(&rw);
+    usart.blocking_write(&[0x59]).unwrap();
+    check_valid_register_status(usart, TxReg::X, &[0x59]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+
+    usart_write(usart, &[OpeMode::Inst as u8, 0xE8]);
+    check_valid_register_status(usart, TxReg::X, &[0x5A]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+}
+
+pub fn test_inx_impl_with_zero<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    rw: &Input<P>,
+    nop: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::Debug as u8]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA2]);
+    check_rw_is_high(&rw);
+    usart.blocking_write(&[0x7F]).unwrap();
+    check_valid_register_status(usart, TxReg::X, &[0x7F]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xE8]);
+    check_valid_register_status(usart, TxReg::X, &[0x80]);
+    check_valid_register_status(usart, TxReg::P, &[0b11000000]);
+}
+
+pub fn test_iny_impl_without_flag<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    rw: &Input<P>,
+    nop: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::Debug as u8]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA0]);
+    check_rw_is_high(&rw);
+    usart.blocking_write(&[0x23]).unwrap();
+    check_valid_register_status(usart, TxReg::Y, &[0x23]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+
+    usart_write(usart, &[OpeMode::Inst as u8, 0xC8]);
+    check_valid_register_status(usart, TxReg::Y, &[0x24]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+}
+
+pub fn test_iny_impl_with_negative<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    rw: &Input<P>,
+    nop: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::Debug as u8]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA0]);
+    check_rw_is_high(&rw);
+    usart.blocking_write(&[0x9B]).unwrap();
+    check_valid_register_status(usart, TxReg::Y, &[0x9B]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+
+    usart_write(usart, &[OpeMode::Inst as u8, 0xC8]);
+    check_valid_register_status(usart, TxReg::Y, &[0x9C]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+}
+
 #[cortex_m_rt::entry]
 fn main() -> ! {
     let p = embassy_stm32::init(Default::default());
@@ -149,6 +228,7 @@ fn main() -> ! {
         p.USART1, p.PA10, p.PA9, Irqs, p.PA12, p.PA11, NoDma, NoDma, config,
     )
     .unwrap();
+    let rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
     test_inc_abs(&mut usart, &nop, &mut resb);
@@ -158,6 +238,10 @@ fn main() -> ! {
     test_inc_zp_with_zero_flag(&mut usart, &nop, &mut resb);
     test_inc_zp_with_negative_flag(&mut usart, &nop, &mut resb);
     test_inc_zpx(&mut usart, &nop, &mut resb);
+    test_inx_impl_without_flag(&mut usart, &rw, &nop, &mut resb);
+    test_inx_impl_with_zero(&mut usart, &rw, &nop, &mut resb);
+    test_iny_impl_without_flag(&mut usart, &rw, &nop, &mut resb);
+    test_iny_impl_with_negative(&mut usart, &rw, &nop, &mut resb);
     info!("all tests passed!");
     loop {}
 }
