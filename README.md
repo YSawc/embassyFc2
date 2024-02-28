@@ -13,10 +13,10 @@ Before run below samples, there are some step needs.
 ##### single test runner
 ```
 cd packages/stm32l476rg
-cargo run --bin jmp_abs_test
+cargo run --bin jmp_tests
 ```
 
-If test passed, passed message shown as below. If test not passed, fpga requires reset for initializing internal state machine and registers.
+If test passed, message shown as below. If test not passed, invalid status message shown or signal blocking will occure.
 ```
 ...
 INFO  rw flag is high
