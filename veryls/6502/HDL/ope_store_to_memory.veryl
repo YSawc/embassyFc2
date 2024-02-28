@@ -4,13 +4,17 @@ module OpeStoreToMemory (
     EN                     : input  logic                   ,
     WE                     : input  logic                   ,
     ope_kind               : input  OperatorsPkg::OpeKind   ,
-    target_low_addr        : input  logic                <8>,
-    target_high_addr       : input  logic                <8>,
-    a                      : input  logic                <8>,
-    x                      : input  logic                <8>,
-    y                      : input  logic                <8>,
+    a_target_low_addr      : input  logic                <8>,
+    a_target_high_addr     : input  logic                <8>,
+    a_a                    : input  logic                <8>,
+    a_x                    : input  logic                <8>,
+    a_y                    : input  logic                <8>,
+    a_s                    : input  logic                <8>,
+    a_p                    : input  logic                <8>,
     zp_adding_without_carry: input  logic                <8>,
     tx_data_out            : output logic                   ,
+    s                      : output logic                <8>,
+    p                      : output logic                <8>,
     busy                   : output logic                   ,
     finish                 : output logic                   ,
 ) {
@@ -20,18 +24,26 @@ module OpeStoreToMemory (
         TargetHighAddr,
         StoreToMemory,
     }
-    var n_status     : Status;
-    var status       : Status;
-    var n_tx_data_out: logic ;
-    var n_busy       : logic ;
-    var n_finish     : logic ;
+    var n_status          : Status   ;
+    var status            : Status   ;
+    var n_tx_data_out     : logic    ;
+    var n_busy            : logic    ;
+    var n_finish          : logic    ;
+    var target_low_addr   : logic <8>;
+    var target_high_addr  : logic <8>;
+    var n_target_low_addr : logic <8>;
+    var n_target_high_addr: logic <8>;
+    var n_s               : logic <8>;
+    var n_p               : logic <8>;
 
     var send_data: logic<8> = if ope_kind == OperatorsPkg::OpeKind::Sta {
-        a
+        a_a
     } else if ope_kind == OperatorsPkg::OpeKind::Stx {
-        x
+        a_x
     } else if ope_kind == OperatorsPkg::OpeKind::Sty {
-        y
+        a_y
+    } else if ope_kind == OperatorsPkg::OpeKind::Php {
+        a_p
     } else {
         0
     };
@@ -79,13 +91,27 @@ module OpeStoreToMemory (
     );
 
     always_comb {
-        n_tx_data_out = tx_data_out;
-        n_status      = status;
-        n_finish      = finish;
+        n_tx_data_out      = tx_data_out;
+        n_status           = status;
+        n_finish           = finish;
+        n_target_low_addr  = target_low_addr;
+        n_target_high_addr = target_high_addr;
+        n_s                = s;
+        n_p                = p;
         case status {
             Status::Ready: {
                 n_finish = 0;
                 if EN {
+                    n_s = a_s;
+                    n_p = a_p;
+                    if ope_kind == OperatorsPkg::OpeKind::Php {
+                        n_s                = RegisterPkg::sub_without_flag(n_p, n_s, 1);
+                        n_target_low_addr  = n_s;
+                        n_target_high_addr = 0;
+                    } else {
+                        n_target_low_addr  = a_target_low_addr;
+                        n_target_high_addr = a_target_high_addr;
+                    }
                     n_status = Status::TargetLowAddr;
                 }
             }
@@ -114,15 +140,23 @@ module OpeStoreToMemory (
 
     always_ff (posedge CLK, async_high RST) {
         if_reset {
-            tx_data_out = 0;
-            busy        = 0;
-            status      = Status::Ready;
-            finish      = 0;
+            tx_data_out      = 0;
+            busy             = 0;
+            status           = Status::Ready;
+            finish           = 0;
+            target_low_addr  = 0;
+            target_high_addr = 0;
+            s                = 0;
+            p                = 0;
         } else {
-            tx_data_out = n_tx_data_out;
-            busy        = n_busy;
-            status      = n_status;
-            finish      = n_finish;
+            tx_data_out      = n_tx_data_out;
+            busy             = n_busy;
+            status           = n_status;
+            finish           = n_finish;
+            target_low_addr  = n_target_low_addr;
+            target_high_addr = n_target_high_addr;
+            s                = n_s;
+            p                = n_p;
         }
     }
 }

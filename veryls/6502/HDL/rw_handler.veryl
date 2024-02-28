@@ -33,7 +33,7 @@ module RWHandler (
                 n_status = Status::idle;
                 n_busy   = 0;
                 n_finish = 1;
-                if ope_kind == OperatorsPkg::OpeKind::Dec || ope_kind == OperatorsPkg::OpeKind::Inc || ope_kind == OperatorsPkg::OpeKind::Sta || ope_kind == OperatorsPkg::OpeKind::Stx || ope_kind == OperatorsPkg::OpeKind::Sty || ope_kind == OperatorsPkg::OpeKind::Dcp {
+                if ope_kind == OperatorsPkg::OpeKind::Dec || ope_kind == OperatorsPkg::OpeKind::Inc || ope_kind == OperatorsPkg::OpeKind::Sta || ope_kind == OperatorsPkg::OpeKind::Stx || ope_kind == OperatorsPkg::OpeKind::Sty || ope_kind == OperatorsPkg::OpeKind::Php || ope_kind == OperatorsPkg::OpeKind::Dcp {
                     n_rw = 0;
                 } else {
                     n_rw = 1;

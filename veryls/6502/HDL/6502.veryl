@@ -15,6 +15,7 @@ module main (
     var a    : logic<8> ;
     var x    : logic<8> ;
     var y    : logic<8> ;
+    var s    : logic<8> ;
     var p    : logic<8> ;
     var pc   : logic<16>;
     var reset: logic     = RST || RESB;
@@ -50,6 +51,7 @@ module main (
     var tmp_a            : logic<8> ;
     var tmp_x            : logic<8> ;
     var tmp_y            : logic<8> ;
+    var tmp_s            : logic<8> ;
     var tmp_p            : logic<8> ;
     var tmp_pc           : logic<16>;
     var debug_rts        : logic    ;
@@ -62,6 +64,7 @@ module main (
         a_a        : a                ,
         a_x        : x                ,
         a_y        : y                ,
+        a_s        : s                ,
         a_p        : p                ,
         tx_data_out: debug_tx_data_out,
         busy       : debug_busy       ,
@@ -71,6 +74,7 @@ module main (
         a          : tmp_a            ,
         x          : tmp_x            ,
         y          : tmp_y            ,
+        s          : tmp_s            ,
         p          : tmp_p            ,
         pc         : tmp_pc           ,
     );
@@ -78,6 +82,7 @@ module main (
     assign a  = tmp_a;
     assign x  = tmp_x;
     assign y  = tmp_y;
+    assign s  = tmp_s;
     assign p  = tmp_p;
     assign pc = tmp_pc;
 
