@@ -14,6 +14,29 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
+pub fn test_pha_impl<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x82]);
+    check_valid_register_status(usart, TxReg::A, &[0x82]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xCD, 0x78, 0x06]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x78, 0x06]);
+    usart.blocking_write(&[0x82]).unwrap();
+    check_valid_register_status(usart, TxReg::P, &[0b00000011]);
+    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x48]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFE, 0x00, 0x82]);
+    check_valid_register_status(usart, TxReg::S, &[0xFE]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x48]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFD, 0x00, 0x82]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
+    info!("test_pha_impl passed!");
+}
+
 pub fn test_php_impl_within_n<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
@@ -76,6 +99,7 @@ fn main() -> ! {
     let _rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
+    test_pha_impl(&mut usart, &nop, &mut resb);
     test_php_impl_within_n(&mut usart, &nop, &mut resb);
     test_php_impl_within_cz(&mut usart, &nop, &mut resb);
     test_php_impl_within_none_flag(&mut usart, &nop, &mut resb);

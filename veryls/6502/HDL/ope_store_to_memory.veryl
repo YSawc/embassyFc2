@@ -36,7 +36,7 @@ module OpeStoreToMemory (
     var n_s               : logic <8>;
     var n_p               : logic <8>;
 
-    var send_data: logic<8> = if ope_kind == OperatorsPkg::OpeKind::Sta {
+    var send_data: logic<8> = if ope_kind == OperatorsPkg::OpeKind::Sta || ope_kind == OperatorsPkg::OpeKind::Pha {
         a_a
     } else if ope_kind == OperatorsPkg::OpeKind::Stx {
         a_x
@@ -104,7 +104,7 @@ module OpeStoreToMemory (
                 if EN {
                     n_s = a_s;
                     n_p = a_p;
-                    if ope_kind == OperatorsPkg::OpeKind::Php {
+                    if ope_kind == OperatorsPkg::OpeKind::Pha || ope_kind == OperatorsPkg::OpeKind::Php {
                         n_s                = RegisterPkg::sub_without_flag(n_p, n_s, 1);
                         n_target_low_addr  = n_s;
                         n_target_high_addr = 0;
