@@ -74,7 +74,7 @@ package RegisterPkg {
         old_carry = (current_p & 8'b00000001) != 0;
         is_carry  = (input_l + input_r + old_carry) >= 16'h100;
         set_c    (current_p, is_carry);
-        return tmp_add_with_vnz(0, 0, 0, 0, 0, 0, 0, 1, current_p, input_l, input_r + old_carry);
+        return tmp_add_with_vnz(0, 0, 0, 0, 0, 0, 0, 1, 1, current_p, input_l, input_r + old_carry);
     }
 
     function add_with_vnz (
@@ -82,7 +82,7 @@ package RegisterPkg {
         input_l  : input logic<8>,
         input_r  : input logic<8>,
     ) -> logic<8> {
-        return tmp_add_with_vnz(0, 0, 0, 0, 0, 0, 0, 1, current_p, input_l, input_r);
+        return tmp_add_with_vnz(0, 0, 0, 0, 0, 0, 0, 1, 1, current_p, input_l, input_r);
     }
 
     function add_with_nz (
@@ -90,7 +90,15 @@ package RegisterPkg {
         input_l  : input logic<8>,
         input_r  : input logic<8>,
     ) -> logic<8> {
-        return tmp_add_with_vnz(0, 0, 0, 0, 0, 0, 0, 0, current_p, input_l, input_r);
+        return tmp_add_with_vnz(0, 0, 0, 0, 0, 0, 0, 0, 1, current_p, input_l, input_r);
+    }
+
+    function add_without_flag (
+        current_p: ref   logic<8>,
+        input_l  : input logic<8>,
+        input_r  : input logic<8>,
+    ) -> logic<8> {
+        return tmp_add_with_vnz(0, 0, 0, 0, 0, 0, 0, 0, 0, current_p, input_l, input_r);
     }
 
     function tmp_add_with_vnz (
@@ -102,6 +110,7 @@ package RegisterPkg {
         is_carry       : input logic    ,
         is_data_plus   : input logic    ,
         handle_overflow: input logic    ,
+        handle_nz      : input logic    ,
         current_p      : ref   logic<8> ,
         input_l        : input logic<8> ,
         input_r        : input logic<8> ,
@@ -120,7 +129,9 @@ package RegisterPkg {
             is_overflow = (is_data_plus != is_l_data_plus) && (is_data_plus != is_r_data_plus);
             set_v      (current_p, is_overflow);
         }
-        set_nz(current_p, output_data);
+        if handle_nz {
+            set_nz(current_p, output_data);
+        }
         return output_data;
     }
 
