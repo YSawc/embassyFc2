@@ -590,6 +590,7 @@ module Debug (
     var ope_other_a     : logic<8> ;
     var ope_other_x     : logic<8> ;
     var ope_other_y     : logic<8> ;
+    var ope_other_s     : logic<8> ;
     var ope_other_p     : logic<8> ;
     var ope_other_pc    : logic<16>;
     var ope_other_busy  : logic    ;
@@ -606,10 +607,12 @@ module Debug (
         a_a                            ,
         a_x                            ,
         a_y                            ,
+        a_s                            ,
         a_p                            ,
         a        : ope_other_a         ,
         x        : ope_other_x         ,
         y        : ope_other_y         ,
+        s        : ope_other_s         ,
         p        : ope_other_p         ,
         pc       : ope_other_pc        ,
         busy     : ope_other_busy      ,
@@ -778,6 +781,7 @@ module Debug (
                     n_a      = ope_other_a;
                     n_x      = ope_other_x;
                     n_y      = ope_other_y;
+                    n_s      = ope_other_s;
                     n_p      = ope_other_p;
                     n_pc     = ope_other_pc;
                     n_status = Status::Ready;
