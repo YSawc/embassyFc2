@@ -37,7 +37,7 @@ module OpeSplitter (
                     n_ope_mode = ModePkg::OpeMode::Compare;
                 } else if ope_kind == OperatorsPkg::OpeKind::Inc || ope_kind == OperatorsPkg::OpeKind::Dec {
                     n_ope_mode = ModePkg::OpeMode::ReadAndStoreToMemory;
-                } else if ope_kind == OperatorsPkg::OpeKind::Adc || ope_kind == OperatorsPkg::OpeKind::Sbc || ope_kind == OperatorsPkg::OpeKind::Lda || ope_kind == OperatorsPkg::OpeKind::Ldx || ope_kind == OperatorsPkg::OpeKind::Ldy || ope_kind == OperatorsPkg::OpeKind::Plp || ope_kind == OperatorsPkg::OpeKind::Pla {
+                } else if ope_kind == OperatorsPkg::OpeKind::Ora || ope_kind == OperatorsPkg::OpeKind::Adc || ope_kind == OperatorsPkg::OpeKind::Sbc || ope_kind == OperatorsPkg::OpeKind::Lda || ope_kind == OperatorsPkg::OpeKind::Ldx || ope_kind == OperatorsPkg::OpeKind::Ldy || ope_kind == OperatorsPkg::OpeKind::Plp || ope_kind == OperatorsPkg::OpeKind::Pla {
                     n_ope_mode = ModePkg::OpeMode::ReadAndStoreToRegister;
                 } else if ope_kind == OperatorsPkg::OpeKind::Sta || ope_kind == OperatorsPkg::OpeKind::Stx || ope_kind == OperatorsPkg::OpeKind::Sty || ope_kind == OperatorsPkg::OpeKind::Pha || ope_kind == OperatorsPkg::OpeKind::Php {
                     n_ope_mode = ModePkg::OpeMode::StoreToMeory;

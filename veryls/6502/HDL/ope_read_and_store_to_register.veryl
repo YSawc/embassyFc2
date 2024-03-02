@@ -127,6 +127,9 @@ module OpeReadAndStoreToRegister (
                     n_a = RegisterPkg::add_with_vnzc_and_adding_carry(n_p, n_a, register_data);
                 } else if ope_kind == OperatorsPkg::OpeKind::Sbc {
                     n_a = RegisterPkg::sub_with_vnzc_and_adding_neg_carry(n_p, n_a, register_data);
+                } else if ope_kind == OperatorsPkg::OpeKind::Ora {
+                    n_a                 |= register_data;
+                    RegisterPkg::set_nz(n_p, n_a);
                 } else if ope_kind == OperatorsPkg::OpeKind::Lda || ope_kind == OperatorsPkg::OpeKind::Pla {
                     n_a                 = register_data;
                     RegisterPkg::set_nz(n_p, n_a);
