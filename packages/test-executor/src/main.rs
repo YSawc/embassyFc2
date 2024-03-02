@@ -11,14 +11,14 @@ async fn exe_testcase(testcase: String) {
     let mut test_process = Command::new("cargo")
         .arg("run")
         .arg("--bin")
-        .arg(format!("{}", testcase))
+        .arg(&testcase)
         .stdout(Stdio::piped())
         .spawn()
         .unwrap();
     let reader = BufReader::new(test_process.stdout.as_mut().unwrap());
     let line = reader
         .lines()
-        .filter_map(|line| line.ok())
+        .map_while(Result::ok)
         .find(|line| line.contains("all tests passed"));
     if line.is_some() {
         println!("{} passed.", testcase);
@@ -31,7 +31,7 @@ async fn exe_testcase(testcase: String) {
 #[tokio::main]
 async fn main() {
     let root = Path::new("../stm32l476rg/src/bin");
-    env::set_current_dir(&root).unwrap();
+    env::set_current_dir(root).unwrap();
     let stdout = Command::new("ls").output().unwrap().stdout;
     let raw_stdout = String::from_utf8_lossy(&stdout);
     let testcases: Vec<&str> = raw_stdout
@@ -39,7 +39,7 @@ async fn main() {
         .filter(|testcase| !testcase.is_empty())
         .collect();
     let root = Path::new("../");
-    env::set_current_dir(&root).unwrap();
+    env::set_current_dir(root).unwrap();
 
     let timelimit = Duration::from_secs(8);
     for testcase in testcases {
