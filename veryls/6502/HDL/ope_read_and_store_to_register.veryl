@@ -133,6 +133,9 @@ module OpeReadAndStoreToRegister (
                 } else if ope_kind == OperatorsPkg::OpeKind::And {
                     n_a                 &= register_data;
                     RegisterPkg::set_nz(n_p, n_a);
+                } else if ope_kind == OperatorsPkg::OpeKind::Eor {
+                    n_a                 ^= register_data;
+                    RegisterPkg::set_nz(n_p, n_a);
                 } else if ope_kind == OperatorsPkg::OpeKind::Lda || ope_kind == OperatorsPkg::OpeKind::Pla {
                     n_a                 = register_data;
                     RegisterPkg::set_nz(n_p, n_a);
