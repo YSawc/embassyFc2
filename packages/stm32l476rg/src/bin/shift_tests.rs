@@ -165,9 +165,11 @@ pub fn test_rol_acc_with_c<T: BasicInstance, P: Pin, P2: Pin>(
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
     usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xC9, 0x00]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000011]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x80]);
     check_valid_register_status(usart, TxReg::A, &[0x80]);
-    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000001]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x2A]);
     check_valid_register_status(usart, TxReg::A, &[0x01]);
     check_valid_register_status(usart, TxReg::P, &[0b00000001]);
@@ -225,9 +227,11 @@ pub fn test_rol_zpx<T: BasicInstance, P: Pin, P2: Pin>(
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
     usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xC9, 0x00]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000011]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x55]);
     check_valid_register_status(usart, TxReg::X, &[0x55]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000001]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x36, 0x00]);
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x55, 0x00]);
     usart.blocking_write(&[0x80]).unwrap();
@@ -243,9 +247,11 @@ pub fn test_rol_absx<T: BasicInstance, P: Pin, P2: Pin>(
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
     usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xC9, 0x00]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000011]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x55]);
     check_valid_register_status(usart, TxReg::X, &[0x55]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000001]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x3E, 0x00, 0x06]);
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x55, 0x06]);
     usart.blocking_write(&[0x80]).unwrap();
