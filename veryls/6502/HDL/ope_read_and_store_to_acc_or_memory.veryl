@@ -109,9 +109,15 @@ module OpeReadAndStoreToAccOrMemory (
                 if ope_kind == OperatorsPkg::OpeKind::Asl || ope_kind == OperatorsPkg::OpeKind::Rol {
                     n_is_carry    =   (assign_data & 8'b10000000) != 0;
                     n_assign_data <<= 1;
+                    if ope_kind == OperatorsPkg::OpeKind::Rol && n_is_carry {
+                        n_assign_data |= 8'b00000001;
+                    }
                 } else if ope_kind == OperatorsPkg::OpeKind::Lsr || ope_kind == OperatorsPkg::OpeKind::Ror {
                     n_is_carry    =   (assign_data & 8'b00000001) != 0;
                     n_assign_data >>= 1;
+                    if ope_kind == OperatorsPkg::OpeKind::Ror && n_is_carry {
+                        n_assign_data |= 8'b10000000;
+                    }
                 }
                 if addr_mode == OperatorsPkg::AddrMode::Acc {
                     n_status = Status::WriteAcc;
