@@ -136,6 +136,10 @@ module OpeReadAndStoreToRegister (
                 } else if ope_kind == OperatorsPkg::OpeKind::Eor {
                     n_a                 ^= register_data;
                     RegisterPkg::set_nz(n_p, n_a);
+                } else if ope_kind == OperatorsPkg::OpeKind::Bit {
+                    RegisterPkg::set_z(n_p, (register_data & n_a) == 0);
+                    RegisterPkg::set_n(n_p, (register_data & 8'b10000000) != 0);
+                    RegisterPkg::set_v(n_p, (register_data & 8'b01000000) != 0);
                 } else if ope_kind == OperatorsPkg::OpeKind::Lda || ope_kind == OperatorsPkg::OpeKind::Pla {
                     n_a                 = register_data;
                     RegisterPkg::set_nz(n_p, n_a);
