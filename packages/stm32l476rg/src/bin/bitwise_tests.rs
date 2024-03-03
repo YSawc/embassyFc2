@@ -51,7 +51,7 @@ pub fn test_ora_zp<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_ora_zp passed!");
 }
 
-pub fn test_ora_imm_without_no_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_ora_imm_without_flag<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -61,7 +61,7 @@ pub fn test_ora_imm_without_no_flag<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[OpeMode::Inst as u8, 0x09, 0x10]);
     check_valid_register_status(usart, TxReg::A, &[0x10]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_ora_imm_without_no_flag passed!");
+    info!("test_ora_imm_without_flag passed!");
 }
 
 pub fn test_ora_imm_with_z<T: BasicInstance, P: Pin, P2: Pin>(
@@ -221,7 +221,7 @@ pub fn test_and_zp<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_and_zp passed!");
 }
 
-pub fn test_and_imm_without_no_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_and_imm_without_flag<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -234,7 +234,7 @@ pub fn test_and_imm_without_no_flag<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[OpeMode::Inst as u8, 0x29, 0xEF]);
     check_valid_register_status(usart, TxReg::A, &[0x6F]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_and_imm_without_no_flag passed!");
+    info!("test_and_imm_without_flag passed!");
 }
 
 pub fn test_and_imm_with_z<T: BasicInstance, P: Pin, P2: Pin>(
@@ -408,7 +408,7 @@ pub fn test_eor_zp<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_eor_zp passed!");
 }
 
-pub fn test_eor_imm_without_no_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_eor_imm_without_flag<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -421,7 +421,7 @@ pub fn test_eor_imm_without_no_flag<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[OpeMode::Inst as u8, 0x49, 0xAA]);
     check_valid_register_status(usart, TxReg::A, &[0x75]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_eor_imm_without_no_flag passed!");
+    info!("test_eor_imm_without_flag passed!");
 }
 
 pub fn test_eor_imm_with_z<T: BasicInstance, P: Pin, P2: Pin>(
@@ -569,7 +569,7 @@ fn main() -> ! {
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
     test_ora_indx(&mut usart, &nop, &mut resb);
     test_ora_zp(&mut usart, &nop, &mut resb);
-    test_ora_imm_without_no_flag(&mut usart, &nop, &mut resb);
+    test_ora_imm_without_flag(&mut usart, &nop, &mut resb);
     test_ora_imm_with_z(&mut usart, &nop, &mut resb);
     test_ora_imm_with_n(&mut usart, &nop, &mut resb);
     test_ora_abs(&mut usart, &nop, &mut resb);
@@ -579,7 +579,7 @@ fn main() -> ! {
     test_ora_absx(&mut usart, &nop, &mut resb);
     test_and_indx(&mut usart, &nop, &mut resb);
     test_and_zp(&mut usart, &nop, &mut resb);
-    test_and_imm_without_no_flag(&mut usart, &nop, &mut resb);
+    test_and_imm_without_flag(&mut usart, &nop, &mut resb);
     test_and_imm_with_z(&mut usart, &nop, &mut resb);
     test_and_imm_with_n(&mut usart, &nop, &mut resb);
     test_and_abs(&mut usart, &nop, &mut resb);
@@ -589,7 +589,7 @@ fn main() -> ! {
     test_and_absx(&mut usart, &nop, &mut resb);
     test_eor_indx(&mut usart, &nop, &mut resb);
     test_eor_zp(&mut usart, &nop, &mut resb);
-    test_eor_imm_without_no_flag(&mut usart, &nop, &mut resb);
+    test_eor_imm_without_flag(&mut usart, &nop, &mut resb);
     test_eor_imm_with_z(&mut usart, &nop, &mut resb);
     test_eor_imm_with_n(&mut usart, &nop, &mut resb);
     test_eor_abs(&mut usart, &nop, &mut resb);

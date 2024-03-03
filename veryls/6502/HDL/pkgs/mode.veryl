@@ -9,6 +9,7 @@ package ModePkg {
         Nop,
         ReadAndStoreToMemory,
         ReadAndStoreToRegister,
+        ReadAndStoreToAccOrMemory,
         StoreToMeory,
         Compare,
         Other,
