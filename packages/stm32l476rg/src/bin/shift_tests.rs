@@ -358,6 +358,126 @@ pub fn test_lsr_absx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_lsr_absx passed!");
 }
 
+pub fn test_ror_zp<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xC9, 0x00]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000011]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x66, 0x78]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x78, 0x00]);
+    usart.blocking_write(&[0x01]).unwrap();
+    usart_read_with_check(usart, &mut [0x0u8; 1], &[0x80]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000001]);
+    info!("test_ror_zp passed!");
+}
+
+pub fn test_ror_acc_without_flag<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x02]);
+    check_valid_register_status(usart, TxReg::A, &[0x02]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x6A]);
+    check_valid_register_status(usart, TxReg::A, &[0x01]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    info!("test_ror_acc_without_flag passed!");
+}
+
+pub fn test_ror_acc_with_zc<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x01]);
+    check_valid_register_status(usart, TxReg::A, &[0x01]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x6A]);
+    check_valid_register_status(usart, TxReg::A, &[0x00]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000011]);
+    info!("test_ror_acc_with_c passed!");
+}
+
+pub fn test_ror_acc_with_cn<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xC9, 0x00]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000011]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x01]);
+    check_valid_register_status(usart, TxReg::A, &[0x01]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000001]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x6A]);
+    check_valid_register_status(usart, TxReg::A, &[0x80]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000001]);
+    info!("test_ror_acc_with_n passed!");
+}
+
+pub fn test_ror_abs<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x6E, 0x78, 0x26]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x78, 0x26]);
+    usart.blocking_write(&[0x55]).unwrap();
+    usart_read_with_check(usart, &mut [0x0u8; 1], &[0x2A]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000001]);
+    info!("test_ror_abs passed!");
+}
+
+pub fn test_ror_zpx<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x55]);
+    check_valid_register_status(usart, TxReg::X, &[0x55]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x76, 0x00]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x55, 0x00]);
+    usart.blocking_write(&[0x55]).unwrap();
+    usart_read_with_check(usart, &mut [0x0u8; 1], &[0x2A]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000001]);
+    info!("test_ror_zpx passed!");
+}
+
+pub fn test_ror_absx<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xC9, 0x00]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000011]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x55]);
+    check_valid_register_status(usart, TxReg::X, &[0x55]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000001]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x7E, 0x00, 0x06]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x55, 0x06]);
+    usart.blocking_write(&[0x01]).unwrap();
+    usart_read_with_check(usart, &mut [0x0u8; 1], &[0x80]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000001]);
+    info!("test_ror_absx passed!");
+}
+
 #[cortex_m_rt::entry]
 fn main() -> ! {
     let p = embassy_stm32::init(Default::default());
@@ -390,6 +510,13 @@ fn main() -> ! {
     test_lsr_abs(&mut usart, &nop, &mut resb);
     test_lsr_zpx(&mut usart, &nop, &mut resb);
     test_lsr_absx(&mut usart, &nop, &mut resb);
+    test_ror_zp(&mut usart, &nop, &mut resb);
+    test_ror_acc_without_flag(&mut usart, &nop, &mut resb);
+    test_ror_acc_with_zc(&mut usart, &nop, &mut resb);
+    test_ror_acc_with_cn(&mut usart, &nop, &mut resb);
+    test_ror_abs(&mut usart, &nop, &mut resb);
+    test_ror_zpx(&mut usart, &nop, &mut resb);
+    test_ror_absx(&mut usart, &nop, &mut resb);
     info!("all tests passed!");
     loop {}
 }
