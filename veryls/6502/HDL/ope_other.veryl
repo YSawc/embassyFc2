@@ -51,7 +51,6 @@ module OpeOther (
         case status {
             Status::idle: {
                 n_finish = 0;
-                n_busy   = 1;
                 n_a      = a_a;
                 n_x      = a_x;
                 n_y      = a_y;
@@ -59,6 +58,7 @@ module OpeOther (
                 n_p      = a_p;
                 n_pc     = a_pc;
                 if EN {
+                    n_busy   = 1;
                     n_status = Status::work;
                 }
             }
@@ -92,6 +92,34 @@ module OpeOther (
                     n_pc = (addr_high << 8) + addr_low;
                 } else if ope_kind == OperatorsPkg::OpeKind::Bpl {
                     if (a_p & 8'b10000000) == 0 {
+                        n_pc = (addr_high << 8) + addr_low;
+                    }
+                } else if ope_kind == OperatorsPkg::OpeKind::Bmi {
+                    if (a_p & 8'b10000000) != 0 {
+                        n_pc = (addr_high << 8) + addr_low;
+                    }
+                } else if ope_kind == OperatorsPkg::OpeKind::Bvc {
+                    if (a_p & 8'b01000000) == 0 {
+                        n_pc = (addr_high << 8) + addr_low;
+                    }
+                } else if ope_kind == OperatorsPkg::OpeKind::Bvs {
+                    if (a_p & 8'b01000000) != 0 {
+                        n_pc = (addr_high << 8) + addr_low;
+                    }
+                } else if ope_kind == OperatorsPkg::OpeKind::Bcc {
+                    if (a_p & 8'b00000001) == 0 {
+                        n_pc = (addr_high << 8) + addr_low;
+                    }
+                } else if ope_kind == OperatorsPkg::OpeKind::Bcs {
+                    if (a_p & 8'b00000001) != 0 {
+                        n_pc = (addr_high << 8) + addr_low;
+                    }
+                } else if ope_kind == OperatorsPkg::OpeKind::Bne {
+                    if (a_p & 8'b00000010) == 0 {
+                        n_pc = (addr_high << 8) + addr_low;
+                    }
+                } else if ope_kind == OperatorsPkg::OpeKind::Beq {
+                    if (a_p & 8'b00000010) != 0 {
                         n_pc = (addr_high << 8) + addr_low;
                     }
                 } else if ope_kind == OperatorsPkg::OpeKind::Tax {
