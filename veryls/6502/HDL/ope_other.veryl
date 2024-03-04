@@ -10,6 +10,7 @@ module OpeOther (
     a_y      : input  logic                <8> ,
     a_s      : input  logic                <8> ,
     a_p      : input  logic                <8> ,
+    a_pc     : input  logic                <16>,
     a        : output logic                <8> ,
     x        : output logic                <8> ,
     y        : output logic                <8> ,
@@ -56,6 +57,7 @@ module OpeOther (
                 n_y      = a_y;
                 n_s      = a_s;
                 n_p      = a_p;
+                n_pc     = a_pc;
                 if EN {
                     n_status = Status::work;
                 }
@@ -88,6 +90,10 @@ module OpeOther (
                     RegisterPkg::set_v(n_p, 0);
                 } else if ope_kind == OperatorsPkg::OpeKind::Jmp {
                     n_pc = (addr_high << 8) + addr_low;
+                } else if ope_kind == OperatorsPkg::OpeKind::Bpl {
+                    if (a_p & 8'b10000000) == 0 {
+                        n_pc = (addr_high << 8) + addr_low;
+                    }
                 } else if ope_kind == OperatorsPkg::OpeKind::Tax {
                     n_x                 = a_a;
                     RegisterPkg::set_nz(n_p, n_x);

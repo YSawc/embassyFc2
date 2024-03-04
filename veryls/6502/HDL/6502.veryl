@@ -66,6 +66,7 @@ module main (
         a_y        : y                ,
         a_s        : s                ,
         a_p        : p                ,
+        a_pc       : pc               ,
         tx_data_out: debug_tx_data_out,
         busy       : debug_busy       ,
         RTS        : debug_rts        ,

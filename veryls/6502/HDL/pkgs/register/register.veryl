@@ -247,6 +247,33 @@ package RegisterPkg {
         }
     }
 
+    function rel (
+        pc     : input logic<16>,
+        input_1: ref   logic<8> ,
+        input_2: ref   logic<8> ,
+        input_3: input logic<8> ,
+    ) {
+        input_1                            = (pc & 16'hFF00) >> 8;
+        input_2                            = pc & 16'h000FF;
+        tmp_add_three_without_adding_carry(0, input_1, input_2, 1);
+        tmp_rel                           (0, input_1, input_2, input_3);
+    }
+
+    function tmp_rel (
+        byte_buf: input logic<16>,
+        input_1 : ref   logic<8> ,
+        input_2 : ref   logic<8> ,
+        input_3 : input logic<8> ,
+    ) {
+        byte_buf =  (input_1 << 8) + input_2;
+        byte_buf += input_3;
+        if (input_3 >= 8'h80) {
+            byte_buf -= 16'h100;
+        }
+        input_1 = (byte_buf & 16'hFF00) >> 8;
+        input_2 = (byte_buf & 16'h00FF);
+    }
+
     function add_three_without_adding_carry (
         input_1: ref   logic<8>,
         input_2: ref   logic<8>,
