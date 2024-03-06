@@ -576,6 +576,7 @@ module Debug (
         RST                                                     ,
         EN                     : ope_store_to_memory_en         ,
         WE                                                      ,
+        DATA_IN                                                 ,
         ope_kind               : inst_casted_ope_kind           ,
         a_target_low_addr      : target_low_addr                ,
         a_target_high_addr     : target_high_addr               ,

@@ -1,4 +1,4 @@
-module ReadMemory (
+module WriteMemory (
     CLK             : input  logic   ,
     RST             : input  logic   ,
     EN              : input  logic   ,
@@ -6,13 +6,11 @@ module ReadMemory (
     DATA_IN         : input  logic   ,
     target_low_addr : input  logic<8>,
     target_high_addr: input  logic<8>,
-    target_data     : output logic<8>,
+    send_data       : input  logic<8>,
     tx_data_out     : output logic   ,
-    RTS             : output logic   ,
     busy            : output logic   ,
     finish          : output logic   ,
 ) {
-    var n_RTS   : logic    ;
     var n_busy  : logic    ;
     var n_finish: logic    ;
     var status  : Status   ;
@@ -21,9 +19,10 @@ module ReadMemory (
         Ready,
         LowTx,
         HighTx,
-        MemoryRx,
+        MemoryTx,
         Finish,
     }
+    var n_tx_data_out: logic;
 
     var low_tx_en      : logic    = WE && status == Status::LowTx;
     var low_tx_data_in : logic<8> = target_low_addr;
@@ -55,56 +54,47 @@ module ReadMemory (
         finish  : high_tx_finish  ,
     );
 
-    var memory_rx_en      : logic    = status == Status::MemoryRx;
-    var memory_rx_data_out: logic<8>;
-    var memory_rx_busy    : logic   ;
-    var memory_rx_finish  : logic   ;
-    inst memory_rx: uarty::Rx (
+    var memory_tx_en      : logic    = status == Status::MemoryTx;
+    var memory_tx_data_out: logic<8>;
+    var memory_tx_busy    : logic   ;
+    var memory_tx_finish  : logic   ;
+    inst memory_tx: uarty::Tx (
         CLK                         ,
         RST                         ,
-        DATA_IN                     ,
-        RE      : memory_rx_en      ,
-        data_out: memory_rx_data_out,
-        busy    : memory_rx_busy    ,
-        finish  : memory_rx_finish  ,
+        WE      : memory_tx_en      ,
+        DATA_IN : send_data         ,
+        data_out: memory_tx_data_out,
+        busy    : memory_tx_busy    ,
+        finish  : memory_tx_finish  ,
     );
 
-    assign n_RTS = if memory_rx_en {
-        ~memory_rx_en
-    } else {
-        1
-    };
-    assign target_data = memory_rx_data_out;
-    assign tx_data_out = if low_tx_en {
-        low_tx_data_out
-    } else if high_tx_en {
-        high_tx_data_out
-    } else {
-        1
-    };
-
     always_comb {
-        n_status = status;
-        n_finish = finish;
+        n_status      = status;
+        n_finish      = finish;
+        n_tx_data_out = tx_data_out;
         case status {
             Status::Ready: {
-                n_finish = 0;
+                n_finish      = 0;
+                n_tx_data_out = 1;
                 if EN {
                     n_status = Status::LowTx;
                 }
             }
             Status::LowTx: {
+                n_tx_data_out = low_tx_data_out;
                 if low_tx_finish {
                     n_status = Status::HighTx;
                 }
             }
             Status::HighTx: {
+                n_tx_data_out = high_tx_data_out;
                 if high_tx_finish {
-                    n_status = Status::MemoryRx;
+                    n_status = Status::MemoryTx;
                 }
             }
-            Status::MemoryRx: {
-                if memory_rx_finish {
+            Status::MemoryTx: {
+                n_tx_data_out = memory_tx_data_out;
+                if memory_tx_finish {
                     n_status = Status::Finish;
                 }
             }
@@ -117,15 +107,15 @@ module ReadMemory (
 
     always_ff (posedge CLK, async_high RST) {
         if_reset {
-            busy   = 0;
-            finish = 0;
-            status = Status::Ready;
-            RTS    = 1;
+            busy        = 0;
+            finish      = 0;
+            status      = Status::Ready;
+            tx_data_out = 0;
         } else {
-            busy   = n_busy;
-            finish = n_finish;
-            status = n_status;
-            RTS    = n_RTS;
+            busy        = n_busy;
+            finish      = n_finish;
+            status      = n_status;
+            tx_data_out = n_tx_data_out;
         }
     }
 }
