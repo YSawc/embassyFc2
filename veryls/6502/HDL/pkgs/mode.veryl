@@ -10,7 +10,7 @@ package ModePkg {
         ReadAndStoreToMemory,
         ReadAndStoreToRegister,
         ReadAndStoreToAccOrMemory,
-        StoreToMeory,
+        StoreToMemory,
         Compare,
         Other,
     }

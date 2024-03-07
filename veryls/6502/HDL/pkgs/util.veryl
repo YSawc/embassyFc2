@@ -13,4 +13,15 @@ package utilPkg {
             return (l + r);
         }
     }
+
+    function wrapping_sub (
+        l: input logic<8>,
+        r: input logic<8>,
+    ) -> logic<8> {
+        if l <: r {
+            return (16'h100 - r + l);
+        } else {
+            return (l - r);
+        }
+    }
 }
