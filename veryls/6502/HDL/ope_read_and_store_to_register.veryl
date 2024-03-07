@@ -1,27 +1,29 @@
 module OpeReadAndStoreToRegister (
-    CLK               : input  logic                    ,
-    RST               : input  logic                    ,
-    EN                : input  logic                    ,
-    WE                : input  logic                    ,
-    DATA_IN           : input  logic                    ,
-    ope_kind          : input  OperatorsPkg::OpeKind    ,
-    addr_mode         : input  OperatorsPkg::AddrMode   ,
-    a_target_low_addr : input  logic                 <8>,
-    a_target_high_addr: input  logic                 <8>,
-    a_a               : input  logic                 <8>,
-    a_x               : input  logic                 <8>,
-    a_y               : input  logic                 <8>,
-    a_s               : input  logic                 <8>,
-    a_p               : input  logic                 <8>,
-    a                 : output logic                 <8>,
-    x                 : output logic                 <8>,
-    y                 : output logic                 <8>,
-    s                 : output logic                 <8>,
-    p                 : output logic                 <8>,
-    tx_data_out       : output logic                    ,
-    RTS               : output logic                    ,
-    busy              : output logic                    ,
-    finish            : output logic                    ,
+    CLK               : input  logic                     ,
+    RST               : input  logic                     ,
+    EN                : input  logic                     ,
+    WE                : input  logic                     ,
+    DATA_IN           : input  logic                     ,
+    ope_kind          : input  OperatorsPkg::OpeKind     ,
+    addr_mode         : input  OperatorsPkg::AddrMode    ,
+    a_target_low_addr : input  logic                 <8> ,
+    a_target_high_addr: input  logic                 <8> ,
+    a_a               : input  logic                 <8> ,
+    a_x               : input  logic                 <8> ,
+    a_y               : input  logic                 <8> ,
+    a_s               : input  logic                 <8> ,
+    a_p               : input  logic                 <8> ,
+    a_pc              : input  logic                 <16>,
+    a                 : output logic                 <8> ,
+    x                 : output logic                 <8> ,
+    y                 : output logic                 <8> ,
+    s                 : output logic                 <8> ,
+    p                 : output logic                 <8> ,
+    pc                : output logic                 <16>,
+    tx_data_out       : output logic                     ,
+    RTS               : output logic                     ,
+    busy              : output logic                     ,
+    finish            : output logic                     ,
 ) {
     enum Status: logic<2> {
         Ready,
@@ -29,21 +31,30 @@ module OpeReadAndStoreToRegister (
         WriteRegister,
         Finish,
     }
-    var n_status          : Status   ;
-    var status            : Status   ;
-    var n_a               : logic <8>;
-    var n_x               : logic <8>;
-    var n_y               : logic <8>;
-    var n_s               : logic <8>;
-    var n_p               : logic <8>;
-    var n_busy            : logic    ;
-    var n_finish          : logic    ;
-    var n_register_data   : logic <8>;
-    var register_data     : logic <8>;
-    var target_low_addr   : logic <8>;
-    var n_target_low_addr : logic <8>;
-    var target_high_addr  : logic <8>;
-    var n_target_high_addr: logic <8>;
+    var n_status          : Status    ;
+    var status            : Status    ;
+    var n_a               : logic <8> ;
+    var n_x               : logic <8> ;
+    var n_y               : logic <8> ;
+    var n_s               : logic <8> ;
+    var n_p               : logic <8> ;
+    var n_pc              : logic <16>;
+    var n_busy            : logic     ;
+    var n_finish          : logic     ;
+    var n_register_data   : logic <8> ;
+    var register_data     : logic <8> ;
+    var target_low_addr   : logic <8> ;
+    var n_target_low_addr : logic <8> ;
+    var target_high_addr  : logic <8> ;
+    var n_target_high_addr: logic <8> ;
+    var write_count       : logic <2> ;
+    var n_write_count     : logic <2> ;
+    var pc_low_tmp        : logic <8> ;
+    var n_pc_low_tmp      : logic <8> ;
+    var pc_high_tmp       : logic <8> ;
+    var n_pc_high_tmp     : logic <8> ;
+    var p_tmp             : logic <8> ;
+    var n_p_tmp           : logic <8> ;
 
     var read_memory_en         : logic    = status == Status::ReadMemory;
     var read_memory_target_data: logic<8>;
@@ -86,32 +97,52 @@ module OpeReadAndStoreToRegister (
         n_y                = y;
         n_s                = s;
         n_p                = p;
+        n_pc               = pc;
         n_register_data    = register_data;
         n_target_low_addr  = target_low_addr;
         n_target_high_addr = target_high_addr;
+        n_write_count      = write_count;
+        n_pc_low_tmp       = pc_low_tmp;
+        n_pc_high_tmp      = pc_high_tmp;
+        n_p_tmp            = p_tmp;
         case status {
             Status::Ready: {
                 n_finish = 0;
-                n_a      = a_a;
-                n_x      = a_x;
-                n_y      = a_y;
-                n_s      = a_s;
-                n_p      = a_p;
                 if EN {
-                    if addr_mode == OperatorsPkg::AddrMode::Imm {
-                        n_register_data = a_target_low_addr;
-                        n_status        = Status::WriteRegister;
-                    } else {
-                        if ope_kind == OperatorsPkg::OpeKind::Plp || ope_kind == OperatorsPkg::OpeKind::Pla {
-                            n_target_low_addr  = n_s;
-                            n_target_high_addr = 0;
-                            n_s                = RegisterPkg::add_without_flag(n_p, n_s, 1);
-                        } else {
-                            n_target_low_addr  = a_target_low_addr;
-                            n_target_high_addr = a_target_high_addr;
-                        }
+                    if write_count == 0 {
+                        n_a           = a_a;
+                        n_x           = a_x;
+                        n_y           = a_y;
+                        n_s           = a_s;
+                        n_p           = a_p;
+                        n_pc          = a_pc;
+                        n_pc_low_tmp  = 0;
+                        n_pc_high_tmp = 0;
+                        n_p_tmp       = 0;
+                        n_write_count = 0;
+                    }
 
-                        n_status = Status::ReadMemory;
+                    if ope_kind == OperatorsPkg::OpeKind::Rti {
+                        n_target_low_addr  = n_s;
+                        n_target_high_addr = 1;
+                        n_s                = utilPkg::wrapping_add(n_s, 1);
+                        n_status           = Status::ReadMemory;
+                    } else {
+                        if addr_mode == OperatorsPkg::AddrMode::Imm {
+                            n_register_data = a_target_low_addr;
+                            n_status        = Status::WriteRegister;
+                        } else {
+                            if ope_kind == OperatorsPkg::OpeKind::Plp || ope_kind == OperatorsPkg::OpeKind::Pla {
+                                n_target_low_addr  = n_s;
+                                n_target_high_addr = 1;
+                                n_s                = RegisterPkg::add_without_flag(n_p, n_s, 1);
+                            } else {
+                                n_target_low_addr  = a_target_low_addr;
+                                n_target_high_addr = a_target_high_addr;
+                            }
+
+                            n_status = Status::ReadMemory;
+                        }
                     }
                 }
             }
@@ -123,7 +154,22 @@ module OpeReadAndStoreToRegister (
             }
             Status::WriteRegister: {
                 n_status = Status::Finish;
-                if ope_kind == OperatorsPkg::OpeKind::Adc {
+                if ope_kind == OperatorsPkg::OpeKind::Rti {
+                    if write_count == 0 {
+                        n_write_count += 1;
+                        n_p_tmp       =  register_data;
+                        n_status      =  Status::Ready;
+                    } else if write_count == 1 {
+                        n_write_count += 1;
+                        n_pc_low_tmp  =  register_data;
+                        n_status      =  Status::Ready;
+                    } else if write_count == 2 {
+                        n_write_count = 0;
+                        n_pc_high_tmp = register_data;
+                        n_pc          = (n_pc_high_tmp << 8) + n_pc_low_tmp;
+                        n_p           = n_p_tmp;
+                    }
+                } else if ope_kind == OperatorsPkg::OpeKind::Adc {
                     n_a = RegisterPkg::add_with_vnzc_and_adding_carry(n_p, n_a, register_data);
                 } else if ope_kind == OperatorsPkg::OpeKind::Sbc {
                     n_a = RegisterPkg::sub_with_vnzc_and_adding_neg_carry(n_p, n_a, register_data);
@@ -168,11 +214,16 @@ module OpeReadAndStoreToRegister (
             y                = 0;
             s                = 0;
             p                = 0;
+            pc               = 0;
             status           = Status::Ready;
             busy             = 0;
             finish           = 0;
             target_low_addr  = 0;
             target_high_addr = 0;
+            write_count      = 0;
+            pc_low_tmp       = 0;
+            pc_high_tmp      = 0;
+            p_tmp            = 0;
         } else {
             register_data    = n_register_data;
             a                = n_a;
@@ -180,11 +231,16 @@ module OpeReadAndStoreToRegister (
             y                = n_y;
             s                = n_s;
             p                = n_p;
+            pc               = n_pc;
             status           = n_status;
             busy             = n_busy;
             finish           = n_finish;
             target_low_addr  = n_target_low_addr;
             target_high_addr = n_target_high_addr;
+            write_count      = n_write_count;
+            pc_low_tmp       = n_pc_low_tmp;
+            pc_high_tmp      = n_pc_high_tmp;
+            p_tmp            = n_p_tmp;
         }
     }
 }

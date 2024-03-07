@@ -29,10 +29,10 @@ pub fn test_plp_impl<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::P, &[0b00000011]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x08]);
-    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFE, 0x00, 0b00000011]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFE, 0x01, 0b00000011]);
     check_valid_register_status(usart, TxReg::S, &[0xFE]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x28]);
-    usart_read_with_check(usart, &mut [0x0u8; 2], &[0xFE, 0x00]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0xFE, 0x01]);
     usart.blocking_write(&[0b00000011]).unwrap();
     check_valid_register_status(usart, TxReg::P, &[0b00000011]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
@@ -54,12 +54,12 @@ pub fn test_pla_impl<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::P, &[0b00000011]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x48]);
-    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFE, 0x00, 0x82]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFE, 0x01, 0x82]);
     check_valid_register_status(usart, TxReg::S, &[0xFE]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x40]);
     check_valid_register_status(usart, TxReg::A, &[0x40]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x68]);
-    usart_read_with_check(usart, &mut [0x0u8; 2], &[0xFE, 0x00]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0xFE, 0x01]);
     usart.blocking_write(&[0x82]).unwrap();
     check_valid_register_status(usart, TxReg::A, &[0x82]);
     check_valid_register_status(usart, TxReg::P, &[0b10000001]);
