@@ -94,7 +94,7 @@ module OpeStoreToMemory (
                     } else if ope_kind == OperatorsPkg::OpeKind::Pha || ope_kind == OperatorsPkg::OpeKind::Php {
                         n_s                = RegisterPkg::sub_without_flag(n_p, n_s, 1);
                         n_target_low_addr  = n_s;
-                        n_target_high_addr = 0;
+                        n_target_high_addr = 1;
                     } else {
                         n_target_low_addr  = a_target_low_addr;
                         n_target_high_addr = a_target_high_addr;

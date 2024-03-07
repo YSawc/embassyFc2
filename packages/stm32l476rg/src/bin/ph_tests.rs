@@ -26,7 +26,7 @@ pub fn test_php_impl_within_n<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x08]);
-    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFE, 0x00, 0b10000000]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFE, 0x01, 0b10000000]);
     check_valid_register_status(usart, TxReg::A, &[0x80]);
     check_valid_register_status(usart, TxReg::S, &[0xFE]);
     info!("test_php_impl_within_n passed!");
@@ -47,7 +47,7 @@ pub fn test_php_impl_within_cz<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::P, &[0b00000011]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x08]);
-    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFE, 0x00, 0b00000011]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFE, 0x01, 0b00000011]);
     check_valid_register_status(usart, TxReg::S, &[0xFE]);
     info!("test_php_impl_within_cz passed!");
 }
@@ -60,7 +60,7 @@ pub fn test_php_impl_within_none_flag<T: BasicInstance, P: Pin, P2: Pin>(
     send_reset_signal_if_not_nop(&nop, resb);
     usart_write(usart, &[CpuMode::Debug as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x08]);
-    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFE, 0x00, 0b00000000]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFE, 0x01, 0b00000000]);
     check_valid_register_status(usart, TxReg::S, &[0xFE]);
     info!("test_php_impl_within_none_flag passed!");
 }
@@ -80,10 +80,10 @@ pub fn test_pha_impl<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::P, &[0b00000011]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x48]);
-    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFE, 0x00, 0x82]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFE, 0x01, 0x82]);
     check_valid_register_status(usart, TxReg::S, &[0xFE]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x48]);
-    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFD, 0x00, 0x82]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFD, 0x01, 0x82]);
     check_valid_register_status(usart, TxReg::S, &[0xFD]);
     info!("test_pha_impl passed!");
 }
