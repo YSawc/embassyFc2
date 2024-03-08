@@ -14,6 +14,21 @@ package utilPkg {
         }
     }
 
+    function short_wrapping_add (
+        l: input logic<16>,
+        r: input logic<8> ,
+    ) -> logic<16> {
+        var int_buffer : logic<17>;
+        var is_overflow: logic    ;
+        int_buffer  = l + r;
+        is_overflow = int_buffer >= 17'h10000;
+        if is_overflow {
+            return (l + r - 17'h10000);
+        } else {
+            return (l + r);
+        }
+    }
+
     function wrapping_sub (
         l: input logic<8>,
         r: input logic<8>,

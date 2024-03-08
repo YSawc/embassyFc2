@@ -49,16 +49,43 @@ pub fn test_rti_impl<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::S, &[0xFC]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x40]);
-    usart_read_with_check(usart, &mut [0x0u8; 2], &[0xFC, 0x01]);
-    usart_write(usart, &[0x45]);
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0xFD, 0x01]);
-    usart_write(usart, &[0xAD]);
+    usart_write(usart, &[0x45]);
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0xFE, 0x01]);
+    usart_write(usart, &[0xAD]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0xFF, 0x01]);
     usart_write(usart, &[0xCE]);
     check_valid_register_status(usart, TxReg::PC, &[0xAD, 0xCE]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
     check_valid_register_status(usart, TxReg::P, &[0x45]);
-    info!("test_jsr_abs passed!");
+    info!("test_rti_abs passed!");
+}
+
+pub fn test_rts_impl<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x4C, 0xFC, 0xC5]);
+    check_valid_register_status(usart, TxReg::PC, &[0xFC, 0xc5]);
+    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x20, 0x2D, 0xC7]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFF, 0x01, 0xC5]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFE, 0x01, 0xFF]);
+    check_valid_register_status(usart, TxReg::PC, &[0x2D, 0xC7]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x60]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0xFE, 0x01]);
+    usart_write(usart, &[0xFF]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0xFF, 0x01]);
+    usart_write(usart, &[0xC5]);
+    check_valid_register_status(usart, TxReg::PC, &[0x00, 0xC6]);
+    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    info!("test_rts_abs passed!");
 }
 
 #[cortex_m_rt::entry]
@@ -73,6 +100,7 @@ fn main() -> ! {
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
     test_rti_impl(&mut usart, &nop, &mut resb);
+    test_rts_impl(&mut usart, &nop, &mut resb);
     info!("all tests passed!");
     loop {}
 }

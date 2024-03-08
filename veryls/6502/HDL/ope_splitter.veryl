@@ -37,7 +37,7 @@ module OpeSplitter (
                     n_ope_mode = ModePkg::OpeMode::Compare;
                 } else if ope_kind == OperatorsPkg::OpeKind::Inc || ope_kind == OperatorsPkg::OpeKind::Dec {
                     n_ope_mode = ModePkg::OpeMode::ReadAndStoreToMemory;
-                } else if ope_kind == OperatorsPkg::OpeKind::Ora || ope_kind == OperatorsPkg::OpeKind::And || ope_kind == OperatorsPkg::OpeKind::Rti || ope_kind == OperatorsPkg::OpeKind::Eor || ope_kind == OperatorsPkg::OpeKind::Adc || ope_kind == OperatorsPkg::OpeKind::Sbc || ope_kind == OperatorsPkg::OpeKind::Lda || ope_kind == OperatorsPkg::OpeKind::Ldx || ope_kind == OperatorsPkg::OpeKind::Ldy || ope_kind == OperatorsPkg::OpeKind::Plp || ope_kind == OperatorsPkg::OpeKind::Pla || ope_kind == OperatorsPkg::OpeKind::Bit {
+                } else if ope_kind == OperatorsPkg::OpeKind::Ora || ope_kind == OperatorsPkg::OpeKind::And || ope_kind == OperatorsPkg::OpeKind::Rti || ope_kind == OperatorsPkg::OpeKind::Rts || ope_kind == OperatorsPkg::OpeKind::Eor || ope_kind == OperatorsPkg::OpeKind::Adc || ope_kind == OperatorsPkg::OpeKind::Sbc || ope_kind == OperatorsPkg::OpeKind::Lda || ope_kind == OperatorsPkg::OpeKind::Ldx || ope_kind == OperatorsPkg::OpeKind::Ldy || ope_kind == OperatorsPkg::OpeKind::Plp || ope_kind == OperatorsPkg::OpeKind::Pla || ope_kind == OperatorsPkg::OpeKind::Bit {
                     n_ope_mode = ModePkg::OpeMode::ReadAndStoreToRegister;
                 } else if ope_kind == OperatorsPkg::OpeKind::Asl || ope_kind == OperatorsPkg::OpeKind::Rol || ope_kind == OperatorsPkg::OpeKind::Lsr || ope_kind == OperatorsPkg::OpeKind::Ror {
                     n_ope_mode = ModePkg::OpeMode::ReadAndStoreToAccOrMemory;
