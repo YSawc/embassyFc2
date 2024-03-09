@@ -144,7 +144,7 @@ pub fn test_dec_zp<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[OpeMode::Inst as u8, 0xC6, 0x78]);
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x78, 0x00]);
     usart.blocking_write(&[0x00]).unwrap();
-    usart_read_with_check(usart, &mut [0x0u8; 1], &[0xFF]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0x78, 0x00, 0xFF]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
     info!("test_dec_zp passed!");
 }
@@ -159,7 +159,7 @@ pub fn test_dec_abs<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[OpeMode::Inst as u8, 0xCE, 0x78, 0x06]);
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x78, 0x06]);
     usart.blocking_write(&[0x80]).unwrap();
-    usart_read_with_check(usart, &mut [0x0u8; 1], &[0x7F]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0x78, 0x06, 0x7F]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     info!("test_dec_abs passed!");
 }
@@ -176,7 +176,7 @@ pub fn test_dec_zpx<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[OpeMode::Inst as u8, 0xDE, 0x00, 0x06]);
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x55, 0x06]);
     usart.blocking_write(&[0x00]).unwrap();
-    usart_read_with_check(usart, &mut [0x0u8; 1], &[0xFF]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0x55, 0x06, 0xFF]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
     info!("test_dec_zpx passed!");
 }
@@ -193,7 +193,7 @@ pub fn test_dec_absx<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[OpeMode::Inst as u8, 0xDE, 0x00, 0x06]);
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x55, 0x06]);
     usart.blocking_write(&[0x00]).unwrap();
-    usart_read_with_check(usart, &mut [0x0u8; 1], &[0xFF]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0x55, 0x06, 0xFF]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
     info!("test_dec_absx passed!");
 }

@@ -88,7 +88,6 @@ module ReadMemory (
         n_finish = finish;
         case status {
             Status::Ready: {
-                n_finish = 0;
                 if EN {
                     n_status = Status::LowTx;
                 }
@@ -109,10 +108,10 @@ module ReadMemory (
                 }
             }
             Status::Finish: {
-                n_finish = 1;
                 n_status = Status::Ready;
             }
         }
+        n_finish = n_status == Status::Finish;
     }
 
     always_ff (posedge CLK, async_high RST) {

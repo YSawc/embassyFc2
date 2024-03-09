@@ -21,9 +21,10 @@ module OpeStoreToMemory (
     busy                   : output logic                    ,
     finish                 : output logic                    ,
 ) {
-    enum Status: logic<5> {
+    enum Status: logic<2> {
         Ready,
         WriteMemory,
+        Finish,
     }
     var n_status          : Status    ;
     var status            : Status    ;
@@ -73,7 +74,6 @@ module OpeStoreToMemory (
         n_write_count      = write_count;
         case status {
             Status::Ready: {
-                n_finish = 0;
                 if EN {
                     if write_count == 0 {
                         n_s           = a_s;
@@ -125,16 +125,18 @@ module OpeStoreToMemory (
                             n_status      =  Status::Ready;
                         } else {
                             n_pc     = (a_target_high_addr << 8) + a_target_low_addr;
-                            n_status = Status::Ready;
-                            n_finish = 1;
+                            n_status = Status::Finish;
                         }
                     } else {
-                        n_status = Status::Ready;
-                        n_finish = 1;
+                        n_status = Status::Finish;
                     }
                 }
             }
+            Status::Finish: {
+                n_status = Status::Ready;
+            }
         }
+        n_finish = n_status == Status::Finish;
     }
 
     always_ff (posedge CLK, async_high RST) {

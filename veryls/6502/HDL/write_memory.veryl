@@ -74,7 +74,6 @@ module WriteMemory (
         n_tx_data_out = tx_data_out;
         case status {
             Status::Ready: {
-                n_finish      = 0;
                 n_tx_data_out = 1;
                 if EN {
                     n_status = Status::LowTx;
@@ -99,10 +98,10 @@ module WriteMemory (
                 }
             }
             Status::Finish: {
-                n_finish = 1;
                 n_status = Status::Ready;
             }
         }
+        n_finish = n_status == Status::Finish;
     }
 
     always_ff (posedge CLK, async_high RST) {

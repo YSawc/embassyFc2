@@ -7,9 +7,10 @@ module OpeSplitter (
     busy    : output logic                ,
     finish  : output logic                ,
 ) {
-    enum Status: logic {
-        idle,
-        work,
+    enum Status: logic<2> {
+        Idle,
+        Work,
+        Finish,
     }
     var status    : Status          ;
     var n_status  : Status          ;
@@ -18,21 +19,19 @@ module OpeSplitter (
     var n_finish  : logic           ;
     always_comb {
         n_status   = status;
-        n_busy     = busy;
         n_finish   = finish;
+        n_busy     = busy;
         n_ope_mode = ope_mode;
         case status {
-            Status::idle: {
-                n_finish = 0;
+            Status::Idle: {
                 if EN {
                     n_busy   = 1;
-                    n_status = Status::work;
+                    n_status = Status::Work;
                 }
             }
-            Status::work: {
-                n_status = Status::idle;
+            Status::Work: {
+                n_status = Status::Finish;
                 n_busy   = 0;
-                n_finish = 1;
                 if ope_kind == OperatorsPkg::OpeKind::Cmp || ope_kind == OperatorsPkg::OpeKind::Cpx || ope_kind == OperatorsPkg::OpeKind::Cpy {
                     n_ope_mode = ModePkg::OpeMode::Compare;
                 } else if ope_kind == OperatorsPkg::OpeKind::Inc || ope_kind == OperatorsPkg::OpeKind::Dec {
@@ -47,12 +46,16 @@ module OpeSplitter (
                     n_ope_mode = ModePkg::OpeMode::Other;
                 }
             }
+            Status::Finish: {
+                n_status = Status::Idle;
+            }
         }
+        n_finish = n_status == Status::Finish;
     }
 
     always_ff (posedge CLK, async_high RST) {
         if_reset {
-            status   = Status::idle;
+            status   = Status::Idle;
             finish   = 0;
             busy     = 0;
             ope_mode = ModePkg::OpeMode::Nop;

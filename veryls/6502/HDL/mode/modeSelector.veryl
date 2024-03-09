@@ -6,28 +6,50 @@ module ModeSelector (
     mode  : output ModePkg::CpuMode   ,
     finish: output logic              ,
 ) {
+    enum Status: logic<2> {
+        Ready,
+        Work,
+        Finish,
+    }
+    var n_status: Status;
+    var status  : Status;
+
     var n_mode  : ModePkg::CpuMode;
     var n_finish: logic           ;
 
     always_comb {
-        n_mode   = mode;
+        n_status = status;
         n_finish = finish;
-        if EN {
-            if data >= 2 && data <= 8'hfe {
-                n_mode = data as ModePkg::CpuMode;
-            } else {
-                n_mode = ModePkg::CpuMode::nop;
+        n_mode   = mode;
+        case status {
+            Status::Ready: {
+                if EN {
+                    n_status = Status::Work;
+                }
             }
-            n_finish = 1;
+            Status::Work: {
+                if data >= 2 && data <= 8'hfe {
+                    n_mode = data as ModePkg::CpuMode;
+                } else {
+                    n_mode = ModePkg::CpuMode::nop;
+                }
+                n_status = Status::Finish;
+            }
+            Status::Finish: {
+                n_status = Status::Ready;
+            }
         }
+        n_finish = n_status == Status::Finish;
     }
 
     always_ff (posedge CLK, async_high RST) {
         if_reset {
             mode   = ModePkg::CpuMode::nop;
+            status = Status::Ready;
             finish = 0;
         } else {
             mode   = n_mode;
+            status = n_status;
             finish = n_finish;
         }
     }

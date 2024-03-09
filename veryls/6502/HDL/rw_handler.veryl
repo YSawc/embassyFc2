@@ -7,9 +7,10 @@ module RWHandler (
     busy    : output logic                ,
     finish  : output logic                ,
 ) {
-    enum Status: logic {
-        idle,
-        work,
+    enum Status: logic<2> {
+        Idle,
+        Work,
+        Finish,
     }
     var status  : Status;
     var n_status: Status;
@@ -18,33 +19,36 @@ module RWHandler (
     var n_finish: logic ;
     always_comb {
         n_status = status;
-        n_busy   = busy;
         n_finish = finish;
+        n_busy   = busy;
         n_rw     = rw;
         case status {
-            Status::idle: {
-                n_finish = 0;
+            Status::Idle: {
                 if EN {
                     n_busy   = 1;
-                    n_status = Status::work;
+                    n_status = Status::Work;
                 }
             }
-            Status::work: {
-                n_status = Status::idle;
+            Status::Work: {
+                n_status = Status::Finish;
                 n_busy   = 0;
-                n_finish = 1;
                 if ope_kind == OperatorsPkg::OpeKind::Dec || ope_kind == OperatorsPkg::OpeKind::Inc || ope_kind == OperatorsPkg::OpeKind::Sta || ope_kind == OperatorsPkg::OpeKind::Stx || ope_kind == OperatorsPkg::OpeKind::Sty || ope_kind == OperatorsPkg::OpeKind::Php || ope_kind == OperatorsPkg::OpeKind::Dcp {
                     n_rw = 0;
                 } else {
                     n_rw = 1;
                 }
             }
+            Status::Finish: {
+                n_status = Status::Idle;
+            }
+
         }
+        n_finish = n_status == Status::Finish;
     }
 
     always_ff (posedge CLK, async_high RST) {
         if_reset {
-            status = Status::idle;
+            status = Status::Idle;
             finish = 0;
             busy   = 0;
             rw     = 0;

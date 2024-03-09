@@ -22,6 +22,7 @@ module OpeCompare (
         Ready,
         ReadMemory,
         Compare,
+        Finish,
     }
     var n_status      : Status   ;
     var status        : Status   ;
@@ -65,8 +66,7 @@ module OpeCompare (
         n_compare_data = compare_data;
         case status {
             Status::Ready: {
-                n_finish = 0;
-                n_p      = a_p;
+                n_p = a_p;
                 if EN {
                     if addr_mode == OperatorsPkg::AddrMode::Imm {
                         n_compare_data = target_low_addr;
@@ -90,10 +90,13 @@ module OpeCompare (
                 } else if ope_kind == OperatorsPkg::OpeKind::Cpy {
                     RegisterPkg::compare_with_nzc(n_p, a_y, compare_data);
                 }
+                n_status = Status::Finish;
+            }
+            Status::Finish: {
                 n_status = Status::Ready;
-                n_finish = 1;
             }
         }
+        n_finish = n_status == Status::Finish;
     }
 
     always_ff (posedge CLK, async_high RST) {

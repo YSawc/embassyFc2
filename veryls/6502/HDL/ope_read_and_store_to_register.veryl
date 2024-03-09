@@ -107,7 +107,6 @@ module OpeReadAndStoreToRegister (
         n_p_tmp            = p_tmp;
         case status {
             Status::Ready: {
-                n_finish = 0;
                 if EN {
                     if write_count == 0 {
                         n_a           = a_a;
@@ -211,9 +210,9 @@ module OpeReadAndStoreToRegister (
             }
             Status::Finish: {
                 n_status = Status::Ready;
-                n_finish = 1;
             }
         }
+        n_finish = n_status == Status::Finish;
     }
 
     always_ff (posedge CLK, async_high RST) {

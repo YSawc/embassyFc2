@@ -25,8 +25,8 @@ pub fn test_inc_abs<T: BasicInstance, P: Pin, P2: Pin>(
         &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0xee, 0x00, 0x04],
     );
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x00, 0x04]);
-    usart.blocking_write(&[0x40]).unwrap();
-    usart_read_with_check(usart, &mut [0x0u8; 1], &[0x41]);
+    usart_write(usart, &[0x40]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0x00, 0x04, 0x41]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     info!("test_inc_abs passed!");
 }
@@ -46,7 +46,7 @@ pub fn test_inc_absx_without_carry<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[OpeMode::Inst as u8, 0xFE, 0x30, 0x40]);
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x60, 0x40]);
     usart_write(usart, &[0x60]);
-    usart_read_with_check(usart, &mut [0x0u8; 1], &[0x61]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0x60, 0x40, 0x61]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     info!("test_inc_absx_without_carry passed!");
 }
@@ -63,7 +63,7 @@ pub fn test_inc_absx_with_carry<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[OpeMode::Inst as u8, 0xFE, 0x30, 0x40]);
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x2F, 0x41]);
     usart_write(usart, &[0x60]);
-    usart_read_with_check(usart, &mut [0x0u8; 1], &[0x61]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0x2F, 0x41, 0x61]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     info!("test_inc_absx_with_carry passed!");
 }
@@ -80,7 +80,7 @@ pub fn test_inc_zp_without_triger_of_p<T: BasicInstance, P: Pin, P2: Pin>(
     );
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x2C, 0x00]);
     usart.blocking_write(&[0x7e]).unwrap();
-    usart_read_with_check(usart, &mut [0x0u8; 1], &[0x7F]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0x2C, 0x00, 0x7F]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     info!("test_inc_zp_without_triger_of_p passed!");
 }
@@ -97,7 +97,7 @@ pub fn test_inc_zp_with_zero_flag<T: BasicInstance, P: Pin, P2: Pin>(
     );
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x2C, 0x00]);
     usart.blocking_write(&[0xff]).unwrap();
-    usart_read_with_check(usart, &mut [0x0u8; 1], &[0x00]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0x2C, 0x00, 0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00000010]);
     info!("test_inc_zp_with_zero_flag passed!");
 }
@@ -114,7 +114,7 @@ pub fn test_inc_zp_with_negative_flag<T: BasicInstance, P: Pin, P2: Pin>(
     );
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x2C, 0x00]);
     usart.blocking_write(&[0x7f]).unwrap();
-    usart_read_with_check(usart, &mut [0x0u8; 1], &[0x80]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0x2C, 0x00, 0x80]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
     info!("test_inc_zp_with_negative_flag passed!");
 }
@@ -135,7 +135,7 @@ pub fn test_inc_zpx<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[OpeMode::Inst as u8, 0xf6, 0x67]);
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0xB7, 0x00]);
     usart.blocking_write(&[0xa0]).unwrap();
-    usart_read_with_check(usart, &mut [0x0u8; 1], &[0xA1]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xB7, 0x00, 0xA1]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
 
     info!("test_inc_zpx passed!");

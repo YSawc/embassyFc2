@@ -20,9 +20,10 @@ module OpeOther (
     busy     : output logic                    ,
     finish   : output logic                    ,
 ) {
-    enum Status: logic {
-        idle,
-        work,
+    enum Status: logic<2> {
+        Idle,
+        Work,
+        Finish,
     }
     var status  : Status    ;
     var n_status: Status    ;
@@ -39,8 +40,8 @@ module OpeOther (
 
     always_comb {
         n_status = status;
-        n_busy   = busy;
         n_finish = finish;
+        n_busy   = busy;
         n_ope_en = ope_en;
         n_a      = a;
         n_x      = x;
@@ -49,23 +50,21 @@ module OpeOther (
         n_p      = p;
         n_pc     = pc;
         case status {
-            Status::idle: {
-                n_finish = 0;
-                n_a      = a_a;
-                n_x      = a_x;
-                n_y      = a_y;
-                n_s      = a_s;
-                n_p      = a_p;
-                n_pc     = a_pc;
+            Status::Idle: {
                 if EN {
+                    n_a      = a_a;
+                    n_x      = a_x;
+                    n_y      = a_y;
+                    n_s      = a_s;
+                    n_p      = a_p;
+                    n_pc     = a_pc;
                     n_busy   = 1;
-                    n_status = Status::work;
+                    n_status = Status::Work;
                 }
             }
-            Status::work: {
-                n_status = Status::idle;
+            Status::Work: {
+                n_status = Status::Finish;
                 n_busy   = 0;
-                n_finish = 1;
                 if ope_kind == OperatorsPkg::OpeKind::Inx {
                     n_x = RegisterPkg::add_with_vnz(n_p, n_x, 1);
                 } else if ope_kind == OperatorsPkg::OpeKind::Dex {
@@ -141,12 +140,16 @@ module OpeOther (
                     n_s = a_x;
                 }
             }
+            Status::Finish: {
+                n_status = Status::Idle;
+            }
         }
+        n_finish = n_status == Status::Finish;
     }
 
     always_ff (posedge CLK, async_high RST) {
         if_reset {
-            status = Status::idle;
+            status = Status::Idle;
             finish = 0;
             busy   = 0;
             ope_en = 0;
