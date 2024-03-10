@@ -478,27 +478,33 @@ module Debug (
         finish  : ope_splitter_finish ,
     );
 
-    var ope_read_and_store_to_memory_en         : logic    = status == Status::OpeReadAndStoreToMemory;
-    var ope_read_and_store_to_memory_p          : logic<8>;
-    var ope_read_and_store_to_memory_tx_data_out: logic   ;
-    var ope_read_and_store_to_memory_rts        : logic   ;
-    var ope_read_and_store_to_memory_busy       : logic   ;
-    var ope_read_and_store_to_memory_finish     : logic   ;
+    var ope_read_and_store_to_memory_en         : logic     = status == Status::OpeReadAndStoreToMemory;
+    var ope_read_and_store_to_memory_s          : logic<8> ;
+    var ope_read_and_store_to_memory_p          : logic<8> ;
+    var ope_read_and_store_to_memory_pc         : logic<16>;
+    var ope_read_and_store_to_memory_tx_data_out: logic    ;
+    var ope_read_and_store_to_memory_rts        : logic    ;
+    var ope_read_and_store_to_memory_busy       : logic    ;
+    var ope_read_and_store_to_memory_finish     : logic    ;
     inst ope_read_and_store_to_memory: OpeReadAndStoreToMemory (
-        CLK                                                       ,
-        RST                                                       ,
-        EN              : ope_read_and_store_to_memory_en         ,
-        WE                                                        ,
-        DATA_IN                                                   ,
-        ope_kind        : inst_casted_ope_kind                    ,
-        target_low_addr                                           ,
-        target_high_addr                                          ,
-        a_p                                                       ,
-        p               : ope_read_and_store_to_memory_p          ,
-        tx_data_out     : ope_read_and_store_to_memory_tx_data_out,
-        RTS             : ope_read_and_store_to_memory_rts        ,
-        busy            : ope_read_and_store_to_memory_busy       ,
-        finish          : ope_read_and_store_to_memory_finish     ,
+        CLK                                                         ,
+        RST                                                         ,
+        EN                : ope_read_and_store_to_memory_en         ,
+        WE                                                          ,
+        DATA_IN                                                     ,
+        ope_kind          : inst_casted_ope_kind                    ,
+        a_target_low_addr : target_low_addr                         ,
+        a_target_high_addr: target_high_addr                        ,
+        a_s                                                         ,
+        a_p                                                         ,
+        a_pc                                                        ,
+        s                 : ope_read_and_store_to_memory_s          ,
+        p                 : ope_read_and_store_to_memory_p          ,
+        pc                : ope_read_and_store_to_memory_pc         ,
+        tx_data_out       : ope_read_and_store_to_memory_tx_data_out,
+        RTS               : ope_read_and_store_to_memory_rts        ,
+        busy              : ope_read_and_store_to_memory_busy       ,
+        finish            : ope_read_and_store_to_memory_finish     ,
     );
 
     var ope_read_and_store_to_register_en         : logic     = status == Status::OpeReadAndStoreToRegister;
@@ -792,7 +798,9 @@ module Debug (
             Status::OpeReadAndStoreToMemory: {
                 n_tx_data_out = ope_read_and_store_to_memory_tx_data_out;
                 if ope_read_and_store_to_memory_finish {
+                    n_s      = ope_read_and_store_to_memory_s;
                     n_p      = ope_read_and_store_to_memory_p;
+                    n_pc     = ope_read_and_store_to_memory_pc;
                     n_status = Status::Ready;
                 }
             }
