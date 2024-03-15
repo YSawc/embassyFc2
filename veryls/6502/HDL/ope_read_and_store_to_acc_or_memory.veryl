@@ -1,21 +1,19 @@
 module OpeReadAndStoreToAccOrMemory (
-    CLK             : input  logic                    ,
-    RST             : input  logic                    ,
-    EN              : input  logic                    ,
-    WE              : input  logic                    ,
-    DATA_IN         : input  logic                    ,
-    addr_mode       : input  OperatorsPkg::AddrMode   ,
-    ope_kind        : input  OperatorsPkg::OpeKind    ,
-    target_low_addr : input  logic                 <8>,
-    target_high_addr: input  logic                 <8>,
-    a_a             : input  logic                 <8>,
-    a_p             : input  logic                 <8>,
-    a               : output logic                 <8>,
-    p               : output logic                 <8>,
-    tx_data_out     : output logic                    ,
-    RTS             : output logic                    ,
-    busy            : output logic                    ,
-    finish          : output logic                    ,
+    CLK             : input   logic                    ,
+    RST             : input   logic                    ,
+    EN              : input   logic                    ,
+    WE              : input   logic                    ,
+    DATA_IN         : input   logic                    ,
+    addr_mode       : input   OperatorsPkg::AddrMode   ,
+    ope_kind        : input   OperatorsPkg::OpeKind    ,
+    target_low_addr : input   logic                 <8>,
+    target_high_addr: input   logic                 <8>,
+    register_slv    : modport RegisterIf::Slave        ,
+    register_mst    : modport RegisterIf::Master       ,
+    tx_data_out     : output  logic                    ,
+    RTS             : output  logic                    ,
+    busy            : output  logic                    ,
+    finish          : output  logic                    ,
 ) {
     enum Status: logic<3> {
         Ready,
@@ -80,8 +78,8 @@ module OpeReadAndStoreToAccOrMemory (
     };
 
     always_comb {
-        n_a           = a;
-        n_p           = p;
+        n_a           = register_mst.a;
+        n_p           = register_mst.p;
         n_status      = status;
         n_finish      = finish;
         n_assign_data = assign_data;
@@ -89,8 +87,8 @@ module OpeReadAndStoreToAccOrMemory (
         case status {
             Status::Ready: {
                 if EN {
-                    n_a = a_a;
-                    n_p = a_p;
+                    n_a = register_slv.a;
+                    n_p = register_slv.p;
                     if addr_mode == OperatorsPkg::AddrMode::Acc {
                         n_assign_data = n_a;
                         n_status      = Status::PreWrite;
@@ -109,13 +107,13 @@ module OpeReadAndStoreToAccOrMemory (
                 if ope_kind == OperatorsPkg::OpeKind::Asl || ope_kind == OperatorsPkg::OpeKind::Rol {
                     n_is_carry    =   (assign_data & 8'b10000000) != 0;
                     n_assign_data <<= 1;
-                    if ope_kind == OperatorsPkg::OpeKind::Rol && (p & 8'b00000001) == 1 {
+                    if ope_kind == OperatorsPkg::OpeKind::Rol && (register_mst.p & 8'b00000001) == 1 {
                         n_assign_data |= 8'b00000001;
                     }
                 } else if ope_kind == OperatorsPkg::OpeKind::Lsr || ope_kind == OperatorsPkg::OpeKind::Ror {
                     n_is_carry    =   (assign_data & 8'b00000001) != 0;
                     n_assign_data >>= 1;
-                    if ope_kind == OperatorsPkg::OpeKind::Ror && (p & 8'b00000001) == 1 {
+                    if ope_kind == OperatorsPkg::OpeKind::Ror && (register_mst.p & 8'b00000001) == 1 {
                         n_assign_data |= 8'b10000000;
                     }
                 }
@@ -147,21 +145,21 @@ module OpeReadAndStoreToAccOrMemory (
 
     always_ff (posedge CLK, async_high RST) {
         if_reset {
-            a           = 0;
-            p           = 0;
-            status      = Status::Ready;
-            assign_data = 0;
-            is_carry    = 0;
-            busy        = 0;
-            finish      = 0;
+            register_mst.a = 0;
+            register_mst.p = 0;
+            status         = Status::Ready;
+            assign_data    = 0;
+            is_carry       = 0;
+            busy           = 0;
+            finish         = 0;
         } else {
-            a           = n_a;
-            p           = n_p;
-            status      = n_status;
-            assign_data = n_assign_data;
-            is_carry    = n_is_carry;
-            busy        = n_busy;
-            finish      = n_finish;
+            register_mst.a = n_a;
+            register_mst.p = n_p;
+            status         = n_status;
+            assign_data    = n_assign_data;
+            is_carry       = n_is_carry;
+            busy           = n_busy;
+            finish         = n_finish;
         }
     }
 }

@@ -1,22 +1,18 @@
 module OpeReadAndStoreToMemory (
-    CLK               : input  logic                    ,
-    RST               : input  logic                    ,
-    EN                : input  logic                    ,
-    WE                : input  logic                    ,
-    DATA_IN           : input  logic                    ,
-    ope_kind          : input  OperatorsPkg::OpeKind    ,
-    a_target_low_addr : input  logic                <8> ,
-    a_target_high_addr: input  logic                <8> ,
-    a_s               : input  logic                <8> ,
-    a_p               : input  logic                <8> ,
-    a_pc              : input  logic                <16>,
-    s                 : output logic                <8> ,
-    p                 : output logic                <8> ,
-    pc                : output logic                <16>,
-    tx_data_out       : output logic                    ,
-    RTS               : output logic                    ,
-    busy              : output logic                    ,
-    finish            : output logic                    ,
+    CLK               : input   logic                   ,
+    RST               : input   logic                   ,
+    EN                : input   logic                   ,
+    WE                : input   logic                   ,
+    DATA_IN           : input   logic                   ,
+    ope_kind          : input   OperatorsPkg::OpeKind   ,
+    a_target_low_addr : input   logic                <8>,
+    a_target_high_addr: input   logic                <8>,
+    register_slv      : modport RegisterIf::Slave       ,
+    register_mst      : modport RegisterIf::Master      ,
+    tx_data_out       : output  logic                   ,
+    RTS               : output  logic                   ,
+    busy              : output  logic                   ,
+    finish            : output  logic                   ,
 ) {
     enum Status: logic<3> {
         Ready,
@@ -102,9 +98,9 @@ module OpeReadAndStoreToMemory (
     };
 
     always_comb {
-        n_s                = s;
-        n_p                = p;
-        n_pc               = pc;
+        n_s                = register_mst.s;
+        n_p                = register_mst.p;
+        n_pc               = register_mst.pc;
         n_status           = status;
         n_finish           = finish;
         n_send_data        = send_data;
@@ -118,9 +114,9 @@ module OpeReadAndStoreToMemory (
             Status::Ready: {
                 if EN {
                     if write_count == 0 && read_count == 0 {
-                        n_s  = a_s;
-                        n_p  = a_p;
-                        n_pc = a_pc;
+                        n_s  = register_slv.s;
+                        n_p  = register_slv.p;
+                        n_pc = register_slv.pc;
                     }
                     if ope_kind == OperatorsPkg::OpeKind::Brk {
                         if (n_p & 8'b00000100) == 0 {
@@ -129,13 +125,13 @@ module OpeReadAndStoreToMemory (
                             n_s                = utilPkg::wrapping_sub(n_s, 1);
                             if write_count == 0 {
                                 n_pc        -= 1;
-                                n_send_data =  (a_pc & 16'hFF00) >> 8;
+                                n_send_data =  (register_slv.pc & 16'hFF00) >> 8;
                                 n_status    =  Status::WriteMemory;
                             } else if write_count == 1 {
-                                n_send_data = a_pc & 16'h00FF;
+                                n_send_data = register_slv.pc & 16'h00FF;
                                 n_status    = Status::WriteMemory;
                             } else if write_count == 2 {
-                                n_send_data = a_p;
+                                n_send_data = register_slv.p;
                                 n_status    = Status::WriteMemory;
                             }
                         } else {
@@ -203,9 +199,9 @@ module OpeReadAndStoreToMemory (
 
     always_ff (posedge CLK, async_high RST) {
         if_reset {
-            s                = 0;
-            p                = 0;
-            pc               = 0;
+            register_mst.s   = 0;
+            register_mst.p   = 0;
+            register_mst.pc  = 0;
             status           = Status::Ready;
             send_data        = 0;
             busy             = 0;
@@ -218,9 +214,9 @@ module OpeReadAndStoreToMemory (
             pc_low_tmp       = 0;
             pc_high_tmp      = 0;
         } else {
-            s                = n_s;
-            p                = n_p;
-            pc               = n_pc;
+            register_mst.s   = n_s;
+            register_mst.p   = n_p;
+            register_mst.pc  = n_pc;
             status           = n_status;
             send_data        = n_send_data;
             busy             = n_busy;

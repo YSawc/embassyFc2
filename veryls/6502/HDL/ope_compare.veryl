@@ -1,22 +1,19 @@
 module OpeCompare (
-    CLK             : input  logic                    ,
-    RST             : input  logic                    ,
-    EN              : input  logic                    ,
-    WE              : input  logic                    ,
-    DATA_IN         : input  logic                    ,
-    ope_kind        : input  OperatorsPkg::OpeKind    ,
-    addr_mode       : input  OperatorsPkg::AddrMode   ,
-    target_low_addr : input  logic                 <8>,
-    target_high_addr: input  logic                 <8>,
-    a_a             : input  logic                 <8>,
-    a_x             : input  logic                 <8>,
-    a_y             : input  logic                 <8>,
-    a_p             : input  logic                 <8>,
-    p               : output logic                 <8>,
-    tx_data_out     : output logic                    ,
-    RTS             : output logic                    ,
-    busy            : output logic                    ,
-    finish          : output logic                    ,
+    CLK             : input   logic                    ,
+    RST             : input   logic                    ,
+    EN              : input   logic                    ,
+    WE              : input   logic                    ,
+    DATA_IN         : input   logic                    ,
+    ope_kind        : input   OperatorsPkg::OpeKind    ,
+    addr_mode       : input   OperatorsPkg::AddrMode   ,
+    target_low_addr : input   logic                 <8>,
+    target_high_addr: input   logic                 <8>,
+    register_slv    : modport RegisterIf::Slave        ,
+    register_mst    : modport RegisterIf::Master       ,
+    tx_data_out     : output  logic                    ,
+    RTS             : output  logic                    ,
+    busy            : output  logic                    ,
+    finish          : output  logic                    ,
 ) {
     enum Status: logic<2> {
         Ready,
@@ -60,13 +57,13 @@ module OpeCompare (
     };
 
     always_comb {
-        n_p            = p;
+        n_p            = register_mst.p;
         n_status       = status;
         n_finish       = finish;
         n_compare_data = compare_data;
         case status {
             Status::Ready: {
-                n_p = a_p;
+                n_p = register_slv.p;
                 if EN {
                     if addr_mode == OperatorsPkg::AddrMode::Imm {
                         n_compare_data = target_low_addr;
@@ -84,11 +81,11 @@ module OpeCompare (
             }
             Status::Compare: {
                 if ope_kind == OperatorsPkg::OpeKind::Cmp {
-                    RegisterPkg::compare_with_nzc(n_p, a_a, compare_data);
+                    RegisterPkg::compare_with_nzc(n_p, register_slv.a, compare_data);
                 } else if ope_kind == OperatorsPkg::OpeKind::Cpx {
-                    RegisterPkg::compare_with_nzc(n_p, a_x, compare_data);
+                    RegisterPkg::compare_with_nzc(n_p, register_slv.x, compare_data);
                 } else if ope_kind == OperatorsPkg::OpeKind::Cpy {
-                    RegisterPkg::compare_with_nzc(n_p, a_y, compare_data);
+                    RegisterPkg::compare_with_nzc(n_p, register_slv.y, compare_data);
                 }
                 n_status = Status::Finish;
             }
@@ -101,17 +98,17 @@ module OpeCompare (
 
     always_ff (posedge CLK, async_high RST) {
         if_reset {
-            compare_data = 0;
-            p            = 0;
-            status       = Status::Ready;
-            busy         = 0;
-            finish       = 0;
+            compare_data   = 0;
+            register_mst.p = 0;
+            status         = Status::Ready;
+            busy           = 0;
+            finish         = 0;
         } else {
-            compare_data = n_compare_data;
-            p            = n_p;
-            status       = n_status;
-            busy         = n_busy;
-            finish       = n_finish;
+            compare_data   = n_compare_data;
+            register_mst.p = n_p;
+            status         = n_status;
+            busy           = n_busy;
+            finish         = n_finish;
         }
     }
 }
