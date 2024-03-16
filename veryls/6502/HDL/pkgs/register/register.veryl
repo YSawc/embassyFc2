@@ -57,24 +57,10 @@ package RegisterPkg {
         input_l  : input logic<8>,
         input_r  : input logic<8>,
     ) -> logic<8> {
-        return tmp_add_with_vnzc_and_adding_carry(0, 0, 0, 0, 0, 0, current_p, input_l, input_r);
-    }
-
-    function tmp_add_with_vnzc_and_adding_carry (
-        byte_buf    : input logic<16>,
-        is_overflow : input logic    ,
-        output_data : input logic<8> ,
-        is_data_plus: input logic    ,
-        is_carry    : input logic    ,
-        old_carry   : input logic    ,
-        current_p   : ref   logic<8> ,
-        input_l     : input logic<8> ,
-        input_r     : input logic<8> ,
-    ) -> logic<8>  {
-        old_carry = (current_p & 8'b00000001) != 0;
-        is_carry  = (input_l + input_r + old_carry) >= 16'h100;
+        let old_carry: logic = (current_p & 8'b00000001) != 0;
+        let is_carry : logic = (input_l + input_r + old_carry) >= 16'h100;
         set_c    (current_p, is_carry);
-        return tmp_add_with_vnz(0, 0, 0, 0, 0, 0, 0, 1, 1, current_p, input_l, input_r + old_carry);
+        return base_add_with_vnz(1, 1, current_p, input_l, input_r + old_carry);
     }
 
     function add_with_vnz (
@@ -82,7 +68,7 @@ package RegisterPkg {
         input_l  : input logic<8>,
         input_r  : input logic<8>,
     ) -> logic<8> {
-        return tmp_add_with_vnz(0, 0, 0, 0, 0, 0, 0, 1, 1, current_p, input_l, input_r);
+        return base_add_with_vnz(1, 1, current_p, input_l, input_r);
     }
 
     function add_with_nz (
@@ -90,7 +76,7 @@ package RegisterPkg {
         input_l  : input logic<8>,
         input_r  : input logic<8>,
     ) -> logic<8> {
-        return tmp_add_with_vnz(0, 0, 0, 0, 0, 0, 0, 0, 1, current_p, input_l, input_r);
+        return base_add_with_vnz(0, 1, current_p, input_l, input_r);
     }
 
     function add_without_flag (
@@ -98,33 +84,27 @@ package RegisterPkg {
         input_l  : input logic<8>,
         input_r  : input logic<8>,
     ) -> logic<8> {
-        return tmp_add_with_vnz(0, 0, 0, 0, 0, 0, 0, 0, 0, current_p, input_l, input_r);
+        return base_add_with_vnz(0, 0, current_p, input_l, input_r);
     }
 
-    function tmp_add_with_vnz (
-        is_overflow    : input logic    ,
-        output_data    : input logic<8> ,
-        is_l_data_plus : input logic    ,
-        is_r_data_plus : input logic    ,
-        byte_buf       : input logic<16>,
-        is_carry       : input logic    ,
-        is_data_plus   : input logic    ,
-        handle_overflow: input logic    ,
-        handle_nz      : input logic    ,
-        current_p      : ref   logic<8> ,
-        input_l        : input logic<8> ,
-        input_r        : input logic<8> ,
-    ) -> logic<8>  {
-        is_l_data_plus = (input_l & 8'b10000000) == 0;
-        is_r_data_plus = (input_r & 8'b10000000) == 0;
-        byte_buf       = input_l + input_r;
-        is_carry       = byte_buf >= 16'h100;
-        output_data    = if is_carry {
+    function base_add_with_vnz (
+        handle_overflow: input logic   ,
+        handle_nz      : input logic   ,
+        current_p      : ref   logic<8>,
+        input_l        : input logic<8>,
+        input_r        : input logic<8>,
+    ) -> logic<8> {
+        let is_l_data_plus: logic     = (input_l & 8'b10000000) == 0;
+        let is_r_data_plus: logic     = (input_r & 8'b10000000) == 0;
+        let byte_buf      : logic<16> = input_l + input_r;
+        let is_carry      : logic     = byte_buf >= 16'h100;
+        let output_data   : logic<8>  = if is_carry {
             input_l + input_r - 16'h100
         } else {
             input_l + input_r
         };
-        is_data_plus = (output_data & 8'b10000000) == 0;
+        let is_data_plus: logic = (output_data & 8'b10000000) == 0;
+        var is_overflow : logic;
         if handle_overflow {
             is_overflow = (is_data_plus != is_l_data_plus) && (is_data_plus != is_r_data_plus);
             set_v      (current_p, is_overflow);
@@ -140,24 +120,10 @@ package RegisterPkg {
         input_l  : input logic<8>,
         input_r  : input logic<8>,
     ) -> logic<8> {
-        return tmp_sub_with_vnzc_and_adding_neg_carry(0, 0, 0, 0, 0, 0, current_p, input_l, input_r);
-    }
-
-    function tmp_sub_with_vnzc_and_adding_neg_carry (
-        byte_buf    : input logic<16>,
-        is_overflow : input logic    ,
-        output_data : input logic<8> ,
-        is_data_plus: input logic    ,
-        is_carry    : input logic    ,
-        old_carry   : input logic    ,
-        current_p   : ref   logic<8> ,
-        input_l     : input logic<8> ,
-        input_r     : input logic<8> ,
-    ) -> logic<8>  {
-        old_carry = (current_p & 8'b00000001) != 0;
-        is_carry  = !((input_l - input_r - !old_carry) >= 16'h100);
+        let old_carry: logic = (current_p & 8'b00000001) != 0;
+        let is_carry : logic = !((input_l - input_r - !old_carry) >= 16'h100);
         set_c    (current_p, is_carry);
-        return tmp_sub_with_vnz(0, 0, 0, 0, 0, 0, 0, 1, 1, current_p, input_l, input_r + !old_carry);
+        return base_sub_with_vnz(1, 1, current_p, input_l, input_r + !old_carry);
     }
 
     function sub_with_vnz (
@@ -165,7 +131,7 @@ package RegisterPkg {
         input_l  : input logic<8>,
         input_r  : input logic<8>,
     ) -> logic<8> {
-        return tmp_sub_with_vnz(0, 0, 0, 0, 0, 0, 0, 1, 1, current_p, input_l, input_r);
+        return base_sub_with_vnz(1, 1, current_p, input_l, input_r);
     }
 
     function sub_with_nz (
@@ -173,7 +139,7 @@ package RegisterPkg {
         input_l  : input logic<8>,
         input_r  : input logic<8>,
     ) -> logic<8> {
-        return tmp_sub_with_vnz(0, 0, 0, 0, 0, 0, 0, 0, 1, current_p, input_l, input_r);
+        return base_sub_with_vnz(0, 1, current_p, input_l, input_r);
     }
 
     function sub_without_flag (
@@ -181,33 +147,26 @@ package RegisterPkg {
         input_l  : input logic<8>,
         input_r  : input logic<8>,
     ) -> logic<8> {
-        return tmp_sub_with_vnz(0, 0, 0, 0, 0, 0, 0, 0, 0, current_p, input_l, input_r);
+        return base_sub_with_vnz(0, 0, current_p, input_l, input_r);
     }
 
-    function tmp_sub_with_vnz (
-        is_overflow    : input logic    ,
-        output_data    : input logic<8> ,
-        is_l_data_minus: input logic    ,
-        is_r_data_minus: input logic    ,
-        byte_buf       : input logic<16>,
-        is_carry       : input logic    ,
-        is_data_plus   : input logic    ,
-        handle_overflow: input logic    ,
-        handle_nz      : input logic    ,
-        current_p      : ref   logic<8> ,
-        input_l        : input logic<8> ,
-        input_r        : input logic<8> ,
-    ) -> logic<8>  {
-        is_l_data_minus = (input_l & 8'b10000000) != 0;
-        is_r_data_minus = (input_r & 8'b10000000) != 0;
-        byte_buf        = input_l - input_r;
-        is_carry        = !(byte_buf <: 16'h100);
-        output_data     = if is_carry {
+    function base_sub_with_vnz (
+        handle_overflow: input logic   ,
+        handle_nz      : input logic   ,
+        current_p      : ref   logic<8>,
+        input_l        : input logic<8>,
+        input_r        : input logic<8>,
+    ) -> logic<8> {
+        let is_l_data_minus: logic     = (input_l & 8'b10000000) != 0;
+        let byte_buf       : logic<16> = input_l - input_r;
+        let is_carry       : logic     = !(byte_buf <: 16'h100);
+        let is_data_plus   : logic     = (output_data & 8'b10000000) == 0;
+        let output_data    : logic<8>  = if is_carry {
             input_l - input_r + 16'h100
         } else {
             input_l - input_r
         };
-        is_data_plus = (output_data & 8'b10000000) == 0;
+        let is_overflow: logic = (output_data & 8'b10000000) == 0;
         if handle_overflow {
             is_overflow = is_data_plus && is_l_data_minus;
             set_v      (current_p, is_overflow);
@@ -224,21 +183,9 @@ package RegisterPkg {
         input_2  : ref   logic<8>,
         input_3  : input logic<8>,
     ) {
-        tmp_add_three_with_adding_carry(0, 0, current_p, input_1, input_2, input_3);
-    }
-
-    function tmp_add_three_with_adding_carry (
-        byte_buf : input logic<16>,
-        old_carry: input logic    ,
-        current_p: ref   logic<8> ,
-        input_1  : ref   logic<8> ,
-        input_2  : ref   logic<8> ,
-        input_3  : input logic<8> ,
-    ) {
-        old_carry =  (current_p & 8'b00000001) != 0;
-        input_3   += old_carry;
-        byte_buf  =  input_2 + input_3;
-        input_2   =  utilPkg::wrapping_add(input_2, input_3);
+        let old_carry: logic     = (current_p & 8'b00000001) != 0;
+        let byte_buf : logic<16> = input_2 + input_3 + old_carry;
+        input_2   = utilPkg::wrapping_add(input_2, input_3 + old_carry);
         if byte_buf >= 16'h100 {
             set_c  (current_p, 1);
             input_1 = utilPkg::wrapping_add(input_1, 1);
@@ -253,20 +200,10 @@ package RegisterPkg {
         input_2: ref   logic<8> ,
         input_3: input logic<8> ,
     ) {
-        input_1                            = (pc & 16'hFF00) >> 8;
-        input_2                            = pc & 16'h000FF;
-        tmp_add_three_without_adding_carry(0, input_1, input_2, 1);
-        tmp_rel                           (0, input_1, input_2, input_3);
-    }
-
-    function tmp_rel (
-        byte_buf: input logic<16>,
-        input_1 : ref   logic<8> ,
-        input_2 : ref   logic<8> ,
-        input_3 : input logic<8> ,
-    ) {
-        byte_buf =  (input_1 << 8) + input_2;
-        byte_buf += input_3;
+        input_1                             = (pc & 16'hFF00) >> 8;
+        input_2                             = pc & 16'h000FF;
+        base_add_three_without_adding_carry(input_1, input_2, 1);
+        let byte_buf                           : logic<16> = (input_1 << 8) + input_2 + input_3;
         if (input_3 >= 8'h80) {
             byte_buf -= 16'h100;
         }
@@ -279,16 +216,15 @@ package RegisterPkg {
         input_2: ref   logic<8>,
         input_3: input logic<8>,
     ) {
-        tmp_add_three_without_adding_carry(0, input_1, input_2, input_3);
+        base_add_three_without_adding_carry(input_1, input_2, input_3);
     }
 
-    function tmp_add_three_without_adding_carry (
-        byte_buf: input logic<16>,
-        input_1 : ref   logic<8> ,
-        input_2 : ref   logic<8> ,
-        input_3 : input logic<8> ,
+    function base_add_three_without_adding_carry (
+        input_1: ref   logic<8>,
+        input_2: ref   logic<8>,
+        input_3: input logic<8>,
     ) {
-        byte_buf = input_2 + input_3;
+        let byte_buf: logic<16> = input_2 + input_3;
         input_2  = utilPkg::wrapping_add(input_2, input_3);
         if byte_buf >= 16'h100 {
             input_1 = utilPkg::wrapping_add(input_1, 1);
