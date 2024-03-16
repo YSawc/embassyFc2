@@ -8,7 +8,8 @@ module ModeHandler (
     busy   : output logic           ,
     finish : output logic           ,
 ) {
-    var mode_read_enable: logic    = (mode == ModePkg::CpuMode::nop);
+    var mode_read_enable: logic;
+    assign mode_read_enable = (mode == ModePkg::CpuMode::nop);
     var mode_read_data  : logic<8>;
     var mode_read_busy  : logic   ;
     var mode_read_finish: logic   ;
@@ -22,7 +23,8 @@ module ModeHandler (
         finish  : mode_read_finish,
     );
 
-    var mode_read_rts_en      : logic = EN && ~mode_read_finish;
+    var mode_read_rts_en      : logic;
+    assign mode_read_rts_en       = EN && ~mode_read_finish;
     var mode_read_rts_data_out: logic;
     var mode_read_rts_busy    : logic;
     var mode_read_rts_finish  : logic;
@@ -41,7 +43,8 @@ module ModeHandler (
         1
     };
 
-    var mode_selector_enable: logic = mode_read_data != 0;
+    var mode_selector_enable: logic;
+    assign mode_selector_enable = mode_read_data != 0;
     var mode_selector_finish: logic;
     inst mode_selector: ModeSelector (
         CLK                         ,

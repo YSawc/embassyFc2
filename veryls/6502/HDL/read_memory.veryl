@@ -25,11 +25,13 @@ module ReadMemory (
         Finish,
     }
 
-    var low_tx_en      : logic    = WE && status == Status::LowTx;
-    var low_tx_data_in : logic<8> = target_low_addr;
-    var low_tx_data_out: logic   ;
-    var low_tx_busy    : logic   ;
-    var low_tx_finish  : logic   ;
+    var low_tx_en      : logic;
+    assign low_tx_en       = WE && status == Status::LowTx;
+    var low_tx_data_in : logic<8>;
+    assign low_tx_data_in  = target_low_addr;
+    var low_tx_data_out: logic;
+    var low_tx_busy    : logic;
+    var low_tx_finish  : logic;
     inst low_tx: uarty::Tx (
         CLK                      ,
         RST                      ,
@@ -40,11 +42,13 @@ module ReadMemory (
         finish  : low_tx_finish  ,
     );
 
-    var high_tx_en      : logic    = WE && status == Status::HighTx;
-    var high_tx_data_in : logic<8> = target_high_addr;
-    var high_tx_data_out: logic   ;
-    var high_tx_busy    : logic   ;
-    var high_tx_finish  : logic   ;
+    var high_tx_en      : logic;
+    assign high_tx_en       = WE && status == Status::HighTx;
+    var high_tx_data_in : logic<8>;
+    assign high_tx_data_in  = target_high_addr;
+    var high_tx_data_out: logic;
+    var high_tx_busy    : logic;
+    var high_tx_finish  : logic;
     inst high_tx: uarty::Tx (
         CLK                       ,
         RST                       ,
@@ -55,7 +59,8 @@ module ReadMemory (
         finish  : high_tx_finish  ,
     );
 
-    var memory_rx_en      : logic    = status == Status::MemoryRx;
+    var memory_rx_en      : logic;
+    assign memory_rx_en       = status == Status::MemoryRx;
     var memory_rx_data_out: logic<8>;
     var memory_rx_busy    : logic   ;
     var memory_rx_finish  : logic   ;

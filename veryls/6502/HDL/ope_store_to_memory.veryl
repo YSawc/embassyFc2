@@ -36,7 +36,8 @@ module OpeStoreToMemory (
     var write_count       : logic <2> ;
     var n_write_count     : logic <2> ;
 
-    var write_memory_en         : logic = status == Status::WriteMemory;
+    var write_memory_en         : logic;
+    assign write_memory_en          = status == Status::WriteMemory;
     var write_memory_tx_data_out: logic;
     var write_memory_busy       : logic;
     var write_memory_finish     : logic;

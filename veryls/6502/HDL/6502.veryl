@@ -10,14 +10,18 @@ module main (
     GPIO_0_4: output logic   , // RW
     GPIO_0_5: output logic   , // Nop(Low if cpumode is not nop)
 ) {
-    var CTS     : logic = GPIO_0_3;
-    var RESB    : logic = GPIO_0_6;
-    var reset   : logic = RST || RESB;
+    var CTS     : logic;
+    assign CTS      = GPIO_0_3;
+    var RESB    : logic;
+    assign RESB     = GPIO_0_6;
+    var reset   : logic;
+    assign reset    = RST || RESB;
     inst register: RegisterIf;
 
     var mode               : ModePkg::CpuMode;
     var tmp_mode           : ModePkg::CpuMode;
-    var mode_handler_en    : logic            = (mode == ModePkg::CpuMode::nop);
+    var mode_handler_en    : logic           ;
+    assign mode_handler_en     = (mode == ModePkg::CpuMode::nop);
     var mode_handler_rts   : logic           ;
     var mode_handler_busy  : logic           ;
     var mode_handler_finish: logic           ;
@@ -37,8 +41,10 @@ module main (
         tmp_mode
     };
 
-    var debug_en         : logic = mode == ModePkg::CpuMode::debug;
-    var debug_tx_en      : logic = ~CTS;
+    var debug_en         : logic;
+    assign debug_en          = mode == ModePkg::CpuMode::debug;
+    var debug_tx_en      : logic;
+    assign debug_tx_en       = ~CTS;
     var debug_busy       : logic;
     var debug_tx_data_out: logic;
     var debug_rw         : logic;

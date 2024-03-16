@@ -44,7 +44,8 @@ module OpeReadAndStoreToMemory (
     var n_target_high_addr: logic <8> ;
     var target_high_addr  : logic <8> ;
 
-    var read_memory_en         : logic    = status == Status::ReadMemory;
+    var read_memory_en         : logic   ;
+    assign read_memory_en          = status == Status::ReadMemory;
     var read_memory_target_data: logic<8>;
     var read_memory_tx_data_out: logic   ;
     var read_memory_rts        : logic   ;
@@ -65,7 +66,8 @@ module OpeReadAndStoreToMemory (
         finish          : read_memory_finish     ,
     );
 
-    var write_memory_en         : logic = status == Status::WriteMemory;
+    var write_memory_en         : logic;
+    assign write_memory_en          = status == Status::WriteMemory;
     var write_memory_tx_data_out: logic;
     var write_memory_busy       : logic;
     var write_memory_finish     : logic;

@@ -320,7 +320,8 @@ module Debug (
     );
     var casted_ope_mode          : OpeMode;
     assign casted_ope_mode           = raw_operator_mode as OpeMode;
-    var tx_reg_detect_rx_en      : logic    = status == Status::TxRegisterDetect;
+    var tx_reg_detect_rx_en      : logic   ;
+    assign tx_reg_detect_rx_en       = status == Status::TxRegisterDetect;
     var tx_reg_detect_rx_data_out: logic<8>;
     var tx_reg_detect_rx_busy    : logic   ;
     var tx_reg_detect_rx_finish  : logic   ;
@@ -341,11 +342,15 @@ module Debug (
         P,
         PC,
     }
-    var casted_tx_reg : TxReg = tx_reg_detect_rx_data_out as TxReg;
-    var tmp_high_tx_en: logic = casted_tx_reg == TxReg::PC;
+    var casted_tx_reg : TxReg;
+    assign casted_tx_reg  = tx_reg_detect_rx_data_out as TxReg;
+    var tmp_high_tx_en: logic;
+    assign tmp_high_tx_en = casted_tx_reg == TxReg::PC;
 
-    var register_row_tx_en     : logic    = WE && status == Status::RegisterLowTransfer;
-    var register_row_tx_data_in: logic<8> = if casted_tx_reg == TxReg::A {
+    var register_row_tx_en     : logic   ;
+    assign register_row_tx_en      = WE && status == Status::RegisterLowTransfer;
+    var register_row_tx_data_in: logic<8>;
+    assign register_row_tx_data_in = if casted_tx_reg == TxReg::A {
         register_mst.a
     } else if casted_tx_reg == TxReg::X {
         register_mst.x
@@ -373,8 +378,10 @@ module Debug (
         finish  : register_row_tx_finish  ,
     );
 
-    var register_high_tx_en     : logic    = WE && status == Status::RegisterHighTransfer;
-    var register_high_tx_data_in: logic<8> = if casted_tx_reg == TxReg::PC {
+    var register_high_tx_en     : logic   ;
+    assign register_high_tx_en      = WE && status == Status::RegisterHighTransfer;
+    var register_high_tx_data_in: logic<8>;
+    assign register_high_tx_data_in = if casted_tx_reg == TxReg::PC {
         (register_mst.pc & 16'hff00) >> 8
     } else {
         0
@@ -406,10 +413,13 @@ module Debug (
         busy    : inst_read_busy  ,
         finish  : inst_read_finish,
     );
-    var inst_casted_ope_kind : OperatorsPkg::OpeKind  = operators[raw_inst_mode].ope_kind;
-    var inst_casted_addr_mode: OperatorsPkg::AddrMode = operators[raw_inst_mode].addr_mode;
+    var inst_casted_ope_kind : OperatorsPkg::OpeKind ;
+    assign inst_casted_ope_kind  = operators[raw_inst_mode].ope_kind;
+    var inst_casted_addr_mode: OperatorsPkg::AddrMode;
+    assign inst_casted_addr_mode = operators[raw_inst_mode].addr_mode;
 
-    var rw_handler_en    : logic = status == Status::RWHandler;
+    var rw_handler_en    : logic;
+    assign rw_handler_en     = status == Status::RWHandler;
     var rw_handler_rw    : logic;
     var rw_handler_busy  : logic;
     var rw_handler_finish: logic;
@@ -423,7 +433,8 @@ module Debug (
         finish  : rw_handler_finish   ,
     );
 
-    var addr_handler_en         : logic = status == Status::AddrHandler;
+    var addr_handler_en         : logic;
+    assign addr_handler_en          = status == Status::AddrHandler;
     var addr_handler_rts        : logic;
     var addr_handler_busy       : logic;
     var addr_handler_finish     : logic;
@@ -448,7 +459,8 @@ module Debug (
         finish          : addr_handler_finish     ,
     );
 
-    var ope_splitter_en    : logic            = status == Status::OpeReady;
+    var ope_splitter_en    : logic           ;
+    assign ope_splitter_en     = status == Status::OpeReady;
     var ope_splitter_busy  : logic           ;
     var ope_splitter_finish: logic           ;
     var ope_mode           : ModePkg::OpeMode;
@@ -462,7 +474,8 @@ module Debug (
         finish  : ope_splitter_finish ,
     );
 
-    var ope_read_and_store_to_memory_en         : logic = status == Status::OpeReadAndStoreToMemory;
+    var ope_read_and_store_to_memory_en         : logic;
+    assign ope_read_and_store_to_memory_en          = status == Status::OpeReadAndStoreToMemory;
     inst ope_read_and_store_to_memory_register   : RegisterIf;
     var ope_read_and_store_to_memory_tx_data_out: logic;
     var ope_read_and_store_to_memory_rts        : logic;
@@ -485,7 +498,8 @@ module Debug (
         finish            : ope_read_and_store_to_memory_finish     ,
     );
 
-    var ope_read_and_store_to_register_en         : logic = status == Status::OpeReadAndStoreToRegister;
+    var ope_read_and_store_to_register_en         : logic;
+    assign ope_read_and_store_to_register_en          = status == Status::OpeReadAndStoreToRegister;
     inst ope_read_and_store_to_register_register   : RegisterIf;
     var ope_read_and_store_to_register_tx_data_out: logic;
     var ope_read_and_store_to_register_rts        : logic;
@@ -509,7 +523,8 @@ module Debug (
         finish            : ope_read_and_store_to_register_finish     ,
     );
 
-    var ope_read_and_store_to_acc_or_memory_en         : logic = status == Status::OpeReadAndStoreToAccOrMemory;
+    var ope_read_and_store_to_acc_or_memory_en         : logic;
+    assign ope_read_and_store_to_acc_or_memory_en          = status == Status::OpeReadAndStoreToAccOrMemory;
     inst ope_read_and_store_to_acc_or_memory_register   : RegisterIf;
     var ope_read_and_store_to_acc_or_memory_tx_data_out: logic;
     var ope_read_and_store_to_acc_or_memory_rts        : logic;
@@ -533,7 +548,8 @@ module Debug (
         finish          : ope_read_and_store_to_acc_or_memory_finish     ,
     );
 
-    var ope_store_to_memory_en         : logic = status == Status::OpeStoreToMemory;
+    var ope_store_to_memory_en         : logic;
+    assign ope_store_to_memory_en          = status == Status::OpeStoreToMemory;
     var zp_adding_without_carry        : logic;
     inst ope_store_to_memory_register   : RegisterIf;
     var ope_store_to_memory_tx_data_out: logic<8>;
@@ -556,7 +572,8 @@ module Debug (
         finish                 : ope_store_to_memory_finish     ,
     );
 
-    var ope_compare_en         : logic = status == Status::OpeCompare;
+    var ope_compare_en         : logic;
+    assign ope_compare_en          = status == Status::OpeCompare;
     inst ope_compare_register   : RegisterIf;
     var ope_compare_tx_data_out: logic;
     var ope_compare_rts        : logic;
