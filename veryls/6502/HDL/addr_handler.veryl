@@ -30,8 +30,7 @@ module AddrHandler (
     var n_tx_data_out     : logic   ;
     var n_RTS             : logic   ;
 
-    var target_low_addr_read_en      : logic   ;
-    assign target_low_addr_read_en       = status == Status::ReadTargetLowAddr;
+    let target_low_addr_read_en      : logic    = status == Status::ReadTargetLowAddr;
     var target_low_addr_read_data_out: logic<8>;
     var target_low_addr_read_busy    : logic   ;
     var target_low_addr_read_finish  : logic   ;
@@ -45,8 +44,7 @@ module AddrHandler (
         finish  : target_low_addr_read_finish  ,
     );
 
-    var target_high_addr_read_en      : logic   ;
-    assign target_high_addr_read_en       = status == Status::ReadTargetHighAddr;
+    let target_high_addr_read_en      : logic    = status == Status::ReadTargetHighAddr;
     var target_high_addr_read_data_out: logic<8>;
     var target_high_addr_read_busy    : logic   ;
     var target_high_addr_read_finish  : logic   ;
@@ -60,8 +58,7 @@ module AddrHandler (
         finish  : target_high_addr_read_finish  ,
     );
 
-    var read_low_memory_en         : logic   ;
-    assign read_low_memory_en          = status == Status::ReadLowMemory;
+    let read_low_memory_en         : logic    = status == Status::ReadLowMemory;
     var read_low_memory_target_data: logic<8>;
     var read_low_memory_tx_data_out: logic   ;
     var read_low_memory_rts        : logic   ;
@@ -82,8 +79,7 @@ module AddrHandler (
         finish          : read_low_memory_finish     ,
     );
 
-    var read_high_memory_en         : logic   ;
-    assign read_high_memory_en          = status == Status::ReadHighMemory;
+    let read_high_memory_en         : logic    = status == Status::ReadHighMemory;
     var read_high_memory_target_data: logic<8>;
     var read_high_memory_tx_data_out: logic   ;
     var read_high_memory_rts        : logic   ;

@@ -32,8 +32,7 @@ module OpeReadAndStoreToAccOrMemory (
     var n_busy    : logic    ;
     var n_finish  : logic    ;
 
-    var read_memory_en         : logic;
-    assign read_memory_en          = status == Status::ReadMemory;
+    let read_memory_en         : logic    = status == Status::ReadMemory;
     var read_memory_target_data: logic<8>;
     var read_memory_tx_data_out: logic   ;
     var read_memory_rts        : logic   ;
@@ -56,11 +55,10 @@ module OpeReadAndStoreToAccOrMemory (
 
     var assign_data       : logic<8>;
     var n_assign_data     : logic<8>;
-    var memory_tx_en      : logic   ;
-    assign memory_tx_en       = WE && status == Status::WriteMemory;
-    var memory_tx_data_out: logic;
-    var memory_tx_busy    : logic;
-    var memory_tx_finish  : logic;
+    let memory_tx_en      : logic    = WE && status == Status::WriteMemory;
+    var memory_tx_data_out: logic   ;
+    var memory_tx_busy    : logic   ;
+    var memory_tx_finish  : logic   ;
     inst memory_tx: uarty::Tx (
         CLK                         ,
         RST                         ,

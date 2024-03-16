@@ -22,9 +22,9 @@ module main (
     var tmp_mode           : ModePkg::CpuMode;
     var mode_handler_en    : logic           ;
     assign mode_handler_en     = (mode == ModePkg::CpuMode::nop);
-    var mode_handler_rts   : logic           ;
-    var mode_handler_busy  : logic           ;
-    var mode_handler_finish: logic           ;
+    var mode_handler_rts   : logic;
+    var mode_handler_busy  : logic;
+    var mode_handler_finish: logic;
     inst mode_handler: ModeHandler (
         CLK                         ,
         RST    : reset              ,

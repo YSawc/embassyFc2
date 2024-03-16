@@ -46,8 +46,7 @@ module OpeReadAndStoreToRegister (
     var p_tmp             : logic <8> ;
     var n_p_tmp           : logic <8> ;
 
-    var read_memory_en         : logic;
-    assign read_memory_en          = status == Status::ReadMemory;
+    let read_memory_en         : logic    = status == Status::ReadMemory;
     var read_memory_target_data: logic<8>;
     var read_memory_tx_data_out: logic   ;
     var read_memory_rts        : logic   ;
