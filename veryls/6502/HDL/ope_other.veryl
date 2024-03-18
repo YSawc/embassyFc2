@@ -1,165 +1,160 @@
 module OpeOther (
-    CLK         : input   logic                   ,
-    RST         : input   logic                   ,
-    EN          : input   logic                   ,
-    ope_kind    : input   OperatorsPkg::OpeKind   ,
-    addr_low    : input   logic                <8>,
-    addr_high   : input   logic                <8>,
-    register_slv: modport RegisterIf::Slave       ,
-    register_mst: modport RegisterIf::Master      ,
-    busy        : output  logic                   ,
-    finish      : output  logic                   ,
+    i_clk          : input   logic                   ,
+    i_rst          : input   logic                   ,
+    i_en           : input   logic                   ,
+    i_ope_kind     : input   OperatorsPkg::OpeKind   ,
+    i_addr_low     : input   logic                <8>,
+    i_addr_high    : input   logic                <8>,
+    if_register_slv: modport RegisterIf::Slave       ,
+    if_register_mst: modport RegisterIf::Master      ,
+    o_busy         : output  logic                   ,
+    o_finish       : output  logic                   ,
 ) {
     enum Status: logic<2> {
         Idle,
         Work,
         Finish,
     }
-    var status  : Status    ;
-    var n_status: Status    ;
-    var n_a     : logic <8> ;
-    var n_x     : logic <8> ;
-    var n_y     : logic <8> ;
-    var n_s     : logic <8> ;
-    var n_p     : logic <8> ;
-    var n_pc    : logic <16>;
-    var n_busy  : logic     ;
-    var n_finish: logic     ;
-    var ope_en  : logic     ;
-    var n_ope_en: logic     ;
+    var status       : Status    ;
+    var status_next  : Status    ;
+    var a_next       : logic <8> ;
+    var x_next       : logic <8> ;
+    var y_next       : logic <8> ;
+    var s_next       : logic <8> ;
+    var p_next       : logic <8> ;
+    var pc_next      : logic <16>;
+    var o_busy_next  : logic     ;
+    var o_finish_next: logic     ;
 
     always_comb {
-        n_status = status;
-        n_finish = finish;
-        n_busy   = busy;
-        n_ope_en = ope_en;
-        n_a      = register_mst.a;
-        n_x      = register_mst.x;
-        n_y      = register_mst.y;
-        n_s      = register_mst.s;
-        n_p      = register_mst.p;
-        n_pc     = register_mst.pc;
+        status_next   = status;
+        o_finish_next = o_finish;
+        o_busy_next   = o_busy;
+        a_next        = if_register_mst.a;
+        x_next        = if_register_mst.x;
+        y_next        = if_register_mst.y;
+        s_next        = if_register_mst.s;
+        p_next        = if_register_mst.p;
+        pc_next       = if_register_mst.pc;
         case status {
             Status::Idle: {
-                if EN {
-                    n_a      = register_slv.a;
-                    n_x      = register_slv.x;
-                    n_y      = register_slv.y;
-                    n_s      = register_slv.s;
-                    n_p      = register_slv.p;
-                    n_pc     = register_slv.pc;
-                    n_busy   = 1;
-                    n_status = Status::Work;
+                if i_en {
+                    a_next      = if_register_slv.a;
+                    x_next      = if_register_slv.x;
+                    y_next      = if_register_slv.y;
+                    s_next      = if_register_slv.s;
+                    p_next      = if_register_slv.p;
+                    pc_next     = if_register_slv.pc;
+                    o_busy_next = 1;
+                    status_next = Status::Work;
                 }
             }
             Status::Work: {
-                n_status = Status::Finish;
-                n_busy   = 0;
-                if ope_kind == OperatorsPkg::OpeKind::Inx {
-                    n_x = RegisterPkg::add_with_vnz(n_p, n_x, 1);
-                } else if ope_kind == OperatorsPkg::OpeKind::Dex {
-                    n_x = RegisterPkg::sub_with_nz(n_p, n_x, 1);
-                } else if ope_kind == OperatorsPkg::OpeKind::Iny {
-                    n_y = RegisterPkg::add_with_vnz(n_p, n_y, 1);
-                } else if ope_kind == OperatorsPkg::OpeKind::Dey {
-                    n_y = RegisterPkg::sub_with_nz(n_p, n_y, 1);
-                } else if ope_kind == OperatorsPkg::OpeKind::Clc {
-                    RegisterPkg::set_c(n_p, 0);
-                } else if ope_kind == OperatorsPkg::OpeKind::Sec {
-                    RegisterPkg::set_c(n_p, 1);
-                } else if ope_kind == OperatorsPkg::OpeKind::Cli {
-                    RegisterPkg::set_i(n_p, 0);
-                } else if ope_kind == OperatorsPkg::OpeKind::Sei {
-                    RegisterPkg::set_i(n_p, 1);
-                } else if ope_kind == OperatorsPkg::OpeKind::Cld {
-                    RegisterPkg::set_d(n_p, 0);
-                } else if ope_kind == OperatorsPkg::OpeKind::Sed {
-                    RegisterPkg::set_d(n_p, 1);
-                } else if ope_kind == OperatorsPkg::OpeKind::Clv {
-                    RegisterPkg::set_v(n_p, 0);
-                } else if ope_kind == OperatorsPkg::OpeKind::Jmp {
-                    n_pc = (addr_high << 8) + addr_low;
-                } else if ope_kind == OperatorsPkg::OpeKind::Bpl {
-                    if (register_slv.p & 8'b10000000) == 0 {
-                        n_pc = (addr_high << 8) + addr_low;
+                status_next = Status::Finish;
+                o_busy_next = 0;
+                if i_ope_kind == OperatorsPkg::OpeKind::Inx {
+                    x_next = RegisterPkg::add_with_vnz(p_next, x_next, 1);
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Dex {
+                    x_next = RegisterPkg::sub_with_nz(p_next, x_next, 1);
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Iny {
+                    y_next = RegisterPkg::add_with_vnz(p_next, y_next, 1);
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Dey {
+                    y_next = RegisterPkg::sub_with_nz(p_next, y_next, 1);
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Clc {
+                    RegisterPkg::set_c(p_next, 0);
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Sec {
+                    RegisterPkg::set_c(p_next, 1);
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Cli {
+                    RegisterPkg::set_i(p_next, 0);
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Sei {
+                    RegisterPkg::set_i(p_next, 1);
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Cld {
+                    RegisterPkg::set_d(p_next, 0);
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Sed {
+                    RegisterPkg::set_d(p_next, 1);
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Clv {
+                    RegisterPkg::set_v(p_next, 0);
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Jmp {
+                    pc_next = (i_addr_high << 8) + i_addr_low;
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Bpl {
+                    if (if_register_slv.p & 8'b10000000) == 0 {
+                        pc_next = (i_addr_high << 8) + i_addr_low;
                     }
-                } else if ope_kind == OperatorsPkg::OpeKind::Bmi {
-                    if (register_slv.p & 8'b10000000) != 0 {
-                        n_pc = (addr_high << 8) + addr_low;
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Bmi {
+                    if (if_register_slv.p & 8'b10000000) != 0 {
+                        pc_next = (i_addr_high << 8) + i_addr_low;
                     }
-                } else if ope_kind == OperatorsPkg::OpeKind::Bvc {
-                    if (register_slv.p & 8'b01000000) == 0 {
-                        n_pc = (addr_high << 8) + addr_low;
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Bvc {
+                    if (if_register_slv.p & 8'b01000000) == 0 {
+                        pc_next = (i_addr_high << 8) + i_addr_low;
                     }
-                } else if ope_kind == OperatorsPkg::OpeKind::Bvs {
-                    if (register_slv.p & 8'b01000000) != 0 {
-                        n_pc = (addr_high << 8) + addr_low;
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Bvs {
+                    if (if_register_slv.p & 8'b01000000) != 0 {
+                        pc_next = (i_addr_high << 8) + i_addr_low;
                     }
-                } else if ope_kind == OperatorsPkg::OpeKind::Bcc {
-                    if (register_slv.p & 8'b00000001) == 0 {
-                        n_pc = (addr_high << 8) + addr_low;
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Bcc {
+                    if (if_register_slv.p & 8'b00000001) == 0 {
+                        pc_next = (i_addr_high << 8) + i_addr_low;
                     }
-                } else if ope_kind == OperatorsPkg::OpeKind::Bcs {
-                    if (register_slv.p & 8'b00000001) != 0 {
-                        n_pc = (addr_high << 8) + addr_low;
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Bcs {
+                    if (if_register_slv.p & 8'b00000001) != 0 {
+                        pc_next = (i_addr_high << 8) + i_addr_low;
                     }
-                } else if ope_kind == OperatorsPkg::OpeKind::Bne {
-                    if (register_slv.p & 8'b00000010) == 0 {
-                        n_pc = (addr_high << 8) + addr_low;
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Bne {
+                    if (if_register_slv.p & 8'b00000010) == 0 {
+                        pc_next = (i_addr_high << 8) + i_addr_low;
                     }
-                } else if ope_kind == OperatorsPkg::OpeKind::Beq {
-                    if (register_slv.p & 8'b00000010) != 0 {
-                        n_pc = (addr_high << 8) + addr_low;
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Beq {
+                    if (if_register_slv.p & 8'b00000010) != 0 {
+                        pc_next = (i_addr_high << 8) + i_addr_low;
                     }
-                } else if ope_kind == OperatorsPkg::OpeKind::Tax {
-                    n_x                 = register_slv.a;
-                    RegisterPkg::set_nz(n_p, n_x);
-                } else if ope_kind == OperatorsPkg::OpeKind::Txa {
-                    n_a                 = register_slv.x;
-                    RegisterPkg::set_nz(n_p, n_a);
-                } else if ope_kind == OperatorsPkg::OpeKind::Tay {
-                    n_y                 = register_slv.a;
-                    RegisterPkg::set_nz(n_p, n_y);
-                } else if ope_kind == OperatorsPkg::OpeKind::Tya {
-                    n_a                 = register_slv.y;
-                    RegisterPkg::set_nz(n_p, n_a);
-                } else if ope_kind == OperatorsPkg::OpeKind::Tsx {
-                    n_x                 = register_slv.s;
-                    RegisterPkg::set_nz(n_p, n_x);
-                } else if ope_kind == OperatorsPkg::OpeKind::Txs {
-                    n_s = register_slv.x;
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Tax {
+                    x_next              = if_register_slv.a;
+                    RegisterPkg::set_nz(p_next, x_next);
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Txa {
+                    a_next              = if_register_slv.x;
+                    RegisterPkg::set_nz(p_next, a_next);
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Tay {
+                    y_next              = if_register_slv.a;
+                    RegisterPkg::set_nz(p_next, y_next);
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Tya {
+                    a_next              = if_register_slv.y;
+                    RegisterPkg::set_nz(p_next, a_next);
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Tsx {
+                    x_next              = if_register_slv.s;
+                    RegisterPkg::set_nz(p_next, x_next);
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Txs {
+                    s_next = if_register_slv.x;
                 }
             }
             Status::Finish: {
-                n_status = Status::Idle;
+                status_next = Status::Idle;
             }
         }
-        n_finish = n_status == Status::Finish;
+        o_finish_next = status_next == Status::Finish;
     }
 
-    always_ff (posedge CLK, async_high RST) {
+    always_ff (posedge i_clk, async_high i_rst) {
         if_reset {
-            status          = Status::Idle;
-            finish          = 0;
-            busy            = 0;
-            ope_en          = 0;
-            register_mst.a  = 0;
-            register_mst.x  = 0;
-            register_mst.y  = 0;
-            register_mst.s  = 0;
-            register_mst.p  = 0;
-            register_mst.pc = 0;
+            status             = Status::Idle;
+            o_finish           = 0;
+            o_busy             = 0;
+            if_register_mst.a  = 0;
+            if_register_mst.x  = 0;
+            if_register_mst.y  = 0;
+            if_register_mst.s  = 0;
+            if_register_mst.p  = 0;
+            if_register_mst.pc = 0;
         } else {
-            status          = n_status;
-            finish          = n_finish;
-            busy            = n_busy;
-            ope_en          = n_ope_en;
-            register_mst.a  = n_a;
-            register_mst.x  = n_x;
-            register_mst.y  = n_y;
-            register_mst.s  = n_s;
-            register_mst.p  = n_p;
-            register_mst.pc = n_pc;
+            status             = status_next;
+            o_finish           = o_finish_next;
+            o_busy             = o_busy_next;
+            if_register_mst.a  = a_next;
+            if_register_mst.x  = x_next;
+            if_register_mst.y  = y_next;
+            if_register_mst.s  = s_next;
+            if_register_mst.p  = p_next;
+            if_register_mst.pc = pc_next;
         }
     }
 }

@@ -1,109 +1,111 @@
 module main (
-    CLK     : input  logic   ,
-    RST     : input  logic   ,
-    KEY     : input  logic<3>,
-    GPIO_0_1: input  logic   , // RX
-    GPIO_0_3: input  logic   , // CTS
-    GPIO_0_6: input  logic   , // RESB
-    GPIO_0_0: output logic   , // TX
-    GPIO_0_2: output logic   , // RTS
-    GPIO_0_4: output logic   , // RW
-    GPIO_0_5: output logic   , // Nop(Low if cpumode is not nop)
+    clk     : input  logic   ,
+    rst     : input  logic   ,
+    key     : input  logic<3>,
+    gpio_0_1: input  logic   , // RX
+    gpio_0_3: input  logic   , // CTS
+    gpio_0_6: input  logic   , // RESB
+    gpio_0_0: output logic   , // TX
+    gpio_0_2: output logic   , // RTS
+    gpio_0_4: output logic   , // RW
+    gpio_0_5: output logic   , // Nop(Low if cpumode is not nop)
 ) {
-    var CTS     : logic;
-    assign CTS      = GPIO_0_3;
-    var RESB    : logic;
-    assign RESB     = GPIO_0_6;
-    var reset   : logic;
-    assign reset    = RST || RESB;
-    inst register: RegisterIf;
+    let i_clk     : logic    = clk;
+    let i_rst     : logic    = rst;
+    let _i_key    : logic<3> = key;
+    let i_gpio_0_1: logic    = gpio_0_1;
+    let i_rx      : logic    = i_gpio_0_1;
+    let i_gpio_0_3: logic    = gpio_0_3;
+    let i_gpio_0_6: logic    = gpio_0_6;
 
-    var mode               : ModePkg::CpuMode;
-    var tmp_mode           : ModePkg::CpuMode;
-    var mode_handler_en    : logic           ;
-    assign mode_handler_en     = (mode == ModePkg::CpuMode::nop);
-    var mode_handler_rts   : logic;
-    var mode_handler_busy  : logic;
-    var mode_handler_finish: logic;
+    let cts        : logic = i_gpio_0_3;
+    let resb       : logic = i_gpio_0_6;
+    let reset      : logic = i_rst || resb;
+    inst if_register: RegisterIf;
+
+    var mode                 : ModePkg::CpuMode;
+    var o_tmp_mode           : ModePkg::CpuMode;
+    let i_mode_handler_en    : logic            = (mode == ModePkg::CpuMode::nop);
+    var o_mode_handler_rts   : logic           ;
+    var o_mode_handler_busy  : logic           ;
+    var o_mode_handler_finish: logic           ;
     inst mode_handler: ModeHandler (
-        CLK                         ,
-        RST    : reset              ,
-        EN     : mode_handler_en    ,
-        DATA_IN: GPIO_0_1           ,
-        mode   : tmp_mode           ,
-        RTS    : mode_handler_rts   ,
-        busy   : mode_handler_busy  ,
-        finish : mode_handler_finish,
+        i_clk                          ,
+        i_rst   : reset                ,
+        i_en    : i_mode_handler_en    ,
+        i_rx                           ,
+        o_mode  : o_tmp_mode           ,
+        o_rts   : o_mode_handler_rts   ,
+        o_busy  : o_mode_handler_busy  ,
+        o_finish: o_mode_handler_finish,
     );
-    assign mode = if debug_finish {
+    assign mode = if o_debug_finish {
         ModePkg::CpuMode::nop
     } else {
-        tmp_mode
+        o_tmp_mode
     };
 
-    var debug_en         : logic;
-    assign debug_en          = mode == ModePkg::CpuMode::debug;
-    var debug_tx_en      : logic;
-    assign debug_tx_en       = ~CTS;
-    var debug_busy       : logic;
-    var debug_tx_data_out: logic;
-    var debug_rw         : logic;
-    var debug_finish     : logic;
-    inst debug_register   : RegisterIf;
-    var debug_rts        : logic;
+    let i_debug_en       : logic = mode == ModePkg::CpuMode::debug;
+    let i_debug_tx_en    : logic = ~cts;
+    var o_debug_busy     : logic;
+    var o_debug_tx       : logic;
+    var o_debug_rw       : logic;
+    var o_debug_finish   : logic;
+    inst if_debug_register: RegisterIf;
+    var o_debug_rts      : logic;
     inst debug: Debug (
-        CLK                            ,
-        RST         : reset            ,
-        DATA_IN     : GPIO_0_1         ,
-        EN          : debug_en         ,
-        WE          : debug_tx_en      ,
-        register_mst: debug_register   ,
-        register_slv: register         ,
-        tx_data_out : debug_tx_data_out,
-        busy        : debug_busy       ,
-        RTS         : debug_rts        ,
-        rw          : debug_rw         ,
-        finish      : debug_finish     ,
+        i_clk                             ,
+        i_rst          : reset            ,
+        i_en           : i_debug_en       ,
+        i_rx                              ,
+        i_we           : i_debug_tx_en    ,
+        if_register_mst: if_debug_register,
+        if_register_slv: if_register      ,
+        o_tx           : o_debug_tx       ,
+        o_busy         : o_debug_busy     ,
+        o_rts          : o_debug_rts      ,
+        o_rw           : o_debug_rw       ,
+        o_finish       : o_debug_finish   ,
     );
 
-    assign GPIO_0_0 = if mode == ModePkg::CpuMode::debug {
-        if debug_tx_en {
-            debug_tx_data_out
+    assign gpio_0_0 = if mode == ModePkg::CpuMode::debug {
+        if i_debug_tx_en {
+            o_debug_tx
         } else {
             1
         }
     } else {
         1
     };
-    assign GPIO_0_2 = if mode_handler_en {
-        ~mode_handler_busy
-    } else if debug_busy {
-        debug_rts
+    assign gpio_0_2 = if i_mode_handler_en {
+        ~o_mode_handler_busy
+    } else if o_debug_busy {
+        o_debug_rts
     } else {
         1
     };
-    assign GPIO_0_4 = if debug_en {
-        debug_rw
+    assign gpio_0_4 = if i_debug_en {
+        o_debug_rw
     } else {
         1
     };
 
-    assign GPIO_0_5 = mode == ModePkg::CpuMode::nop;
-    always_ff (posedge CLK, async_high RST) {
+    assign gpio_0_5 = mode == ModePkg::CpuMode::nop;
+    always_ff (posedge i_clk, async_high i_rst) {
         if_reset {
-            register.a  = 0;
-            register.x  = 0;
-            register.y  = 0;
-            register.s  = 0;
-            register.p  = 0;
-            register.pc = 0;
+            if_register.a  = 0;
+            if_register.x  = 0;
+            if_register.y  = 0;
+            if_register.s  = 0;
+            if_register.p  = 0;
+            if_register.pc = 0;
         } else {
-            register.a  = debug_register.a;
-            register.x  = debug_register.x;
-            register.y  = debug_register.y;
-            register.s  = debug_register.s;
-            register.p  = debug_register.p;
-            register.pc = debug_register.pc;
+            if_register.a  = if_debug_register.a;
+            if_register.x  = if_debug_register.x;
+            if_register.y  = if_debug_register.y;
+            if_register.s  = if_debug_register.s;
+            if_register.p  = if_debug_register.p;
+            if_register.pc = if_debug_register.pc;
         }
     }
 }

@@ -1,31 +1,31 @@
 module Debug (
-    CLK         : input   logic             ,
-    RST         : input   logic             ,
-    DATA_IN     : input   logic             ,
-    EN          : input   logic             ,
-    WE          : input   logic             ,
-    register_slv: modport RegisterIf::Slave ,
-    register_mst: modport RegisterIf::Master,
-    tx_data_out : output  logic             ,
-    busy        : output  logic             ,
-    RTS         : output  logic             ,
-    finish      : output  logic             ,
-    rw          : output  logic             ,
+    i_clk          : input   logic             ,
+    i_rst          : input   logic             ,
+    i_rx           : input   logic             ,
+    i_en           : input   logic             ,
+    i_we           : input   logic             ,
+    if_register_slv: modport RegisterIf::Slave ,
+    if_register_mst: modport RegisterIf::Master,
+    o_tx           : output  logic             ,
+    o_busy         : output  logic             ,
+    o_rts          : output  logic             ,
+    o_finish       : output  logic             ,
+    o_rw           : output  logic             ,
 ) {
-    var n_tx_data_out: logic    ;
-    var n_a          : logic<8> ;
-    var n_x          : logic<8> ;
-    var n_y          : logic<8> ;
-    var n_s          : logic<8> ;
-    var n_p          : logic<8> ;
-    var n_pc         : logic<16>;
+    var o_tx_next: logic    ;
+    var o_a_next : logic<8> ;
+    var o_x_next : logic<8> ;
+    var o_y_next : logic<8> ;
+    var o_s_next : logic<8> ;
+    var o_p_next : logic<8> ;
+    var o_pc_next: logic<16>;
 
-    var n_busy  : logic;
-    var n_RTS   : logic;
-    var n_finish: logic;
+    var o_busy_next  : logic;
+    var o_rts_next   : logic;
+    var o_finish_next: logic;
 
-    var status  : Status   ;
-    var n_status: Status   ;
+    var status     : Status   ;
+    var status_next: Status   ;
     enum Status: logic <5> {
         Ready,
         OpeRead,
@@ -304,33 +304,32 @@ module Debug (
         Inst,
         RegisterTransfer,
     }
-    var raw_operator_mode: logic<8>;
-    var ope_read_busy    : logic   ;
-    var ope_read_en      : logic   ;
-    assign ope_read_en       = status == Status::OpeRead;
-    var ope_mode_finish  : logic;
-    inst ope_mode_rx: uarty::Rx (
-        CLK                        ,
-        RST                        ,
-        DATA_IN                    ,
-        RE      : ope_read_en      ,
-        data_out: raw_operator_mode,
-        busy    : ope_read_busy    ,
-        finish  : ope_mode_finish  ,
+    var o_raw_operator_mode: logic<8>;
+    var o_ope_read_busy    : logic   ;
+    let i_ope_read_en      : logic    = status == Status::OpeRead;
+    var o_ope_mode_finish  : logic   ;
+    inst o_ope_mode_rx: uarty::Rx (
+        i_clk                        ,
+        i_rst                        ,
+        i_rx                         ,
+        i_en    : i_ope_read_en      ,
+        o_data  : o_raw_operator_mode,
+        o_busy  : o_ope_read_busy    ,
+        o_finish: o_ope_mode_finish  ,
     );
-    let casted_ope_mode          : OpeMode    = raw_operator_mode as OpeMode;
-    let tx_reg_detect_rx_en      : logic      = status == Status::TxRegisterDetect;
-    var tx_reg_detect_rx_data_out: logic  <8>;
-    var tx_reg_detect_rx_busy    : logic     ;
-    var tx_reg_detect_rx_finish  : logic     ;
+    let casted_ope_mode          : OpeMode    = o_raw_operator_mode as OpeMode;
+    let i_tx_reg_detect_rx_en    : logic      = status == Status::TxRegisterDetect;
+    var o_tx_reg_detect_rx_data  : logic  <8>;
+    var o_tx_reg_detect_rx_busy  : logic     ;
+    var o_tx_reg_detect_rx_finish: logic     ;
     inst tx_reg_detect_rx: uarty::Rx (
-        CLK                                ,
-        RST                                ,
-        DATA_IN                            ,
-        RE      : tx_reg_detect_rx_en      ,
-        data_out: tx_reg_detect_rx_data_out,
-        busy    : tx_reg_detect_rx_busy    ,
-        finish  : tx_reg_detect_rx_finish  ,
+        i_clk                              ,
+        i_rst                              ,
+        i_rx                               ,
+        i_en    : i_tx_reg_detect_rx_en    ,
+        o_data  : o_tx_reg_detect_rx_data  ,
+        o_busy  : o_tx_reg_detect_rx_busy  ,
+        o_finish: o_tx_reg_detect_rx_finish,
     );
     enum TxReg: logic<3> {
         A,
@@ -340,277 +339,275 @@ module Debug (
         P,
         PC,
     }
-    let casted_tx_reg : TxReg = tx_reg_detect_rx_data_out as TxReg;
+    let casted_tx_reg : TxReg = o_tx_reg_detect_rx_data as TxReg;
     let tmp_high_tx_en: logic = casted_tx_reg == TxReg::PC;
 
-    let register_row_tx_en     : logic    = WE && status == Status::RegisterLowTransfer;
-    let register_row_tx_data_in: logic<8> = if casted_tx_reg == TxReg::A {
-        register_mst.a
+    let register_row_tx_en    : logic    = i_we && status == Status::RegisterLowTransfer;
+    let i_register_row_tx_data: logic<8> = if casted_tx_reg == TxReg::A {
+        if_register_mst.a
     } else if casted_tx_reg == TxReg::X {
-        register_mst.x
+        if_register_mst.x
     } else if casted_tx_reg == TxReg::Y {
-        register_mst.y
+        if_register_mst.y
     } else if casted_tx_reg == TxReg::S {
-        register_mst.s
+        if_register_mst.s
     } else if casted_tx_reg == TxReg::P {
-        register_mst.p
+        if_register_mst.p
     } else if casted_tx_reg == TxReg::PC {
-        register_mst.pc & 8'hff
+        if_register_mst.pc & 8'hff
     } else {
         0
     };
-    var register_row_tx_data_out: logic;
-    var register_row_tx_busy    : logic;
-    var register_row_tx_finish  : logic;
+    var o_register_row_tx_tx    : logic;
+    var o_register_row_tx_busy  : logic;
+    var o_register_row_tx_finish: logic;
     inst register_row_tx: uarty::Tx (
-        CLK                               ,
-        RST                               ,
-        WE      : register_row_tx_en      ,
-        DATA_IN : register_row_tx_data_in ,
-        data_out: register_row_tx_data_out,
-        busy    : register_row_tx_busy    ,
-        finish  : register_row_tx_finish  ,
+        i_clk                             ,
+        i_rst                             ,
+        i_en    : register_row_tx_en      ,
+        i_data  : i_register_row_tx_data  ,
+        o_tx    : o_register_row_tx_tx    ,
+        o_busy  : o_register_row_tx_busy  ,
+        o_finish: o_register_row_tx_finish,
     );
 
-    let register_high_tx_en     : logic    = WE && status == Status::RegisterHighTransfer;
-    let register_high_tx_data_in: logic<8> = if casted_tx_reg == TxReg::PC {
-        (register_mst.pc & 16'hff00) >> 8
+    let i_register_high_tx_en  : logic    = i_we && status == Status::RegisterHighTransfer;
+    let i_register_high_tx_data: logic<8> = if casted_tx_reg == TxReg::PC {
+        (if_register_mst.pc & 16'hff00) >> 8
     } else {
         0
     };
-    var register_high_tx_data_out: logic;
-    var register_high_tx_busy    : logic;
-    var register_high_tx_finish  : logic;
+    var o_register_high_tx_tx    : logic;
+    var o_register_high_tx_busy  : logic;
+    var o_register_high_tx_finish: logic;
     inst register_high_tx: uarty::Tx (
-        CLK                                ,
-        RST                                ,
-        WE      : register_high_tx_en      ,
-        DATA_IN : register_high_tx_data_in ,
-        data_out: register_high_tx_data_out,
-        busy    : register_high_tx_busy    ,
-        finish  : register_high_tx_finish  ,
+        i_clk                              ,
+        i_rst                              ,
+        i_en    : i_register_high_tx_en    ,
+        i_data  : i_register_high_tx_data  ,
+        o_tx    : o_register_high_tx_tx    ,
+        o_busy  : o_register_high_tx_busy  ,
+        o_finish: o_register_high_tx_finish,
     );
 
-    var raw_inst_mode   : logic<8>;
-    var inst_read_busy  : logic   ;
-    let inst_read_en    : logic    = status == Status::InstRead;
-    var inst_read_finish: logic   ;
+    var o_raw_inst_mode   : logic<8>;
+    var o_inst_read_busy  : logic   ;
+    let i_inst_read_en    : logic    = status == Status::InstRead;
+    var o_inst_read_finish: logic   ;
     inst inst_mode_rx: uarty::Rx (
-        CLK                       ,
-        RST                       ,
-        DATA_IN                   ,
-        RE      : inst_read_en    ,
-        data_out: raw_inst_mode   ,
-        busy    : inst_read_busy  ,
-        finish  : inst_read_finish,
+        i_clk                       ,
+        i_rst                       ,
+        i_rx                        ,
+        i_en    : i_inst_read_en    ,
+        o_data  : o_raw_inst_mode   ,
+        o_busy  : o_inst_read_busy  ,
+        o_finish: o_inst_read_finish,
     );
-    let inst_casted_ope_kind : OperatorsPkg::OpeKind  = operators[raw_inst_mode].ope_kind;
-    let inst_casted_addr_mode: OperatorsPkg::AddrMode = operators[raw_inst_mode].addr_mode;
+    let i_inst_casted_ope_kind : OperatorsPkg::OpeKind  = operators[o_raw_inst_mode].ope_kind;
+    let i_inst_casted_addr_mode: OperatorsPkg::AddrMode = operators[o_raw_inst_mode].addr_mode;
 
-    let rw_handler_en    : logic = status == Status::RWHandler;
-    var rw_handler_rw    : logic;
-    var rw_handler_busy  : logic;
-    var rw_handler_finish: logic;
+    let i_rw_handler_en    : logic = status == Status::RWHandler;
+    var o_rw_handler_rw    : logic;
+    var o_rw_handler_busy  : logic;
+    var o_rw_handler_finish: logic;
     inst rw_handler: RWHandler (
-        CLK                           ,
-        RST                           ,
-        EN      : rw_handler_en       ,
-        ope_kind: inst_casted_ope_kind,
-        rw      : rw_handler_rw       ,
-        busy    : rw_handler_busy     ,
-        finish  : rw_handler_finish   ,
+        i_clk                             ,
+        i_rst                             ,
+        i_en      : i_rw_handler_en       ,
+        i_ope_kind: i_inst_casted_ope_kind,
+        o_rw      : o_rw_handler_rw       ,
+        o_busy    : o_rw_handler_busy     ,
+        o_finish  : o_rw_handler_finish   ,
     );
 
-    let addr_handler_en         : logic = status == Status::AddrHandler;
-    var addr_handler_rts        : logic;
-    var addr_handler_busy       : logic;
-    var addr_handler_finish     : logic;
-    inst addr_handler_register   : RegisterIf;
-    var target_low_addr         : logic<8>;
-    var target_high_addr        : logic<8>;
-    var addr_handler_tx_data_out: logic   ;
+    let i_addr_handler_en    : logic = status == Status::AddrHandler;
+    var o_addr_handler_rts   : logic;
+    var o_addr_handler_busy  : logic;
+    var o_addr_handler_finish: logic;
+    inst addr_handler_register: RegisterIf;
+    var o_target_low_addr    : logic<8>;
+    var o_target_high_addr   : logic<8>;
+    var o_addr_handler_tx    : logic   ;
     inst addr_handler: AddrHandler (
-        CLK                                       ,
-        RST                                       ,
-        EN              : addr_handler_en         ,
-        WE                                        ,
-        DATA_IN                                   ,
-        addr_mode       : inst_casted_addr_mode   ,
-        register_mst    : addr_handler_register   ,
-        register_slv                              ,
-        target_low_addr                           ,
-        target_high_addr                          ,
-        tx_data_out     : addr_handler_tx_data_out,
-        RTS             : addr_handler_rts        ,
-        busy            : addr_handler_busy       ,
-        finish          : addr_handler_finish     ,
+        i_clk                                      ,
+        i_rst                                      ,
+        i_en              : i_addr_handler_en      ,
+        i_we                                       ,
+        i_rx                                       ,
+        i_addr_mode       : i_inst_casted_addr_mode,
+        if_register_mst   : addr_handler_register  ,
+        if_register_slv                            ,
+        o_target_low_addr                          ,
+        o_target_high_addr                         ,
+        o_tx              : o_addr_handler_tx      ,
+        o_rts             : o_addr_handler_rts     ,
+        o_busy            : o_addr_handler_busy    ,
+        o_finish          : o_addr_handler_finish  ,
     );
 
-    let ope_splitter_en    : logic            = status == Status::OpeReady;
-    var ope_splitter_busy  : logic           ;
-    var ope_splitter_finish: logic           ;
-    var ope_mode           : ModePkg::OpeMode;
+    let i_ope_splitter_en    : logic            = status == Status::OpeReady;
+    var o_ope_splitter_busy  : logic           ;
+    var o_ope_splitter_finish: logic           ;
+    var o_ope_mode           : ModePkg::OpeMode;
     inst ope_splitter: OpeSplitter (
-        CLK                           ,
-        RST                           ,
-        EN      : ope_splitter_en     ,
-        ope_kind: inst_casted_ope_kind,
-        ope_mode                      ,
-        busy    : ope_splitter_busy   ,
-        finish  : ope_splitter_finish ,
+        i_clk                             ,
+        i_rst                             ,
+        i_en      : i_ope_splitter_en     ,
+        i_ope_kind: i_inst_casted_ope_kind,
+        o_ope_mode                        ,
+        o_busy    : o_ope_splitter_busy   ,
+        o_finish  : o_ope_splitter_finish ,
     );
 
-    let ope_read_and_store_to_memory_en         : logic = status == Status::OpeReadAndStoreToMemory;
-    inst ope_read_and_store_to_memory_register   : RegisterIf;
-    var ope_read_and_store_to_memory_tx_data_out: logic;
-    var ope_read_and_store_to_memory_rts        : logic;
-    var ope_read_and_store_to_memory_busy       : logic;
-    var ope_read_and_store_to_memory_finish     : logic;
+    let i_ope_read_and_store_to_memory_en       : logic = status == Status::OpeReadAndStoreToMemory;
+    inst if_ope_read_and_store_to_memory_register: RegisterIf;
+    var o_ope_read_and_store_to_memory_tx       : logic;
+    var o_ope_read_and_store_to_memory_rts      : logic;
+    var o_ope_read_and_store_to_memory_busy     : logic;
+    var o_ope_read_and_store_to_memory_finish   : logic;
     inst ope_read_and_store_to_memory: OpeReadAndStoreToMemory (
-        CLK                                                         ,
-        RST                                                         ,
-        EN                : ope_read_and_store_to_memory_en         ,
-        WE                                                          ,
-        DATA_IN                                                     ,
-        ope_kind          : inst_casted_ope_kind                    ,
-        a_target_low_addr : target_low_addr                         ,
-        a_target_high_addr: target_high_addr                        ,
-        register_mst      : ope_read_and_store_to_memory_register   ,
-        register_slv                                                ,
-        tx_data_out       : ope_read_and_store_to_memory_tx_data_out,
-        RTS               : ope_read_and_store_to_memory_rts        ,
-        busy              : ope_read_and_store_to_memory_busy       ,
-        finish            : ope_read_and_store_to_memory_finish     ,
+        i_clk                                                       ,
+        i_rst                                                       ,
+        i_en              : i_ope_read_and_store_to_memory_en       ,
+        i_we                                                        ,
+        i_rx                                                        ,
+        i_ope_kind        : i_inst_casted_ope_kind                  ,
+        i_target_low_addr : o_target_low_addr                       ,
+        i_target_high_addr: o_target_high_addr                      ,
+        if_register_mst   : if_ope_read_and_store_to_memory_register,
+        if_register_slv                                             ,
+        o_tx              : o_ope_read_and_store_to_memory_tx       ,
+        o_rts             : o_ope_read_and_store_to_memory_rts      ,
+        o_busy            : o_ope_read_and_store_to_memory_busy     ,
+        o_finish          : o_ope_read_and_store_to_memory_finish   ,
     );
 
-    let ope_read_and_store_to_register_en         : logic = status == Status::OpeReadAndStoreToRegister;
-    inst ope_read_and_store_to_register_register   : RegisterIf;
-    var ope_read_and_store_to_register_tx_data_out: logic;
-    var ope_read_and_store_to_register_rts        : logic;
-    var ope_read_and_store_to_register_busy       : logic;
-    var ope_read_and_store_to_register_finish     : logic;
+    let i_ope_read_and_store_to_register_en       : logic = status == Status::OpeReadAndStoreToRegister;
+    inst if_ope_read_and_store_to_register_register: RegisterIf;
+    var o_ope_read_and_store_to_register_tx       : logic;
+    var o_ope_read_and_store_to_register_rts      : logic;
+    var o_ope_read_and_store_to_register_busy     : logic;
+    var o_ope_read_and_store_to_register_finish   : logic;
     inst ope_read_and_store_to_register: OpeReadAndStoreToRegister (
-        CLK                                                           ,
-        RST                                                           ,
-        EN                : ope_read_and_store_to_register_en         ,
-        WE                                                            ,
-        DATA_IN                                                       ,
-        ope_kind          : inst_casted_ope_kind                      ,
-        addr_mode         : inst_casted_addr_mode                     ,
-        a_target_low_addr : target_low_addr                           ,
-        a_target_high_addr: target_high_addr                          ,
-        register_mst      : ope_read_and_store_to_register_register   ,
-        register_slv                                                  ,
-        tx_data_out       : ope_read_and_store_to_register_tx_data_out,
-        RTS               : ope_read_and_store_to_register_rts        ,
-        busy              : ope_read_and_store_to_register_busy       ,
-        finish            : ope_read_and_store_to_register_finish     ,
+        i_clk                                                         ,
+        i_rst                                                         ,
+        i_en              : i_ope_read_and_store_to_register_en       ,
+        i_we                                                          ,
+        i_rx                                                          ,
+        i_ope_kind        : i_inst_casted_ope_kind                    ,
+        i_addr_mode       : i_inst_casted_addr_mode                   ,
+        i_target_low_addr : o_target_low_addr                         ,
+        i_target_high_addr: o_target_high_addr                        ,
+        if_register_mst   : if_ope_read_and_store_to_register_register,
+        if_register_slv                                               ,
+        o_tx              : o_ope_read_and_store_to_register_tx       ,
+        o_rts             : o_ope_read_and_store_to_register_rts      ,
+        o_busy            : o_ope_read_and_store_to_register_busy     ,
+        o_finish          : o_ope_read_and_store_to_register_finish   ,
     );
 
-    let ope_read_and_store_to_acc_or_memory_en         : logic = status == Status::OpeReadAndStoreToAccOrMemory;
-    inst ope_read_and_store_to_acc_or_memory_register   : RegisterIf;
-    var ope_read_and_store_to_acc_or_memory_tx_data_out: logic;
-    var ope_read_and_store_to_acc_or_memory_rts        : logic;
-    var ope_read_and_store_to_acc_or_memory_busy       : logic;
-    var ope_read_and_store_to_acc_or_memory_finish     : logic;
+    let i_ope_read_and_store_to_acc_or_memory_en       : logic = status == Status::OpeReadAndStoreToAccOrMemory;
+    inst if_ope_read_and_store_to_acc_or_memory_register: RegisterIf;
+    var o_ope_read_and_store_to_acc_or_memory_tx       : logic;
+    var o_ope_read_and_store_to_acc_or_memory_rts      : logic;
+    var o_ope_read_and_store_to_acc_or_memory_busy     : logic;
+    var o_ope_read_and_store_to_acc_or_memory_finish   : logic;
     inst ope_read_and_store_to_acc_or_memory: OpeReadAndStoreToAccOrMemory (
-        CLK                                                              ,
-        RST                                                              ,
-        EN              : ope_read_and_store_to_acc_or_memory_en         ,
-        WE                                                               ,
-        DATA_IN                                                          ,
-        addr_mode       : inst_casted_addr_mode                          ,
-        ope_kind        : inst_casted_ope_kind                           ,
-        target_low_addr                                                  ,
-        target_high_addr                                                 ,
-        register_mst    : ope_read_and_store_to_acc_or_memory_register   ,
-        register_slv                                                     ,
-        tx_data_out     : ope_read_and_store_to_acc_or_memory_tx_data_out,
-        RTS             : ope_read_and_store_to_acc_or_memory_rts        ,
-        busy            : ope_read_and_store_to_acc_or_memory_busy       ,
-        finish          : ope_read_and_store_to_acc_or_memory_finish     ,
+        i_clk                                                              ,
+        i_rst                                                              ,
+        i_en              : i_ope_read_and_store_to_acc_or_memory_en       ,
+        i_we                                                               ,
+        i_rx                                                               ,
+        i_addr_mode       : i_inst_casted_addr_mode                        ,
+        i_ope_kind        : i_inst_casted_ope_kind                         ,
+        i_target_low_addr : o_target_low_addr                              ,
+        i_target_high_addr: o_target_high_addr                             ,
+        if_register_mst   : if_ope_read_and_store_to_acc_or_memory_register,
+        if_register_slv                                                    ,
+        o_tx              : o_ope_read_and_store_to_acc_or_memory_tx       ,
+        o_rts             : o_ope_read_and_store_to_acc_or_memory_rts      ,
+        o_busy            : o_ope_read_and_store_to_acc_or_memory_busy     ,
+        o_finish          : o_ope_read_and_store_to_acc_or_memory_finish   ,
     );
 
-    let ope_store_to_memory_en         : logic = status == Status::OpeStoreToMemory;
-    var zp_adding_without_carry        : logic;
-    inst ope_store_to_memory_register   : RegisterIf;
-    var ope_store_to_memory_tx_data_out: logic<8>;
-    var ope_store_to_memory_busy       : logic   ;
-    var ope_store_to_memory_finish     : logic   ;
+    let i_ope_store_to_memory_en       : logic = status == Status::OpeStoreToMemory;
+    inst if_ope_store_to_memory_register: RegisterIf;
+    var o_ope_store_to_memory_tx       : logic<8>;
+    var o_ope_store_to_memory_busy     : logic   ;
+    var o_ope_store_to_memory_finish   : logic   ;
     inst ope_store_to_memory: OpeStoreToMemory (
-        CLK                                                     ,
-        RST                                                     ,
-        EN                     : ope_store_to_memory_en         ,
-        WE                                                      ,
-        DATA_IN                                                 ,
-        ope_kind               : inst_casted_ope_kind           ,
-        a_target_low_addr      : target_low_addr                ,
-        a_target_high_addr     : target_high_addr               ,
-        register_mst           : ope_store_to_memory_register   ,
-        register_slv                                            ,
-        zp_adding_without_carry                                 ,
-        tx_data_out            : ope_store_to_memory_tx_data_out,
-        busy                   : ope_store_to_memory_busy       ,
-        finish                 : ope_store_to_memory_finish     ,
+        i_clk                                              ,
+        i_rst                                              ,
+        i_en              : i_ope_store_to_memory_en       ,
+        i_we                                               ,
+        i_rx                                               ,
+        i_ope_kind        : i_inst_casted_ope_kind         ,
+        i_target_low_addr : o_target_low_addr              ,
+        i_target_high_addr: o_target_high_addr             ,
+        if_register_mst   : if_ope_store_to_memory_register,
+        if_register_slv                                    ,
+        o_tx              : o_ope_store_to_memory_tx       ,
+        o_busy            : o_ope_store_to_memory_busy     ,
+        o_finish          : o_ope_store_to_memory_finish   ,
     );
 
-    let ope_compare_en         : logic = status == Status::OpeCompare;
-    inst ope_compare_register   : RegisterIf;
-    var ope_compare_tx_data_out: logic;
-    var ope_compare_rts        : logic;
-    var ope_compare_busy       : logic;
-    var ope_compare_finish     : logic;
+    let i_ope_compare_en       : logic = status == Status::OpeCompare;
+    inst if_ope_compare_register: RegisterIf;
+    var o_ope_compare_tx       : logic;
+    var o_ope_compare_rts      : logic;
+    var o_ope_compare_busy     : logic;
+    var o_ope_compare_finish   : logic;
     inst ope_compare: OpeCompare (
-        CLK                                      ,
-        RST                                      ,
-        EN              : ope_compare_en         ,
-        WE                                       ,
-        DATA_IN                                  ,
-        ope_kind        : inst_casted_ope_kind   ,
-        addr_mode       : inst_casted_addr_mode  ,
-        target_low_addr                          ,
-        target_high_addr                         ,
-        register_mst    : ope_compare_register   ,
-        register_slv                             ,
-        tx_data_out     : ope_compare_tx_data_out,
-        RTS             : ope_compare_rts        ,
-        busy            : ope_compare_busy       ,
-        finish          : ope_compare_finish     ,
+        i_clk                                      ,
+        i_rst                                      ,
+        i_en              : i_ope_compare_en       ,
+        i_we                                       ,
+        i_rx                                       ,
+        i_ope_kind        : i_inst_casted_ope_kind ,
+        i_addr_mode       : i_inst_casted_addr_mode,
+        i_target_low_addr : o_target_low_addr      ,
+        i_target_high_addr: o_target_high_addr     ,
+        if_register_mst   : if_ope_compare_register,
+        if_register_slv                            ,
+        o_tx              : o_ope_compare_tx       ,
+        o_rts             : o_ope_compare_rts      ,
+        o_busy            : o_ope_compare_busy     ,
+        o_finish          : o_ope_compare_finish   ,
     );
 
-    inst ope_other_register: RegisterIf;
-    var ope_other_busy    : logic;
-    var ope_other_finish  : logic;
-    let ope_other_en      : logic = status == Status::OpeOther;
+    inst if_ope_other_register: RegisterIf;
+    var o_ope_other_busy     : logic;
+    var o_ope_other_finish   : logic;
+    let i_ope_other_en       : logic = status == Status::OpeOther;
     inst ope_other: OpeOther (
-        CLK                               ,
-        RST                               ,
-        EN          : ope_other_en        ,
-        ope_kind    : inst_casted_ope_kind,
-        addr_low    : target_low_addr     ,
-        addr_high   : target_high_addr    ,
-        register_mst: ope_other_register  ,
-        register_slv                      ,
-        busy        : ope_other_busy      ,
-        finish      : ope_other_finish    ,
+        i_clk                                  ,
+        i_rst                                  ,
+        i_en           : i_ope_other_en        ,
+        i_ope_kind     : i_inst_casted_ope_kind,
+        i_addr_low     : o_target_low_addr     ,
+        i_addr_high    : o_target_high_addr    ,
+        if_register_mst: if_ope_other_register ,
+        if_register_slv                        ,
+        o_busy         : o_ope_other_busy      ,
+        o_finish       : o_ope_other_finish    ,
     );
 
-    assign n_finish                   = ope_other_finish;
-    var n_register_transfer_finish: logic;
-    var register_transfer_finish  : logic;
-    assign n_busy                     = if casted_ope_mode == OpeMode::Inst {
+    assign o_finish_next                 = o_ope_other_finish;
+    var register_transfer_finish_next: logic;
+    var register_transfer_finish     : logic;
+    assign o_busy_next                   = if casted_ope_mode == OpeMode::Inst {
         if status == Status::OpeReadAndStoreToMemory {
-            ~ope_read_and_store_to_memory_finish
+            ~o_ope_read_and_store_to_memory_finish
         } else if status == Status::OpeReadAndStoreToRegister {
-            ~ope_read_and_store_to_register_finish
+            ~o_ope_read_and_store_to_register_finish
         } else if status == Status::OpeReadAndStoreToAccOrMemory {
-            ~ope_read_and_store_to_acc_or_memory_finish
+            ~o_ope_read_and_store_to_acc_or_memory_finish
         } else if status == Status::OpeStoreToMemory {
-            ~ope_store_to_memory_finish
+            ~o_ope_store_to_memory_finish
         } else if status == Status::OpeCompare {
-            ~ope_compare_finish
+            ~o_ope_compare_finish
         } else if status == Status::OpeOther {
-            ~ope_other_finish
+            ~o_ope_other_finish
         } else {
             1
         }
@@ -620,199 +617,199 @@ module Debug (
         1
     };
 
-    assign n_RTS = if ope_read_en {
-        ~ope_read_en
-    } else if inst_read_en {
-        ~inst_read_en
-    } else if tx_reg_detect_rx_en {
-        ~tx_reg_detect_rx_en
-    } else if addr_handler_en {
-        addr_handler_rts
-    } else if ope_read_and_store_to_memory_en {
-        ope_read_and_store_to_memory_rts
-    } else if ope_read_and_store_to_register_en {
-        ope_read_and_store_to_register_rts
-    } else if ope_read_and_store_to_acc_or_memory_en {
-        ope_read_and_store_to_acc_or_memory_rts
-    } else if ope_compare_en {
-        ope_compare_rts
+    assign o_rts_next = if i_ope_read_en {
+        ~i_ope_read_en
+    } else if i_inst_read_en {
+        ~i_inst_read_en
+    } else if i_tx_reg_detect_rx_en {
+        ~i_tx_reg_detect_rx_en
+    } else if i_addr_handler_en {
+        o_addr_handler_rts
+    } else if i_ope_read_and_store_to_memory_en {
+        o_ope_read_and_store_to_memory_rts
+    } else if i_ope_read_and_store_to_register_en {
+        o_ope_read_and_store_to_register_rts
+    } else if i_ope_read_and_store_to_acc_or_memory_en {
+        o_ope_read_and_store_to_acc_or_memory_rts
+    } else if i_ope_compare_en {
+        o_ope_compare_rts
     } else {
         1
     };
 
     always_comb {
-        n_tx_data_out              = tx_data_out;
-        n_a                        = register_mst.a;
-        n_x                        = register_mst.x;
-        n_y                        = register_mst.y;
-        n_s                        = register_mst.s;
-        n_p                        = register_mst.p;
-        n_pc                       = register_mst.pc;
-        n_status                   = status;
-        n_register_transfer_finish = register_transfer_finish;
+        o_tx_next                     = o_tx;
+        o_a_next                      = if_register_mst.a;
+        o_x_next                      = if_register_mst.x;
+        o_y_next                      = if_register_mst.y;
+        o_s_next                      = if_register_mst.s;
+        o_p_next                      = if_register_mst.p;
+        o_pc_next                     = if_register_mst.pc;
+        status_next                   = status;
+        register_transfer_finish_next = register_transfer_finish;
         case status {
             Status::Ready: {
-                n_tx_data_out              = 1;
-                n_register_transfer_finish = 0;
-                if EN {
-                    n_status = Status::OpeRead;
+                o_tx_next                     = 1;
+                register_transfer_finish_next = 0;
+                if i_en {
+                    status_next = Status::OpeRead;
                 }
             }
             Status::OpeRead: {
-                if ope_mode_finish {
+                if o_ope_mode_finish {
                     if casted_ope_mode == OpeMode::Inst {
-                        n_status = Status::InstRead;
+                        status_next = Status::InstRead;
                     } else if casted_ope_mode == OpeMode::RegisterTransfer {
-                        n_status = Status::TxRegisterDetect;
+                        status_next = Status::TxRegisterDetect;
                     }
                 }
             }
             Status::TxRegisterDetect: {
-                if tx_reg_detect_rx_finish {
-                    n_status = Status::RegisterLowTransfer;
+                if o_tx_reg_detect_rx_finish {
+                    status_next = Status::RegisterLowTransfer;
                 }
             }
             Status::RegisterLowTransfer: {
-                n_tx_data_out = register_row_tx_data_out;
-                if register_row_tx_finish {
+                o_tx_next = o_register_row_tx_tx;
+                if o_register_row_tx_finish {
                     if tmp_high_tx_en {
-                        n_status = Status::RegisterHighTransfer;
+                        status_next = Status::RegisterHighTransfer;
                     } else {
-                        n_register_transfer_finish = 1;
-                        n_status                   = Status::Ready;
+                        register_transfer_finish_next = 1;
+                        status_next                   = Status::Ready;
                     }
                 }
             }
             Status::RegisterHighTransfer: {
-                n_tx_data_out = register_high_tx_data_out;
-                if register_high_tx_finish {
-                    n_register_transfer_finish = 1;
-                    n_status                   = Status::Ready;
+                o_tx_next = o_register_high_tx_tx;
+                if o_register_high_tx_finish {
+                    register_transfer_finish_next = 1;
+                    status_next                   = Status::Ready;
                 }
             }
             Status::InstRead: {
-                if inst_read_finish {
-                    n_status = Status::RWHandler;
+                if o_inst_read_finish {
+                    status_next = Status::RWHandler;
                 }
             }
             Status::RWHandler: {
-                if rw_handler_finish {
-                    n_status = Status::AddrHandler;
+                if o_rw_handler_finish {
+                    status_next = Status::AddrHandler;
                 }
             }
             Status::AddrHandler: {
-                n_tx_data_out = addr_handler_tx_data_out;
-                if addr_handler_finish {
-                    n_p      = addr_handler_register.p;
-                    n_pc     = addr_handler_register.pc;
-                    n_status = Status::OpeReady;
+                o_tx_next = o_addr_handler_tx;
+                if o_addr_handler_finish {
+                    o_p_next    = addr_handler_register.p;
+                    o_pc_next   = addr_handler_register.pc;
+                    status_next = Status::OpeReady;
                 }
             }
             Status::OpeReady: {
-                if ope_splitter_finish {
-                    if ope_mode == ModePkg::OpeMode::ReadAndStoreToMemory {
-                        n_status = Status::OpeReadAndStoreToMemory;
-                    } else if ope_mode == ModePkg::OpeMode::ReadAndStoreToRegister {
-                        n_status = Status::OpeReadAndStoreToRegister;
-                    } else if ope_mode == ModePkg::OpeMode::ReadAndStoreToAccOrMemory {
-                        n_status = Status::OpeReadAndStoreToAccOrMemory;
-                    } else if ope_mode == ModePkg::OpeMode::StoreToMemory {
-                        n_status = Status::OpeStoreToMemory;
-                    } else if ope_mode == ModePkg::OpeMode::Compare {
-                        n_status = Status::OpeCompare;
+                if o_ope_splitter_finish {
+                    if o_ope_mode == ModePkg::OpeMode::ReadAndStoreToMemory {
+                        status_next = Status::OpeReadAndStoreToMemory;
+                    } else if o_ope_mode == ModePkg::OpeMode::ReadAndStoreToRegister {
+                        status_next = Status::OpeReadAndStoreToRegister;
+                    } else if o_ope_mode == ModePkg::OpeMode::ReadAndStoreToAccOrMemory {
+                        status_next = Status::OpeReadAndStoreToAccOrMemory;
+                    } else if o_ope_mode == ModePkg::OpeMode::StoreToMemory {
+                        status_next = Status::OpeStoreToMemory;
+                    } else if o_ope_mode == ModePkg::OpeMode::Compare {
+                        status_next = Status::OpeCompare;
                     } else {
-                        n_status = Status::OpeOther;
+                        status_next = Status::OpeOther;
                     }
                 }
             }
             Status::OpeReadAndStoreToMemory: {
-                n_tx_data_out = ope_read_and_store_to_memory_tx_data_out;
-                if ope_read_and_store_to_memory_finish {
-                    n_s      = ope_read_and_store_to_memory_register.s;
-                    n_p      = ope_read_and_store_to_memory_register.p;
-                    n_pc     = ope_read_and_store_to_memory_register.pc;
-                    n_status = Status::Ready;
+                o_tx_next = o_ope_read_and_store_to_memory_tx;
+                if o_ope_read_and_store_to_memory_finish {
+                    o_s_next    = if_ope_read_and_store_to_memory_register.s;
+                    o_p_next    = if_ope_read_and_store_to_memory_register.p;
+                    o_pc_next   = if_ope_read_and_store_to_memory_register.pc;
+                    status_next = Status::Ready;
                 }
             }
             Status::OpeReadAndStoreToRegister: {
-                n_tx_data_out = ope_read_and_store_to_register_tx_data_out;
-                if ope_read_and_store_to_register_finish {
-                    n_a      = ope_read_and_store_to_register_register.a;
-                    n_x      = ope_read_and_store_to_register_register.x;
-                    n_y      = ope_read_and_store_to_register_register.y;
-                    n_s      = ope_read_and_store_to_register_register.s;
-                    n_p      = ope_read_and_store_to_register_register.p;
-                    n_pc     = ope_read_and_store_to_register_register.pc;
-                    n_status = Status::Ready;
+                o_tx_next = o_ope_read_and_store_to_register_tx;
+                if o_ope_read_and_store_to_register_finish {
+                    o_a_next    = if_ope_read_and_store_to_register_register.a;
+                    o_x_next    = if_ope_read_and_store_to_register_register.x;
+                    o_y_next    = if_ope_read_and_store_to_register_register.y;
+                    o_s_next    = if_ope_read_and_store_to_register_register.s;
+                    o_p_next    = if_ope_read_and_store_to_register_register.p;
+                    o_pc_next   = if_ope_read_and_store_to_register_register.pc;
+                    status_next = Status::Ready;
                 }
             }
             Status::OpeReadAndStoreToAccOrMemory: {
-                n_tx_data_out = ope_read_and_store_to_acc_or_memory_tx_data_out;
-                if ope_read_and_store_to_acc_or_memory_finish {
-                    n_a      = ope_read_and_store_to_acc_or_memory_register.a;
-                    n_p      = ope_read_and_store_to_acc_or_memory_register.p;
-                    n_status = Status::Ready;
+                o_tx_next = o_ope_read_and_store_to_acc_or_memory_tx;
+                if o_ope_read_and_store_to_acc_or_memory_finish {
+                    o_a_next    = if_ope_read_and_store_to_acc_or_memory_register.a;
+                    o_p_next    = if_ope_read_and_store_to_acc_or_memory_register.p;
+                    status_next = Status::Ready;
                 }
             }
             Status::OpeStoreToMemory: {
-                n_tx_data_out = ope_store_to_memory_tx_data_out;
-                if ope_store_to_memory_finish {
-                    n_status = Status::Ready;
-                    n_s      = ope_store_to_memory_register.s;
-                    n_p      = ope_store_to_memory_register.p;
-                    n_pc     = ope_store_to_memory_register.pc;
+                o_tx_next = o_ope_store_to_memory_tx;
+                if o_ope_store_to_memory_finish {
+                    status_next = Status::Ready;
+                    o_s_next    = if_ope_store_to_memory_register.s;
+                    o_p_next    = if_ope_store_to_memory_register.p;
+                    o_pc_next   = if_ope_store_to_memory_register.pc;
                 }
             }
             Status::OpeCompare: {
-                n_tx_data_out = ope_compare_tx_data_out;
-                n_p           = ope_compare_register.p;
-                if ope_compare_finish {
-                    n_status = Status::Ready;
+                o_tx_next = o_ope_compare_tx;
+                o_p_next  = if_ope_compare_register.p;
+                if o_ope_compare_finish {
+                    status_next = Status::Ready;
                 }
             }
 
             Status::OpeOther: {
-                if ope_other_finish {
-                    n_a      = ope_other_register.a;
-                    n_x      = ope_other_register.x;
-                    n_y      = ope_other_register.y;
-                    n_s      = ope_other_register.s;
-                    n_p      = ope_other_register.p;
-                    n_pc     = ope_other_register.pc;
-                    n_status = Status::Ready;
+                if o_ope_other_finish {
+                    o_a_next    = if_ope_other_register.a;
+                    o_x_next    = if_ope_other_register.x;
+                    o_y_next    = if_ope_other_register.y;
+                    o_s_next    = if_ope_other_register.s;
+                    o_p_next    = if_ope_other_register.p;
+                    o_pc_next   = if_ope_other_register.pc;
+                    status_next = Status::Ready;
                 }
             }
         }
     }
 
-    assign rw = rw_handler_rw;
-    always_ff (posedge CLK, async_high RST) {
+    assign o_rw = o_rw_handler_rw;
+    always_ff (posedge i_clk, async_high i_rst) {
         if_reset {
-            tx_data_out              = 1;
-            register_mst.a           = 0;
-            register_mst.x           = 0;
-            register_mst.y           = 0;
-            register_mst.s           = 8'hFF;
-            register_mst.p           = 0;
-            register_mst.pc          = 0;
-            busy                     = 0;
-            RTS                      = 1;
+            o_tx                     = 1;
+            if_register_mst.a        = 0;
+            if_register_mst.x        = 0;
+            if_register_mst.y        = 0;
+            if_register_mst.s        = 8'hFF;
+            if_register_mst.p        = 0;
+            if_register_mst.pc       = 0;
+            o_busy                   = 0;
+            o_rts                    = 1;
             status                   = Status::Ready;
             register_transfer_finish = 0;
-            finish                   = 0;
+            o_finish                 = 0;
         } else {
-            tx_data_out              = n_tx_data_out;
-            register_mst.a           = n_a;
-            register_mst.x           = n_x;
-            register_mst.y           = n_y;
-            register_mst.s           = n_s;
-            register_mst.p           = n_p;
-            register_mst.pc          = n_pc;
-            busy                     = n_busy;
-            RTS                      = n_RTS;
-            register_transfer_finish = n_register_transfer_finish;
-            status                   = n_status;
-            finish                   = n_finish;
+            o_tx                     = o_tx_next;
+            if_register_mst.a        = o_a_next;
+            if_register_mst.x        = o_x_next;
+            if_register_mst.y        = o_y_next;
+            if_register_mst.s        = o_s_next;
+            if_register_mst.p        = o_p_next;
+            if_register_mst.pc       = o_pc_next;
+            o_busy                   = o_busy_next;
+            o_rts                    = o_rts_next;
+            register_transfer_finish = register_transfer_finish_next;
+            status                   = status_next;
+            o_finish                 = o_finish_next;
         }
     }
 }

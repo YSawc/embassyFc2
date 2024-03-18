@@ -200,10 +200,10 @@ package RegisterPkg {
         input_2: ref   logic<8> ,
         input_3: input logic<8> ,
     ) {
-        input_1                             = (pc & 16'hFF00) >> 8;
-        input_2                             = pc & 16'h000FF;
-        base_add_three_without_adding_carry(input_1, input_2, 1);
-        let byte_buf                           : logic<16> = (input_1 << 8) + input_2 + input_3;
+        input_1                        = (pc & 16'hFF00) >> 8;
+        input_2                        = pc & 16'h000FF;
+        add_three_without_adding_carry(input_1, input_2, 1);
+        let byte_buf                      : logic<16> = (input_1 << 8) + input_2 + input_3;
         if (input_3 >= 8'h80) {
             byte_buf -= 16'h100;
         }
@@ -212,14 +212,6 @@ package RegisterPkg {
     }
 
     function add_three_without_adding_carry (
-        input_1: ref   logic<8>,
-        input_2: ref   logic<8>,
-        input_3: input logic<8>,
-    ) {
-        base_add_three_without_adding_carry(input_1, input_2, input_3);
-    }
-
-    function base_add_three_without_adding_carry (
         input_1: ref   logic<8>,
         input_2: ref   logic<8>,
         input_3: input logic<8>,

@@ -1,20 +1,20 @@
 module WriteMemory (
-    CLK             : input  logic   ,
-    RST             : input  logic   ,
-    EN              : input  logic   ,
-    WE              : input  logic   ,
-    DATA_IN         : input  logic   ,
-    target_low_addr : input  logic<8>,
-    target_high_addr: input  logic<8>,
-    send_data       : input  logic<8>,
-    tx_data_out     : output logic   ,
-    busy            : output logic   ,
-    finish          : output logic   ,
+    i_clk             : input  logic   ,
+    i_rst             : input  logic   ,
+    i_en              : input  logic   ,
+    i_we              : input  logic   ,
+    i_rx              : input  logic   ,
+    i_target_low_addr : input  logic<8>,
+    i_target_high_addr: input  logic<8>,
+    i_send_data       : input  logic<8>,
+    o_tx              : output logic   ,
+    o_busy            : output logic   ,
+    o_finish          : output logic   ,
 ) {
-    var n_busy  : logic    ;
-    var n_finish: logic    ;
-    var status  : Status   ;
-    var n_status: Status   ;
+    var o_busy_next  : logic    ;
+    var o_finish_next: logic    ;
+    var status       : Status   ;
+    var status_next  : Status   ;
     enum Status: logic <3> {
         Ready,
         LowTx,
@@ -22,104 +22,99 @@ module WriteMemory (
         MemoryTx,
         Finish,
     }
-    var n_tx_data_out: logic;
+    var o_tx_next: logic;
 
-    var low_tx_en      : logic;
-    assign low_tx_en       = WE && status == Status::LowTx;
-    var low_tx_data_in : logic<8>;
-    assign low_tx_data_in  = target_low_addr;
-    var low_tx_data_out: logic;
-    var low_tx_busy    : logic;
-    var low_tx_finish  : logic;
+    let i_low_tx_en    : logic    = i_we && status == Status::LowTx;
+    let i_low_tx_data  : logic<8> = i_target_low_addr;
+    var o_low_tx_tx    : logic   ;
+    var o_low_tx_busy  : logic   ;
+    var o_low_tx_finish: logic   ;
     inst low_tx: uarty::Tx (
-        CLK                      ,
-        RST                      ,
-        WE      : low_tx_en      ,
-        DATA_IN : low_tx_data_in ,
-        data_out: low_tx_data_out,
-        busy    : low_tx_busy    ,
-        finish  : low_tx_finish  ,
+        i_clk                    ,
+        i_rst                    ,
+        i_en    : i_low_tx_en    ,
+        i_data  : i_low_tx_data  ,
+        o_tx    : o_low_tx_tx    ,
+        o_busy  : o_low_tx_busy  ,
+        o_finish: o_low_tx_finish,
     );
 
-    var high_tx_en      : logic;
-    assign high_tx_en       = WE && status == Status::HighTx;
-    var high_tx_data_in : logic<8>;
-    assign high_tx_data_in  = target_high_addr;
-    var high_tx_data_out: logic;
-    var high_tx_busy    : logic;
-    var high_tx_finish  : logic;
+    let i_high_tx_en    : logic    = i_we && status == Status::HighTx;
+    let i_high_tx_data  : logic<8> = i_target_high_addr;
+    var o_high_tx_tx    : logic   ;
+    var o_high_tx_busy  : logic   ;
+    var o_high_tx_finish: logic   ;
     inst high_tx: uarty::Tx (
-        CLK                       ,
-        RST                       ,
-        WE      : high_tx_en      ,
-        DATA_IN : high_tx_data_in ,
-        data_out: high_tx_data_out,
-        busy    : high_tx_busy    ,
-        finish  : high_tx_finish  ,
+        i_clk                     ,
+        i_rst                     ,
+        i_en    : i_high_tx_en    ,
+        i_data  : i_high_tx_data  ,
+        o_tx    : o_high_tx_tx    ,
+        o_busy  : o_high_tx_busy  ,
+        o_finish: o_high_tx_finish,
     );
 
-    var memory_tx_en      : logic;
-    assign memory_tx_en       = status == Status::MemoryTx;
-    var memory_tx_data_out: logic<8>;
-    var memory_tx_busy    : logic   ;
-    var memory_tx_finish  : logic   ;
+    let i_memory_tx_en    : logic    = status == Status::MemoryTx;
+    var o_memory_tx_tx    : logic<8>;
+    var o_memory_tx_busy  : logic   ;
+    var o_memory_tx_finish: logic   ;
     inst memory_tx: uarty::Tx (
-        CLK                         ,
-        RST                         ,
-        WE      : memory_tx_en      ,
-        DATA_IN : send_data         ,
-        data_out: memory_tx_data_out,
-        busy    : memory_tx_busy    ,
-        finish  : memory_tx_finish  ,
+        i_clk                       ,
+        i_rst                       ,
+        i_en    : i_memory_tx_en    ,
+        i_data  : i_send_data       ,
+        o_tx    : o_memory_tx_tx    ,
+        o_busy  : o_memory_tx_busy  ,
+        o_finish: o_memory_tx_finish,
     );
 
     always_comb {
-        n_status      = status;
-        n_finish      = finish;
-        n_tx_data_out = tx_data_out;
+        status_next   = status;
+        o_finish_next = o_finish;
+        o_tx_next     = o_tx;
         case status {
             Status::Ready: {
-                n_tx_data_out = 1;
-                if EN {
-                    n_status = Status::LowTx;
+                o_tx_next = 1;
+                if i_en {
+                    status_next = Status::LowTx;
                 }
             }
             Status::LowTx: {
-                n_tx_data_out = low_tx_data_out;
-                if low_tx_finish {
-                    n_status = Status::HighTx;
+                o_tx_next = o_low_tx_tx;
+                if o_low_tx_finish {
+                    status_next = Status::HighTx;
                 }
             }
             Status::HighTx: {
-                n_tx_data_out = high_tx_data_out;
-                if high_tx_finish {
-                    n_status = Status::MemoryTx;
+                o_tx_next = o_high_tx_tx;
+                if o_high_tx_finish {
+                    status_next = Status::MemoryTx;
                 }
             }
             Status::MemoryTx: {
-                n_tx_data_out = memory_tx_data_out;
-                if memory_tx_finish {
-                    n_status = Status::Finish;
+                o_tx_next = o_memory_tx_tx;
+                if o_memory_tx_finish {
+                    status_next = Status::Finish;
                 }
             }
             Status::Finish: {
-                n_status = Status::Ready;
+                status_next = Status::Ready;
             }
         }
-        n_finish = n_status == Status::Finish;
+        o_finish_next = status_next == Status::Finish;
     }
 
-    always_ff (posedge CLK, async_high RST) {
+    always_ff (posedge i_clk, async_high i_rst) {
         if_reset {
-            busy        = 0;
-            finish      = 0;
-            status      = Status::Ready;
-            tx_data_out = 0;
+            o_busy   = 0;
+            o_finish = 0;
+            status   = Status::Ready;
+            o_tx     = 0;
         } else {
-            busy        = n_busy;
-            finish      = n_finish;
-            status      = n_status;
-            tx_data_out = n_tx_data_out;
+            o_busy   = o_busy_next;
+            o_finish = o_finish_next;
+            status   = status_next;
+            o_tx     = o_tx_next;
         }
     }
 }

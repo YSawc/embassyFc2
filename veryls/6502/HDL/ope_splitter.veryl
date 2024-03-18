@@ -1,71 +1,71 @@
 module OpeSplitter (
-    CLK     : input  logic                ,
-    RST     : input  logic                ,
-    EN      : input  logic                ,
-    ope_kind: input  OperatorsPkg::OpeKind,
-    ope_mode: output ModePkg::OpeMode     ,
-    busy    : output logic                ,
-    finish  : output logic                ,
+    i_clk     : input  logic                ,
+    i_rst     : input  logic                ,
+    i_en      : input  logic                ,
+    i_ope_kind: input  OperatorsPkg::OpeKind,
+    o_ope_mode: output ModePkg::OpeMode     ,
+    o_busy    : output logic                ,
+    o_finish  : output logic                ,
 ) {
     enum Status: logic<2> {
         Idle,
         Work,
         Finish,
     }
-    var status    : Status          ;
-    var n_status  : Status          ;
-    var n_ope_mode: ModePkg::OpeMode;
-    var n_busy    : logic           ;
-    var n_finish  : logic           ;
+    var status         : Status          ;
+    var status_next    : Status          ;
+    var o_ope_mode_next: ModePkg::OpeMode;
+    var o_busy_next    : logic           ;
+    var o_finish_next  : logic           ;
     always_comb {
-        n_status   = status;
-        n_finish   = finish;
-        n_busy     = busy;
-        n_ope_mode = ope_mode;
+        status_next     = status;
+        o_finish_next   = o_finish;
+        o_busy_next     = o_busy;
+        o_ope_mode_next = o_ope_mode;
         case status {
             Status::Idle: {
-                if EN {
-                    n_busy   = 1;
-                    n_status = Status::Work;
+                if i_en {
+                    o_busy_next = 1;
+                    status_next = Status::Work;
                 }
             }
             Status::Work: {
-                n_status = Status::Finish;
-                n_busy   = 0;
-                if ope_kind == OperatorsPkg::OpeKind::Cmp || ope_kind == OperatorsPkg::OpeKind::Cpx || ope_kind == OperatorsPkg::OpeKind::Cpy {
-                    n_ope_mode = ModePkg::OpeMode::Compare;
-                } else if ope_kind == OperatorsPkg::OpeKind::Brk || ope_kind == OperatorsPkg::OpeKind::Inc || ope_kind == OperatorsPkg::OpeKind::Dec {
-                    n_ope_mode = ModePkg::OpeMode::ReadAndStoreToMemory;
-                } else if ope_kind == OperatorsPkg::OpeKind::Ora || ope_kind == OperatorsPkg::OpeKind::And || ope_kind == OperatorsPkg::OpeKind::Rti || ope_kind == OperatorsPkg::OpeKind::Rts || ope_kind == OperatorsPkg::OpeKind::Eor || ope_kind == OperatorsPkg::OpeKind::Adc || ope_kind == OperatorsPkg::OpeKind::Sbc || ope_kind == OperatorsPkg::OpeKind::Lda || ope_kind == OperatorsPkg::OpeKind::Ldx || ope_kind == OperatorsPkg::OpeKind::Ldy || ope_kind == OperatorsPkg::OpeKind::Plp || ope_kind == OperatorsPkg::OpeKind::Pla || ope_kind == OperatorsPkg::OpeKind::Bit {
-                    n_ope_mode = ModePkg::OpeMode::ReadAndStoreToRegister;
-                } else if ope_kind == OperatorsPkg::OpeKind::Asl || ope_kind == OperatorsPkg::OpeKind::Rol || ope_kind == OperatorsPkg::OpeKind::Lsr || ope_kind == OperatorsPkg::OpeKind::Ror {
-                    n_ope_mode = ModePkg::OpeMode::ReadAndStoreToAccOrMemory;
-                } else if ope_kind == OperatorsPkg::OpeKind::Jsr || ope_kind == OperatorsPkg::OpeKind::Sta || ope_kind == OperatorsPkg::OpeKind::Stx || ope_kind == OperatorsPkg::OpeKind::Sty || ope_kind == OperatorsPkg::OpeKind::Pha || ope_kind == OperatorsPkg::OpeKind::Php {
-                    n_ope_mode = ModePkg::OpeMode::StoreToMemory;
-                } else if ope_kind == OperatorsPkg::OpeKind::Nop {
-                    n_finish = n_status == Status::Finish;
+                status_next = Status::Finish;
+                o_busy_next = 0;
+                if i_ope_kind == OperatorsPkg::OpeKind::Cmp || i_ope_kind == OperatorsPkg::OpeKind::Cpx || i_ope_kind == OperatorsPkg::OpeKind::Cpy {
+                    o_ope_mode_next = ModePkg::OpeMode::Compare;
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Brk || i_ope_kind == OperatorsPkg::OpeKind::Inc || i_ope_kind == OperatorsPkg::OpeKind::Dec {
+                    o_ope_mode_next = ModePkg::OpeMode::ReadAndStoreToMemory;
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Ora || i_ope_kind == OperatorsPkg::OpeKind::And || i_ope_kind == OperatorsPkg::OpeKind::Rti || i_ope_kind == OperatorsPkg::OpeKind::Rts || i_ope_kind == OperatorsPkg::OpeKind::Eor || i_ope_kind == OperatorsPkg::OpeKind::Adc || i_ope_kind == OperatorsPkg::OpeKind::Sbc || i_ope_kind == OperatorsPkg::OpeKind::Lda || i_ope_kind == OperatorsPkg::OpeKind::Ldx || i_ope_kind == OperatorsPkg::OpeKind::Ldy || i_ope_kind == OperatorsPkg::OpeKind::Plp || i_ope_kind == OperatorsPkg::OpeKind::Pla || i_ope_kind == OperatorsPkg::OpeKind::Bit {
+                    o_ope_mode_next = ModePkg::OpeMode::ReadAndStoreToRegister;
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Asl || i_ope_kind == OperatorsPkg::OpeKind::Rol || i_ope_kind == OperatorsPkg::OpeKind::Lsr || i_ope_kind == OperatorsPkg::OpeKind::Ror {
+                    o_ope_mode_next = ModePkg::OpeMode::ReadAndStoreToAccOrMemory;
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Jsr || i_ope_kind == OperatorsPkg::OpeKind::Sta || i_ope_kind == OperatorsPkg::OpeKind::Stx || i_ope_kind == OperatorsPkg::OpeKind::Sty || i_ope_kind == OperatorsPkg::OpeKind::Pha || i_ope_kind == OperatorsPkg::OpeKind::Php {
+                    o_ope_mode_next = ModePkg::OpeMode::StoreToMemory;
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Nop {
+                    o_finish_next = status_next == Status::Finish;
                 } else {
-                    n_ope_mode = ModePkg::OpeMode::Other;
+                    o_ope_mode_next = ModePkg::OpeMode::Other;
                 }
             }
             Status::Finish: {
-                n_status = Status::Idle;
+                status_next = Status::Idle;
             }
         }
-        n_finish = n_status == Status::Finish;
+        o_finish_next = status_next == Status::Finish;
     }
 
-    always_ff (posedge CLK, async_high RST) {
+    always_ff (posedge i_clk, async_high i_rst) {
         if_reset {
-            status   = Status::Idle;
-            finish   = 0;
-            busy     = 0;
-            ope_mode = ModePkg::OpeMode::Nop;
+            status     = Status::Idle;
+            o_finish   = 0;
+            o_busy     = 0;
+            o_ope_mode = ModePkg::OpeMode::Nop;
         } else {
-            status   = n_status;
-            finish   = n_finish;
-            busy     = n_busy;
-            ope_mode = n_ope_mode;
+            status     = status_next;
+            o_finish   = o_finish_next;
+            o_busy     = o_busy_next;
+            o_ope_mode = o_ope_mode_next;
         }
     }
 }

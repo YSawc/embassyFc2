@@ -2,8 +2,8 @@
 # It is not intended for manual editing.
 [[projects]]
 name = "uarty"
-uuid = "29a77892-6f68-5375-a113-01d7fd1a7988"
-version = "0.1.9"
+uuid = "4410d9da-3c8f-5e4f-9b7d-547904301039"
+version = "0.2.1"
 url = "https://github.com/YSawc/uarty"
-revision = "1f5b104b39e217700b301918b0ae24a2a50a947e"
+revision = "e6b377393d911ab6b23b0c2604a404026a68f185"
 dependencies = []

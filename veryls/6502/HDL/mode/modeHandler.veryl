@@ -1,60 +1,57 @@
 module ModeHandler (
-    CLK    : input  logic           ,
-    RST    : input  logic           ,
-    EN     : input  logic           ,
-    DATA_IN: input  logic           ,
-    RTS    : output logic           ,
-    mode   : output ModePkg::CpuMode,
-    busy   : output logic           ,
-    finish : output logic           ,
+    i_clk   : input  logic           ,
+    i_rst   : input  logic           ,
+    i_en    : input  logic           ,
+    i_rx    : input  logic           ,
+    o_mode  : output ModePkg::CpuMode,
+    o_rts   : output logic           ,
+    o_busy  : output logic           ,
+    o_finish: output logic           ,
 ) {
-    var mode_read_enable: logic;
-    assign mode_read_enable = (mode == ModePkg::CpuMode::nop);
-    var mode_read_data  : logic<8>;
-    var mode_read_busy  : logic   ;
-    var mode_read_finish: logic   ;
+    let i_mode_read_en    : logic    = (o_mode == ModePkg::CpuMode::nop);
+    var o_mode_read_data  : logic<8>;
+    var o_mode_read_busy  : logic   ;
+    var o_mode_read_finish: logic   ;
     inst mode_read_rx: uarty::Rx (
-        CLK                       ,
-        RST                       ,
-        DATA_IN                   ,
-        RE      : mode_read_enable,
-        data_out: mode_read_data  ,
-        busy    : mode_read_busy  ,
-        finish  : mode_read_finish,
+        i_clk                       ,
+        i_rst                       ,
+        i_en    : i_mode_read_en    ,
+        i_rx                        ,
+        o_data  : o_mode_read_data  ,
+        o_busy  : o_mode_read_busy  ,
+        o_finish: o_mode_read_finish,
     );
 
-    var mode_read_rts_en      : logic;
-    assign mode_read_rts_en       = EN && ~mode_read_finish;
-    var mode_read_rts_data_out: logic;
-    var mode_read_rts_busy    : logic;
-    var mode_read_rts_finish  : logic;
+    let i_mode_read_rts_en    : logic = i_en && ~o_mode_read_finish;
+    var o_mode_read_rts_rts   : logic;
+    var o_mode_read_rts_busy  : logic;
+    var o_mode_read_rts_finish: logic;
     inst mode_read_rts: uarty::Rts (
-        CLK                             ,
-        RST                             ,
-        EN      : mode_read_rts_en      ,
-        data_out: mode_read_rts_data_out,
-        busy    : mode_read_rts_busy    ,
-        finish  : mode_read_rts_finish  ,
+        i_clk                           ,
+        i_rst                           ,
+        i_en    : i_mode_read_rts_en    ,
+        o_rts   : o_mode_read_rts_rts   ,
+        o_busy  : o_mode_read_rts_busy  ,
+        o_finish: o_mode_read_rts_finish,
     );
 
-    assign RTS = if mode_read_rts_en && ~mode_read_rts_finish {
-        mode_read_rts_data_out
+    assign o_rts = if i_mode_read_rts_en && ~o_mode_read_rts_finish {
+        o_mode_read_rts_rts
     } else {
         1
     };
 
-    var mode_selector_enable: logic;
-    assign mode_selector_enable = mode_read_data != 0;
-    var mode_selector_finish: logic;
+    let mode_selector_en      : logic = o_mode_read_data != 0;
+    var o_mode_selector_finish: logic;
     inst mode_selector: ModeSelector (
-        CLK                         ,
-        RST                         ,
-        EN    : mode_selector_enable,
-        data  : mode_read_data      ,
-        mode                        ,
-        finish: mode_selector_finish,
+        i_clk                           ,
+        i_rst                           ,
+        i_en    : mode_selector_en      ,
+        i_data  : o_mode_read_data      ,
+        o_mode                          ,
+        o_finish: o_mode_selector_finish,
     );
 
-    assign busy   = ~mode_selector_finish;
-    assign finish = mode_selector_finish;
+    assign o_busy   = ~o_mode_selector_finish;
+    assign o_finish = o_mode_selector_finish;
 }

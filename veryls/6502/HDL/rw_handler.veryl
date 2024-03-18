@@ -1,62 +1,62 @@
 module RWHandler (
-    CLK     : input  logic                ,
-    RST     : input  logic                ,
-    EN      : input  logic                ,
-    ope_kind: input  OperatorsPkg::OpeKind,
-    rw      : output logic                ,
-    busy    : output logic                ,
-    finish  : output logic                ,
+    i_clk     : input  logic                ,
+    i_rst     : input  logic                ,
+    i_en      : input  logic                ,
+    i_ope_kind: input  OperatorsPkg::OpeKind,
+    o_rw      : output logic                ,
+    o_busy    : output logic                ,
+    o_finish  : output logic                ,
 ) {
     enum Status: logic<2> {
         Idle,
         Work,
         Finish,
     }
-    var status  : Status;
-    var n_status: Status;
-    var n_rw    : logic ;
-    var n_busy  : logic ;
-    var n_finish: logic ;
+    var status       : Status;
+    var status_next  : Status;
+    var o_rw_next    : logic ;
+    var o_busy_next  : logic ;
+    var o_finish_next: logic ;
     always_comb {
-        n_status = status;
-        n_finish = finish;
-        n_busy   = busy;
-        n_rw     = rw;
+        status_next   = status;
+        o_finish_next = o_finish;
+        o_busy_next   = o_busy;
+        o_rw_next     = o_rw;
         case status {
             Status::Idle: {
-                if EN {
-                    n_busy   = 1;
-                    n_status = Status::Work;
+                if i_en {
+                    o_busy_next = 1;
+                    status_next = Status::Work;
                 }
             }
             Status::Work: {
-                n_status = Status::Finish;
-                n_busy   = 0;
-                if ope_kind == OperatorsPkg::OpeKind::Dec || ope_kind == OperatorsPkg::OpeKind::Inc || ope_kind == OperatorsPkg::OpeKind::Sta || ope_kind == OperatorsPkg::OpeKind::Stx || ope_kind == OperatorsPkg::OpeKind::Sty || ope_kind == OperatorsPkg::OpeKind::Php || ope_kind == OperatorsPkg::OpeKind::Dcp {
-                    n_rw = 0;
+                status_next = Status::Finish;
+                o_busy_next = 0;
+                if i_ope_kind == OperatorsPkg::OpeKind::Dec || i_ope_kind == OperatorsPkg::OpeKind::Inc || i_ope_kind == OperatorsPkg::OpeKind::Sta || i_ope_kind == OperatorsPkg::OpeKind::Stx || i_ope_kind == OperatorsPkg::OpeKind::Sty || i_ope_kind == OperatorsPkg::OpeKind::Php || i_ope_kind == OperatorsPkg::OpeKind::Dcp {
+                    o_rw_next = 0;
                 } else {
-                    n_rw = 1;
+                    o_rw_next = 1;
                 }
             }
             Status::Finish: {
-                n_status = Status::Idle;
+                status_next = Status::Idle;
             }
 
         }
-        n_finish = n_status == Status::Finish;
+        o_finish_next = status_next == Status::Finish;
     }
 
-    always_ff (posedge CLK, async_high RST) {
+    always_ff (posedge i_clk, async_high i_rst) {
         if_reset {
-            status = Status::Idle;
-            finish = 0;
-            busy   = 0;
-            rw     = 0;
+            status   = Status::Idle;
+            o_finish = 0;
+            o_busy   = 0;
+            o_rw     = 0;
         } else {
-            status = n_status;
-            finish = n_finish;
-            busy   = n_busy;
-            rw     = n_rw;
+            status   = status_next;
+            o_finish = o_finish_next;
+            o_busy   = o_busy_next;
+            o_rw     = o_rw_next;
         }
     }
 

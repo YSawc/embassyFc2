@@ -1,19 +1,19 @@
 module OpeReadAndStoreToAccOrMemory (
-    CLK             : input   logic                    ,
-    RST             : input   logic                    ,
-    EN              : input   logic                    ,
-    WE              : input   logic                    ,
-    DATA_IN         : input   logic                    ,
-    addr_mode       : input   OperatorsPkg::AddrMode   ,
-    ope_kind        : input   OperatorsPkg::OpeKind    ,
-    target_low_addr : input   logic                 <8>,
-    target_high_addr: input   logic                 <8>,
-    register_slv    : modport RegisterIf::Slave        ,
-    register_mst    : modport RegisterIf::Master       ,
-    tx_data_out     : output  logic                    ,
-    RTS             : output  logic                    ,
-    busy            : output  logic                    ,
-    finish          : output  logic                    ,
+    i_clk             : input   logic                    ,
+    i_rst             : input   logic                    ,
+    i_en              : input   logic                    ,
+    i_we              : input   logic                    ,
+    i_rx              : input   logic                    ,
+    i_addr_mode       : input   OperatorsPkg::AddrMode   ,
+    i_ope_kind        : input   OperatorsPkg::OpeKind    ,
+    i_target_low_addr : input   logic                 <8>,
+    i_target_high_addr: input   logic                 <8>,
+    if_register_slv   : modport RegisterIf::Slave        ,
+    if_register_mst   : modport RegisterIf::Master       ,
+    o_tx              : output  logic                    ,
+    o_rts             : output  logic                    ,
+    o_busy            : output  logic                    ,
+    o_finish          : output  logic                    ,
 ) {
     enum Status: logic<3> {
         Ready,
@@ -23,143 +23,143 @@ module OpeReadAndStoreToAccOrMemory (
         WriteMemory,
         Finish,
     }
-    var n_status  : Status   ;
-    var status    : Status   ;
-    var n_is_carry: logic    ;
-    var is_carry  : logic    ;
-    var n_a       : logic <8>;
-    var n_p       : logic <8>;
-    var n_busy    : logic    ;
-    var n_finish  : logic    ;
+    var status_next  : Status   ;
+    var status       : Status   ;
+    var is_carry_next: logic    ;
+    var is_carry     : logic    ;
+    var a_next       : logic <8>;
+    var p_next       : logic <8>;
+    var o_busy_next  : logic    ;
+    var o_finish_next: logic    ;
 
-    let read_memory_en         : logic    = status == Status::ReadMemory;
-    var read_memory_target_data: logic<8>;
-    var read_memory_tx_data_out: logic   ;
-    var read_memory_rts        : logic   ;
-    var read_memory_busy       : logic   ;
-    var read_memory_finish     : logic   ;
+    let i_read_memory_en    : logic    = status == Status::ReadMemory;
+    var o_read_memory_data  : logic<8>;
+    var o_read_memory_tx    : logic   ;
+    var o_read_memory_rts   : logic   ;
+    var o_read_memory_busy  : logic   ;
+    var o_read_memory_finish: logic   ;
     inst read_memory: ReadMemory (
-        CLK                                      ,
-        RST                                      ,
-        EN              : read_memory_en         ,
-        WE                                       ,
-        DATA_IN                                  ,
-        target_low_addr                          ,
-        target_high_addr                         ,
-        target_data     : read_memory_target_data,
-        tx_data_out     : read_memory_tx_data_out,
-        RTS             : read_memory_rts        ,
-        busy            : read_memory_busy       ,
-        finish          : read_memory_finish     ,
+        i_clk                                   ,
+        i_rst                                   ,
+        i_en              : i_read_memory_en    ,
+        i_we                                    ,
+        i_rx                                    ,
+        i_target_low_addr                       ,
+        i_target_high_addr                      ,
+        o_data            : o_read_memory_data  ,
+        o_tx              : o_read_memory_tx    ,
+        o_rts             : o_read_memory_rts   ,
+        o_busy            : o_read_memory_busy  ,
+        o_finish          : o_read_memory_finish,
     );
 
-    var assign_data       : logic<8>;
-    var n_assign_data     : logic<8>;
-    let memory_tx_en      : logic    = WE && status == Status::WriteMemory;
-    var memory_tx_data_out: logic   ;
-    var memory_tx_busy    : logic   ;
-    var memory_tx_finish  : logic   ;
+    var i_assign_data     : logic<8>;
+    var i_assign_data_next: logic<8>;
+    let i_memory_tx_en    : logic    = i_en && status == Status::WriteMemory;
+    var i_memory_tx_tx    : logic   ;
+    var o_memory_tx_busy  : logic   ;
+    var o_memory_tx_finish: logic   ;
     inst memory_tx: uarty::Tx (
-        CLK                         ,
-        RST                         ,
-        WE      : memory_tx_en      ,
-        DATA_IN : assign_data       ,
-        data_out: memory_tx_data_out,
-        busy    : memory_tx_busy    ,
-        finish  : memory_tx_finish  ,
+        i_clk                       ,
+        i_rst                       ,
+        i_en    : i_memory_tx_en    ,
+        i_data  : i_assign_data     ,
+        o_tx    : i_memory_tx_tx    ,
+        o_busy  : o_memory_tx_busy  ,
+        o_finish: o_memory_tx_finish,
     );
 
-    assign tx_data_out = if status == Status::ReadMemory {
-        read_memory_tx_data_out
+    assign o_tx = if status == Status::ReadMemory {
+        o_read_memory_tx
     } else if status == Status::WriteMemory {
-        memory_tx_data_out
+        i_memory_tx_tx
     } else {
         1
     };
 
     always_comb {
-        n_a           = register_mst.a;
-        n_p           = register_mst.p;
-        n_status      = status;
-        n_finish      = finish;
-        n_assign_data = assign_data;
-        n_is_carry    = is_carry;
+        a_next             = if_register_mst.a;
+        p_next             = if_register_mst.p;
+        status_next        = status;
+        o_finish_next      = o_finish;
+        i_assign_data_next = i_assign_data;
+        is_carry_next      = is_carry;
         case status {
             Status::Ready: {
-                if EN {
-                    n_a = register_slv.a;
-                    n_p = register_slv.p;
-                    if addr_mode == OperatorsPkg::AddrMode::Acc {
-                        n_assign_data = n_a;
-                        n_status      = Status::PreWrite;
+                if i_en {
+                    a_next = if_register_slv.a;
+                    p_next = if_register_slv.p;
+                    if i_addr_mode == OperatorsPkg::AddrMode::Acc {
+                        i_assign_data_next = a_next;
+                        status_next        = Status::PreWrite;
                     } else {
-                        n_status = Status::ReadMemory;
+                        status_next = Status::ReadMemory;
                     }
                 }
             }
             Status::ReadMemory: {
-                if read_memory_finish {
-                    n_assign_data = read_memory_target_data;
-                    n_status      = Status::PreWrite;
+                if o_read_memory_finish {
+                    i_assign_data_next = o_read_memory_data;
+                    status_next        = Status::PreWrite;
                 }
             }
             Status::PreWrite: {
-                if ope_kind == OperatorsPkg::OpeKind::Asl || ope_kind == OperatorsPkg::OpeKind::Rol {
-                    n_is_carry    =   (assign_data & 8'b10000000) != 0;
-                    n_assign_data <<= 1;
-                    if ope_kind == OperatorsPkg::OpeKind::Rol && (register_mst.p & 8'b00000001) == 1 {
-                        n_assign_data |= 8'b00000001;
+                if i_ope_kind == OperatorsPkg::OpeKind::Asl || i_ope_kind == OperatorsPkg::OpeKind::Rol {
+                    is_carry_next      =   (i_assign_data & 8'b10000000) != 0;
+                    i_assign_data_next <<= 1;
+                    if i_ope_kind == OperatorsPkg::OpeKind::Rol && (if_register_mst.p & 8'b00000001) == 1 {
+                        i_assign_data_next |= 8'b00000001;
                     }
-                } else if ope_kind == OperatorsPkg::OpeKind::Lsr || ope_kind == OperatorsPkg::OpeKind::Ror {
-                    n_is_carry    =   (assign_data & 8'b00000001) != 0;
-                    n_assign_data >>= 1;
-                    if ope_kind == OperatorsPkg::OpeKind::Ror && (register_mst.p & 8'b00000001) == 1 {
-                        n_assign_data |= 8'b10000000;
+                } else if i_ope_kind == OperatorsPkg::OpeKind::Lsr || i_ope_kind == OperatorsPkg::OpeKind::Ror {
+                    is_carry_next      =   (i_assign_data & 8'b00000001) != 0;
+                    i_assign_data_next >>= 1;
+                    if i_ope_kind == OperatorsPkg::OpeKind::Ror && (if_register_mst.p & 8'b00000001) == 1 {
+                        i_assign_data_next |= 8'b10000000;
                     }
                 }
-                if addr_mode == OperatorsPkg::AddrMode::Acc {
-                    n_status = Status::WriteAcc;
+                if i_addr_mode == OperatorsPkg::AddrMode::Acc {
+                    status_next = Status::WriteAcc;
                 } else {
-                    n_status = Status::WriteMemory;
+                    status_next = Status::WriteMemory;
                 }
             }
             Status::WriteAcc: {
-                n_a                 = assign_data;
-                RegisterPkg::set_c (n_p, is_carry);
-                RegisterPkg::set_nz(n_p, assign_data);
-                n_status            = Status::Finish;
+                a_next              = i_assign_data;
+                RegisterPkg::set_c (p_next, is_carry);
+                RegisterPkg::set_nz(p_next, i_assign_data);
+                status_next         = Status::Finish;
             }
             Status::WriteMemory: {
-                if memory_tx_finish {
-                    RegisterPkg::set_c (n_p, is_carry);
-                    RegisterPkg::set_nz(n_p, assign_data);
-                    n_status            = Status::Finish;
+                if o_memory_tx_finish {
+                    RegisterPkg::set_c (p_next, is_carry);
+                    RegisterPkg::set_nz(p_next, i_assign_data);
+                    status_next         = Status::Finish;
                 }
             }
             Status::Finish: {
-                n_status = Status::Ready;
+                status_next = Status::Ready;
             }
         }
-        n_finish = n_status == Status::Finish;
+        o_finish_next = status_next == Status::Finish;
     }
 
-    always_ff (posedge CLK, async_high RST) {
+    always_ff (posedge i_clk, async_high i_rst) {
         if_reset {
-            register_mst.a = 0;
-            register_mst.p = 0;
-            status         = Status::Ready;
-            assign_data    = 0;
-            is_carry       = 0;
-            busy           = 0;
-            finish         = 0;
+            if_register_mst.a = 0;
+            if_register_mst.p = 0;
+            status            = Status::Ready;
+            i_assign_data     = 0;
+            is_carry          = 0;
+            o_busy            = 0;
+            o_finish          = 0;
         } else {
-            register_mst.a = n_a;
-            register_mst.p = n_p;
-            status         = n_status;
-            assign_data    = n_assign_data;
-            is_carry       = n_is_carry;
-            busy           = n_busy;
-            finish         = n_finish;
+            if_register_mst.a = a_next;
+            if_register_mst.p = p_next;
+            status            = status_next;
+            i_assign_data     = i_assign_data_next;
+            is_carry          = is_carry_next;
+            o_busy            = o_busy_next;
+            o_finish          = o_finish_next;
         }
     }
 }

@@ -1,18 +1,18 @@
 module OpeReadAndStoreToMemory (
-    CLK               : input   logic                   ,
-    RST               : input   logic                   ,
-    EN                : input   logic                   ,
-    WE                : input   logic                   ,
-    DATA_IN           : input   logic                   ,
-    ope_kind          : input   OperatorsPkg::OpeKind   ,
-    a_target_low_addr : input   logic                <8>,
-    a_target_high_addr: input   logic                <8>,
-    register_slv      : modport RegisterIf::Slave       ,
-    register_mst      : modport RegisterIf::Master      ,
-    tx_data_out       : output  logic                   ,
-    RTS               : output  logic                   ,
-    busy              : output  logic                   ,
-    finish            : output  logic                   ,
+    i_clk             : input   logic                   ,
+    i_rst             : input   logic                   ,
+    i_en              : input   logic                   ,
+    i_we              : input   logic                   ,
+    i_rx              : input   logic                   ,
+    i_ope_kind        : input   OperatorsPkg::OpeKind   ,
+    i_target_low_addr : input   logic                <8>,
+    i_target_high_addr: input   logic                <8>,
+    if_register_slv   : modport RegisterIf::Slave       ,
+    if_register_mst   : modport RegisterIf::Master      ,
+    o_tx              : output  logic                   ,
+    o_rts             : output  logic                   ,
+    o_busy            : output  logic                   ,
+    o_finish          : output  logic                   ,
 ) {
     enum Status: logic<3> {
         Ready,
@@ -21,214 +21,213 @@ module OpeReadAndStoreToMemory (
         WriteMemory,
         Finish,
     }
-    var n_status          : Status    ;
-    var status            : Status    ;
-    var n_s               : logic <8> ;
-    var n_p               : logic <8> ;
-    var n_pc              : logic <16>;
-    var n_busy            : logic     ;
-    var n_finish          : logic     ;
-    var n_RTS             : logic     ;
-    var n_send_data       : logic <8> ;
-    var send_data         : logic <8> ;
-    var write_count       : logic <2> ;
-    var n_write_count     : logic <2> ;
-    var read_count        : logic <2> ;
-    var n_read_count      : logic <2> ;
-    var pc_low_tmp        : logic <8> ;
-    var n_pc_low_tmp      : logic <8> ;
-    var pc_high_tmp       : logic <8> ;
-    var n_pc_high_tmp     : logic <8> ;
-    var n_target_low_addr : logic <8> ;
-    var target_low_addr   : logic <8> ;
-    var n_target_high_addr: logic <8> ;
-    var target_high_addr  : logic <8> ;
+    var status_next              : Status    ;
+    var status                   : Status    ;
+    var o_s_next                 : logic <8> ;
+    var o_p_next                 : logic <8> ;
+    var o_pc_next                : logic <16>;
+    var o_busy_next              : logic     ;
+    var o_finish_next            : logic     ;
+    var o_rts_next               : logic     ;
+    var i_send_data_next         : logic <8> ;
+    var i_send_data              : logic <8> ;
+    var write_count              : logic <2> ;
+    var write_count_next         : logic <2> ;
+    var read_count               : logic <2> ;
+    var read_count_next          : logic <2> ;
+    var pc_low_tmp               : logic <8> ;
+    var o_pc_low_tmp_next        : logic <8> ;
+    var pc_high_tmp              : logic <8> ;
+    var o_pc_high_tmp_next       : logic <8> ;
+    var tmp_target_low_addr_next : logic <8> ;
+    var tmp_target_low_addr      : logic <8> ;
+    var tmp_target_high_addr_next: logic <8> ;
+    var tmp_target_high_addr     : logic <8> ;
 
-    let read_memory_en         : logic    = status == Status::ReadMemory;
-    var read_memory_target_data: logic<8>;
-    var read_memory_tx_data_out: logic   ;
-    var read_memory_rts        : logic   ;
-    var read_memory_busy       : logic   ;
-    var read_memory_finish     : logic   ;
+    let i_read_memory_en    : logic    = status == Status::ReadMemory;
+    var o_read_memory_data  : logic<8>;
+    var o_read_memory_tx    : logic   ;
+    var o_read_memory_rts   : logic   ;
+    var o_read_memory_busy  : logic   ;
+    var o_read_memory_finish: logic   ;
     inst read_memory: ReadMemory (
-        CLK                                      ,
-        RST                                      ,
-        EN              : read_memory_en         ,
-        WE                                       ,
-        DATA_IN                                  ,
-        target_low_addr                          ,
-        target_high_addr                         ,
-        target_data     : read_memory_target_data,
-        tx_data_out     : read_memory_tx_data_out,
-        RTS             : read_memory_rts        ,
-        busy            : read_memory_busy       ,
-        finish          : read_memory_finish     ,
+        i_clk                                   ,
+        i_rst                                   ,
+        i_en              : i_read_memory_en    ,
+        i_we                                    ,
+        i_rx                                    ,
+        i_target_low_addr : tmp_target_low_addr ,
+        i_target_high_addr: tmp_target_high_addr,
+        o_data            : o_read_memory_data  ,
+        o_tx              : o_read_memory_tx    ,
+        o_rts             : o_read_memory_rts   ,
+        o_busy            : o_read_memory_busy  ,
+        o_finish          : o_read_memory_finish,
     );
 
-    let write_memory_en         : logic = status == Status::WriteMemory;
-    var write_memory_tx_data_out: logic;
-    var write_memory_busy       : logic;
-    var write_memory_finish     : logic;
+    let i_write_memory_en    : logic = status == Status::WriteMemory;
+    var o_write_memory_tx    : logic;
+    var o_write_memory_busy  : logic;
+    var o_write_memory_finish: logic;
     inst write_memory: WriteMemory (
-        CLK                                       ,
-        RST                                       ,
-        EN              : write_memory_en         ,
-        WE                                        ,
-        DATA_IN                                   ,
-        target_low_addr                           ,
-        target_high_addr                          ,
-        send_data                                 ,
-        tx_data_out     : write_memory_tx_data_out,
-        busy            : write_memory_busy       ,
-        finish          : write_memory_finish     ,
+        i_clk                                    ,
+        i_rst                                    ,
+        i_en              : i_write_memory_en    ,
+        i_we                                     ,
+        i_rx                                     ,
+        i_target_low_addr : tmp_target_low_addr  ,
+        i_target_high_addr: tmp_target_high_addr ,
+        i_send_data                              ,
+        o_tx              : o_write_memory_tx    ,
+        o_busy            : o_write_memory_busy  ,
+        o_finish          : o_write_memory_finish,
     );
 
-    assign n_RTS = if status == Status::ReadMemory {
-        read_memory_rts
+    assign o_rts_next = if status == Status::ReadMemory {
+        o_read_memory_rts
     } else {
         1
     };
 
-    assign tx_data_out = if status == Status::ReadMemory {
-        read_memory_tx_data_out
+    assign o_tx = if status == Status::ReadMemory {
+        o_read_memory_tx
     } else if status == Status::WriteMemory {
-        write_memory_tx_data_out
+        o_write_memory_tx
     } else {
         1
     };
 
     always_comb {
-        n_s                = register_mst.s;
-        n_p                = register_mst.p;
-        n_pc               = register_mst.pc;
-        n_status           = status;
-        n_finish           = finish;
-        n_send_data        = send_data;
-        n_write_count      = write_count;
-        n_read_count       = read_count;
-        n_pc_low_tmp       = pc_low_tmp;
-        n_pc_high_tmp      = pc_high_tmp;
-        n_target_low_addr  = target_low_addr;
-        n_target_high_addr = target_high_addr;
+        o_s_next                  = if_register_mst.s;
+        o_p_next                  = if_register_mst.p;
+        o_pc_next                 = if_register_mst.pc;
+        status_next               = status;
+        o_finish_next             = o_finish;
+        i_send_data_next          = i_send_data;
+        write_count_next          = write_count;
+        read_count_next           = read_count;
+        o_pc_low_tmp_next         = pc_low_tmp;
+        o_pc_high_tmp_next        = pc_high_tmp;
+        tmp_target_low_addr_next  = tmp_target_low_addr;
+        tmp_target_high_addr_next = tmp_target_high_addr;
         case status {
             Status::Ready: {
-                if EN {
+                if i_en {
                     if write_count == 0 && read_count == 0 {
-                        n_s  = register_slv.s;
-                        n_p  = register_slv.p;
-                        n_pc = register_slv.pc;
+                        o_s_next  = if_register_slv.s;
+                        o_p_next  = if_register_slv.p;
+                        o_pc_next = if_register_slv.pc;
                     }
-                    if ope_kind == OperatorsPkg::OpeKind::Brk {
-                        if (n_p & 8'b00000100) == 0 {
-                            n_target_low_addr  = n_s;
-                            n_target_high_addr = 1;
-                            n_s                = utilPkg::wrapping_sub(n_s, 1);
+                    if i_ope_kind == OperatorsPkg::OpeKind::Brk {
+                        if (o_p_next & 8'b00000100) == 0 {
+                            tmp_target_low_addr_next  = o_s_next;
+                            tmp_target_high_addr_next = 1;
+                            o_s_next                  = utilPkg::wrapping_sub(o_s_next, 1);
                             if write_count == 0 {
-                                n_pc        -= 1;
-                                n_send_data =  (register_slv.pc & 16'hFF00) >> 8;
-                                n_status    =  Status::WriteMemory;
+                                o_pc_next        -= 1;
+                                i_send_data_next =  (if_register_slv.pc & 16'hFF00) >> 8;
+                                status_next      =  Status::WriteMemory;
                             } else if write_count == 1 {
-                                n_send_data = register_slv.pc & 16'h00FF;
-                                n_status    = Status::WriteMemory;
+                                i_send_data_next = if_register_slv.pc & 16'h00FF;
+                                status_next      = Status::WriteMemory;
                             } else if write_count == 2 {
-                                n_send_data = register_slv.p;
-                                n_status    = Status::WriteMemory;
+                                i_send_data_next = if_register_slv.p;
+                                status_next      = Status::WriteMemory;
                             }
                         } else {
-                            n_status = Status::Finish;
+                            status_next = Status::Finish;
                         }
                     } else {
-                        n_target_low_addr  = a_target_low_addr;
-                        n_target_high_addr = a_target_high_addr;
-                        n_status           = Status::ReadMemory;
+                        tmp_target_low_addr_next  = i_target_low_addr;
+                        tmp_target_high_addr_next = i_target_high_addr;
+                        status_next               = Status::ReadMemory;
                     }
                 }
             }
             Status::ReadMemory: {
-                if read_memory_finish {
-                    n_status = Status::PreWrite;
+                if o_read_memory_finish {
+                    status_next = Status::PreWrite;
                 }
             }
             Status::PreWrite: {
-                if ope_kind == OperatorsPkg::OpeKind::Brk {
+                if i_ope_kind == OperatorsPkg::OpeKind::Brk {
                     if read_count == 0 {
-                        n_read_count       += 1;
-                        n_target_low_addr  =  8'hFF;
-                        n_target_high_addr =  8'hFF;
-                        n_pc_high_tmp      =  read_memory_target_data;
-                        n_status           =  Status::ReadMemory;
+                        read_count_next           += 1;
+                        tmp_target_low_addr_next  =  8'hFF;
+                        tmp_target_high_addr_next =  8'hFF;
+                        o_pc_high_tmp_next        =  o_read_memory_data;
+                        status_next               =  Status::ReadMemory;
                     } else if read_count == 1 {
-                        n_pc_low_tmp  = read_memory_target_data;
-                        n_pc          = (n_pc_high_tmp << 8) + n_pc_low_tmp;
-                        n_write_count = 0;
-                        n_read_count  = 0;
-                        n_status      = Status::Finish;
+                        o_pc_low_tmp_next = o_read_memory_data;
+                        o_pc_next         = (o_pc_high_tmp_next << 8) + o_pc_low_tmp_next;
+                        write_count_next  = 0;
+                        read_count_next   = 0;
+                        status_next       = Status::Finish;
                     }
                 } else {
-                    if ope_kind == OperatorsPkg::OpeKind::Inc {
-                        n_send_data = RegisterPkg::add_with_nz(n_p, read_memory_target_data, 1);
-                    } else if ope_kind == OperatorsPkg::OpeKind::Dec {
-                        n_send_data = RegisterPkg::sub_with_nz(n_p, read_memory_target_data, 1);
+                    if i_ope_kind == OperatorsPkg::OpeKind::Inc {
+                        i_send_data_next = RegisterPkg::add_with_nz(o_p_next, o_read_memory_data, 1);
+                    } else if i_ope_kind == OperatorsPkg::OpeKind::Dec {
+                        i_send_data_next = RegisterPkg::sub_with_nz(o_p_next, o_read_memory_data, 1);
                     }
-                    n_status = Status::WriteMemory;
+                    status_next = Status::WriteMemory;
                 }
             }
             Status::WriteMemory: {
-                if write_memory_finish {
-                    if ope_kind == OperatorsPkg::OpeKind::Brk {
+                if o_write_memory_finish {
+                    if i_ope_kind == OperatorsPkg::OpeKind::Brk {
                         if write_count <= 1 {
-                            n_write_count += 1;
-                            n_status      =  Status::Ready;
+                            write_count_next += 1;
+                            status_next      =  Status::Ready;
                         } else if write_count == 2 {
-                            n_p                |= 8'b00010100;
-                            n_target_low_addr  =  8'hFE;
-                            n_target_high_addr =  8'hFF;
-                            n_status           =  Status::ReadMemory;
+                            o_p_next                  |= 8'b00010100;
+                            tmp_target_low_addr_next  =  8'hFE;
+                            tmp_target_high_addr_next =  8'hFF;
+                            status_next               =  Status::ReadMemory;
                         }
                     } else {
-                        n_status = Status::Finish;
+                        status_next = Status::Finish;
                     }
                 }
             }
             Status::Finish: {
-                n_status = Status::Ready;
+                status_next = Status::Ready;
             }
         }
-        n_finish = n_status == Status::Finish;
+        o_finish_next = status_next == Status::Finish;
     }
 
-    always_ff (posedge CLK, async_high RST) {
+    always_ff (posedge i_clk, async_high i_rst) {
         if_reset {
-            register_mst.s   = 0;
-            register_mst.p   = 0;
-            register_mst.pc  = 0;
-            status           = Status::Ready;
-            send_data        = 0;
-            busy             = 0;
-            finish           = 0;
-            RTS              = 0;
-            target_low_addr  = 0;
-            target_high_addr = 0;
-            write_count      = 0;
-            read_count       = 0;
-            pc_low_tmp       = 0;
-            pc_high_tmp      = 0;
+            if_register_mst.s    = 0;
+            if_register_mst.p    = 0;
+            if_register_mst.pc   = 0;
+            status               = Status::Ready;
+            i_send_data          = 0;
+            o_busy               = 0;
+            o_finish             = 0;
+            o_rts                = 0;
+            tmp_target_low_addr  = 0;
+            tmp_target_high_addr = 0;
+            write_count          = 0;
+            read_count           = 0;
+            pc_low_tmp           = 0;
+            pc_high_tmp          = 0;
         } else {
-            register_mst.s   = n_s;
-            register_mst.p   = n_p;
-            register_mst.pc  = n_pc;
-            status           = n_status;
-            send_data        = n_send_data;
-            busy             = n_busy;
-            finish           = n_finish;
-            RTS              = n_RTS;
-            target_low_addr  = n_target_low_addr;
-            target_high_addr = n_target_high_addr;
-            write_count      = 0;
-            write_count      = n_write_count;
-            read_count       = n_read_count;
-            pc_low_tmp       = n_pc_low_tmp;
-            pc_high_tmp      = n_pc_high_tmp;
+            if_register_mst.s    = o_s_next;
+            if_register_mst.p    = o_p_next;
+            if_register_mst.pc   = o_pc_next;
+            status               = status_next;
+            i_send_data          = i_send_data_next;
+            o_busy               = o_busy_next;
+            o_finish             = o_finish_next;
+            o_rts                = o_rts_next;
+            tmp_target_low_addr  = tmp_target_low_addr_next;
+            tmp_target_high_addr = tmp_target_high_addr_next;
+            write_count          = write_count_next;
+            read_count           = read_count_next;
+            pc_low_tmp           = o_pc_low_tmp_next;
+            pc_high_tmp          = o_pc_high_tmp_next;
         }
     }
 }

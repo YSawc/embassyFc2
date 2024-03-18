@@ -1,162 +1,161 @@
 module OpeStoreToMemory (
-    CLK                    : input   logic                   ,
-    RST                    : input   logic                   ,
-    EN                     : input   logic                   ,
-    WE                     : input   logic                   ,
-    DATA_IN                : input   logic                   ,
-    ope_kind               : input   OperatorsPkg::OpeKind   ,
-    a_target_low_addr      : input   logic                <8>,
-    a_target_high_addr     : input   logic                <8>,
-    register_slv           : modport RegisterIf::Slave       ,
-    register_mst           : modport RegisterIf::Master      ,
-    zp_adding_without_carry: input   logic                <8>,
-    tx_data_out            : output  logic                   ,
-    busy                   : output  logic                   ,
-    finish                 : output  logic                   ,
+    i_clk             : input   logic                   ,
+    i_rst             : input   logic                   ,
+    i_en              : input   logic                   ,
+    i_we              : input   logic                   ,
+    i_rx              : input   logic                   ,
+    i_ope_kind        : input   OperatorsPkg::OpeKind   ,
+    i_target_low_addr : input   logic                <8>,
+    i_target_high_addr: input   logic                <8>,
+    if_register_slv   : modport RegisterIf::Slave       ,
+    if_register_mst   : modport RegisterIf::Master      ,
+    o_tx              : output  logic                   ,
+    o_busy            : output  logic                   ,
+    o_finish          : output  logic                   ,
 ) {
     enum Status: logic<2> {
         Ready,
         WriteMemory,
         Finish,
     }
-    var n_status          : Status    ;
-    var status            : Status    ;
-    var n_tx_data_out     : logic     ;
-    var n_busy            : logic     ;
-    var n_finish          : logic     ;
-    var target_low_addr   : logic <8> ;
-    var target_high_addr  : logic <8> ;
-    var n_target_low_addr : logic <8> ;
-    var n_target_high_addr: logic <8> ;
-    var n_s               : logic <8> ;
-    var n_p               : logic <8> ;
-    var n_pc              : logic <16>;
-    var n_send_data       : logic <8> ;
-    var send_data         : logic <8> ;
-    var write_count       : logic <2> ;
-    var n_write_count     : logic <2> ;
+    var status_next              : Status    ;
+    var status                   : Status    ;
+    var o_tx_next                : logic     ;
+    var o_busy_next              : logic     ;
+    var o_finish_next            : logic     ;
+    var tmp_target_low_addr      : logic <8> ;
+    var tmp_target_high_addr     : logic <8> ;
+    var tmp_target_low_addr_next : logic <8> ;
+    var tmp_target_high_addr_next: logic <8> ;
+    var s_next                   : logic <8> ;
+    var p_next                   : logic <8> ;
+    var pc_next                  : logic <16>;
+    var i_send_data_next         : logic <8> ;
+    var i_send_data              : logic <8> ;
+    var write_count              : logic <2> ;
+    var write_count_next         : logic <2> ;
 
-    let write_memory_en         : logic = status == Status::WriteMemory;
-    var write_memory_tx_data_out: logic;
-    var write_memory_busy       : logic;
-    var write_memory_finish     : logic;
+    let i_write_memory_en    : logic = status == Status::WriteMemory;
+    var o_write_memory_tx    : logic;
+    var o_write_memory_busy  : logic;
+    var o_write_memory_finish: logic;
     inst write_memory: WriteMemory (
-        CLK                                       ,
-        RST                                       ,
-        EN              : write_memory_en         ,
-        WE                                        ,
-        DATA_IN                                   ,
-        target_low_addr                           ,
-        target_high_addr                          ,
-        send_data                                 ,
-        tx_data_out     : write_memory_tx_data_out,
-        busy            : write_memory_busy       ,
-        finish          : write_memory_finish     ,
+        i_clk                                    ,
+        i_rst                                    ,
+        i_en              : i_write_memory_en    ,
+        i_we                                     ,
+        i_rx                                     ,
+        i_target_low_addr : tmp_target_low_addr  ,
+        i_target_high_addr: tmp_target_high_addr ,
+        i_send_data                              ,
+        o_tx              : o_write_memory_tx    ,
+        o_busy            : o_write_memory_busy  ,
+        o_finish          : o_write_memory_finish,
     );
 
     always_comb {
-        n_tx_data_out      = tx_data_out;
-        n_status           = status;
-        n_finish           = finish;
-        n_target_low_addr  = target_low_addr;
-        n_target_high_addr = target_high_addr;
-        n_s                = register_mst.s;
-        n_p                = register_mst.p;
-        n_pc               = register_mst.pc;
-        n_send_data        = send_data;
-        n_write_count      = write_count;
+        o_tx_next                 = o_tx;
+        status_next               = status;
+        o_finish_next             = o_finish;
+        tmp_target_low_addr_next  = tmp_target_low_addr;
+        tmp_target_high_addr_next = tmp_target_high_addr;
+        s_next                    = if_register_mst.s;
+        p_next                    = if_register_mst.p;
+        pc_next                   = if_register_mst.pc;
+        i_send_data_next          = i_send_data;
+        write_count_next          = write_count;
         case status {
             Status::Ready: {
-                if EN {
+                if i_en {
                     if write_count == 0 {
-                        n_s           = register_slv.s;
-                        n_p           = register_slv.p;
-                        n_pc          = register_slv.pc;
-                        n_write_count = 0;
+                        s_next           = if_register_slv.s;
+                        p_next           = if_register_slv.p;
+                        pc_next          = if_register_slv.pc;
+                        write_count_next = 0;
                     }
 
-                    if ope_kind == OperatorsPkg::OpeKind::Jsr {
-                        n_target_low_addr  = n_s;
-                        n_target_high_addr = 1;
-                        n_s                = utilPkg::wrapping_sub(n_s, 1);
+                    if i_ope_kind == OperatorsPkg::OpeKind::Jsr {
+                        tmp_target_low_addr_next  = s_next;
+                        tmp_target_high_addr_next = 1;
+                        s_next                    = utilPkg::wrapping_sub(s_next, 1);
                         if write_count == 0 {
-                            n_send_data = (register_slv.pc & 16'hFF00) >> 8;
+                            i_send_data_next = (if_register_slv.pc & 16'hFF00) >> 8;
                         } else {
-                            n_send_data = register_slv.pc & 16'h00FF;
+                            i_send_data_next = if_register_slv.pc & 16'h00FF;
                         }
-                    } else if ope_kind == OperatorsPkg::OpeKind::Pha || ope_kind == OperatorsPkg::OpeKind::Php {
-                        n_s                = RegisterPkg::sub_without_flag(n_p, n_s, 1);
-                        n_target_low_addr  = n_s;
-                        n_target_high_addr = 1;
+                    } else if i_ope_kind == OperatorsPkg::OpeKind::Pha || i_ope_kind == OperatorsPkg::OpeKind::Php {
+                        s_next                    = RegisterPkg::sub_without_flag(p_next, s_next, 1);
+                        tmp_target_low_addr_next  = s_next;
+                        tmp_target_high_addr_next = 1;
                     } else {
-                        n_target_low_addr  = a_target_low_addr;
-                        n_target_high_addr = a_target_high_addr;
+                        tmp_target_low_addr_next  = i_target_low_addr;
+                        tmp_target_high_addr_next = i_target_high_addr;
                     }
 
-                    if ope_kind != OperatorsPkg::OpeKind::Jsr {
-                        n_send_data = if ope_kind == OperatorsPkg::OpeKind::Sta || ope_kind == OperatorsPkg::OpeKind::Pha {
-                            register_slv.a
-                        } else if ope_kind == OperatorsPkg::OpeKind::Stx {
-                            register_slv.x
-                        } else if ope_kind == OperatorsPkg::OpeKind::Sty {
-                            register_slv.y
-                        } else if ope_kind == OperatorsPkg::OpeKind::Php {
-                            register_slv.p
+                    if i_ope_kind != OperatorsPkg::OpeKind::Jsr {
+                        i_send_data_next = if i_ope_kind == OperatorsPkg::OpeKind::Sta || i_ope_kind == OperatorsPkg::OpeKind::Pha {
+                            if_register_slv.a
+                        } else if i_ope_kind == OperatorsPkg::OpeKind::Stx {
+                            if_register_slv.x
+                        } else if i_ope_kind == OperatorsPkg::OpeKind::Sty {
+                            if_register_slv.y
+                        } else if i_ope_kind == OperatorsPkg::OpeKind::Php {
+                            if_register_slv.p
                         } else {
                             0
                         };
                     }
-                    n_status = Status::WriteMemory;
+                    status_next = Status::WriteMemory;
                 }
             }
             Status::WriteMemory: {
-                n_tx_data_out = write_memory_tx_data_out;
-                if write_memory_finish {
-                    if ope_kind == OperatorsPkg::OpeKind::Jsr {
+                o_tx_next = o_write_memory_tx;
+                if o_write_memory_finish {
+                    if i_ope_kind == OperatorsPkg::OpeKind::Jsr {
                         if write_count == 0 {
-                            n_write_count += 1;
-                            n_status      =  Status::Ready;
+                            write_count_next += 1;
+                            status_next      =  Status::Ready;
                         } else {
-                            n_pc     = (a_target_high_addr << 8) + a_target_low_addr;
-                            n_status = Status::Finish;
+                            pc_next     = (i_target_high_addr << 8) + i_target_low_addr;
+                            status_next = Status::Finish;
                         }
                     } else {
-                        n_status = Status::Finish;
+                        status_next = Status::Finish;
                     }
                 }
             }
             Status::Finish: {
-                n_status = Status::Ready;
+                status_next = Status::Ready;
             }
         }
-        n_finish = n_status == Status::Finish;
+        o_finish_next = status_next == Status::Finish;
     }
 
-    always_ff (posedge CLK, async_high RST) {
+    always_ff (posedge i_clk, async_high i_rst) {
         if_reset {
-            tx_data_out      = 0;
-            busy             = 0;
-            status           = Status::Ready;
-            finish           = 0;
-            target_low_addr  = 0;
-            target_high_addr = 0;
-            register_mst.s   = 0;
-            register_mst.p   = 0;
-            register_mst.pc  = 0;
-            send_data        = 0;
-            write_count      = 0;
+            o_tx                 = 0;
+            o_busy               = 0;
+            status               = Status::Ready;
+            o_finish             = 0;
+            tmp_target_low_addr  = 0;
+            tmp_target_high_addr = 0;
+            if_register_mst.s    = 0;
+            if_register_mst.p    = 0;
+            if_register_mst.pc   = 0;
+            i_send_data          = 0;
+            write_count          = 0;
         } else {
-            tx_data_out      = n_tx_data_out;
-            busy             = n_busy;
-            status           = n_status;
-            finish           = n_finish;
-            target_low_addr  = n_target_low_addr;
-            target_high_addr = n_target_high_addr;
-            register_mst.s   = n_s;
-            register_mst.p   = n_p;
-            register_mst.pc  = n_pc;
-            send_data        = n_send_data;
-            write_count      = n_write_count;
+            o_tx                 = o_tx_next;
+            o_busy               = o_busy_next;
+            status               = status_next;
+            o_finish             = o_finish_next;
+            tmp_target_low_addr  = tmp_target_low_addr_next;
+            tmp_target_high_addr = tmp_target_high_addr_next;
+            if_register_mst.s    = s_next;
+            if_register_mst.p    = p_next;
+            if_register_mst.pc   = pc_next;
+            i_send_data          = i_send_data_next;
+            write_count          = write_count_next;
         }
     }
 }

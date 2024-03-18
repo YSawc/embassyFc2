@@ -12,7 +12,6 @@
 **/incremental_db/
 **/devkits/
 **/db/
-**/*.sdc
 .qsys_edit/
 **/*.qsf
 **/*.stp
