@@ -1,3 +1,6 @@
 **/target
 **/*.f
 dependencies/**
+*.map.*
+*.qpf
+6502.flow.rpt
