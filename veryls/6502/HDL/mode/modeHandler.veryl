@@ -22,21 +22,8 @@ module ModeHandler (
         o_finish: o_mode_read_finish,
     );
 
-    let i_mode_read_rts_en    : logic = i_en && ~o_mode_read_finish;
-    var o_mode_read_rts_rts   : logic;
-    var o_mode_read_rts_busy  : logic;
-    var o_mode_read_rts_finish: logic;
-    inst mode_read_rts: uarty::Rts (
-        i_clk                           ,
-        i_rst                           ,
-        i_en    : i_mode_read_rts_en    ,
-        o_rts   : o_mode_read_rts_rts   ,
-        o_busy  : o_mode_read_rts_busy  ,
-        o_finish: o_mode_read_rts_finish,
-    );
-
-    assign o_rts = if i_mode_read_rts_en && ~o_mode_read_rts_finish {
-        o_mode_read_rts_rts
+    assign o_rts = if i_mode_read_en {
+        ~i_mode_read_en
     } else {
         1
     };
