@@ -35,4 +35,11 @@ package utilPkg {
             return (l - r);
         }
     }
+
+    function combine_byte_to_short (
+        l: input logic<8> ,
+        r: input logic<8> ,
+    ) -> logic<16> {
+        return (l << 8) + r;
+    }
 }

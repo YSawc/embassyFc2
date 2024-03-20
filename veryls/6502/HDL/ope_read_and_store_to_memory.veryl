@@ -159,7 +159,7 @@ module OpeReadAndStoreToMemory (
                         status_next               =  Status::ReadMemory;
                     } else if read_count == 1 {
                         o_pc_low_tmp_next = o_read_memory_data;
-                        o_pc_next         = (o_pc_high_tmp_next << 8) + o_pc_low_tmp_next;
+                        o_pc_next         = utilPkg::combine_byte_to_short(o_pc_high_tmp_next, o_pc_low_tmp_next);
                         write_count_next  = 0;
                         read_count_next   = 0;
                         status_next       = Status::Finish;

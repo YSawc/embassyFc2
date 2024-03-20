@@ -155,7 +155,7 @@ module OpeReadAndStoreToRegister (
                     } else {
                         write_count_next   = 0;
                         o_pc_high_tmp_next = register_data;
-                        o_pc_next          = (o_pc_high_tmp_next << 8) + o_pc_low_tmp_next;
+                        o_pc_next          = utilPkg::combine_byte_to_short(o_pc_high_tmp_next, o_pc_low_tmp_next);
                         o_p_next           = o_p_tmp_next;
                     }
                 } else if i_ope_kind == OperatorsPkg::OpeKind::Rts {
@@ -165,7 +165,7 @@ module OpeReadAndStoreToRegister (
                         status_next       =  Status::Ready;
                     } else {
                         o_pc_high_tmp_next = register_data;
-                        o_pc_next          = (o_pc_high_tmp_next << 8) + o_pc_low_tmp_next;
+                        o_pc_next          = utilPkg::combine_byte_to_short(o_pc_high_tmp_next, o_pc_low_tmp_next);
                         o_pc_next          = utilPkg::short_wrapping_add(o_pc_next, 1);
                     }
                 } else if i_ope_kind == OperatorsPkg::OpeKind::Adc {

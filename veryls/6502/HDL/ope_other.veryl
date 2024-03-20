@@ -75,38 +75,38 @@ module OpeOther (
                 } else if i_ope_kind == OperatorsPkg::OpeKind::Clv {
                     RegisterPkg::set_v(p_next, 0);
                 } else if i_ope_kind == OperatorsPkg::OpeKind::Jmp {
-                    pc_next = (i_addr_high << 8) + i_addr_low;
+                    pc_next = utilPkg::combine_byte_to_short(i_addr_high, i_addr_low);
                 } else if i_ope_kind == OperatorsPkg::OpeKind::Bpl {
                     if (if_register_slv.p & 8'b10000000) == 0 {
-                        pc_next = (i_addr_high << 8) + i_addr_low;
+                        pc_next = utilPkg::combine_byte_to_short(i_addr_high, i_addr_low);
                     }
                 } else if i_ope_kind == OperatorsPkg::OpeKind::Bmi {
                     if (if_register_slv.p & 8'b10000000) != 0 {
-                        pc_next = (i_addr_high << 8) + i_addr_low;
+                        pc_next = utilPkg::combine_byte_to_short(i_addr_high, i_addr_low);
                     }
                 } else if i_ope_kind == OperatorsPkg::OpeKind::Bvc {
                     if (if_register_slv.p & 8'b01000000) == 0 {
-                        pc_next = (i_addr_high << 8) + i_addr_low;
+                        pc_next = utilPkg::combine_byte_to_short(i_addr_high, i_addr_low);
                     }
                 } else if i_ope_kind == OperatorsPkg::OpeKind::Bvs {
                     if (if_register_slv.p & 8'b01000000) != 0 {
-                        pc_next = (i_addr_high << 8) + i_addr_low;
+                        pc_next = utilPkg::combine_byte_to_short(i_addr_high, i_addr_low);
                     }
                 } else if i_ope_kind == OperatorsPkg::OpeKind::Bcc {
                     if (if_register_slv.p & 8'b00000001) == 0 {
-                        pc_next = (i_addr_high << 8) + i_addr_low;
+                        pc_next = utilPkg::combine_byte_to_short(i_addr_high, i_addr_low);
                     }
                 } else if i_ope_kind == OperatorsPkg::OpeKind::Bcs {
                     if (if_register_slv.p & 8'b00000001) != 0 {
-                        pc_next = (i_addr_high << 8) + i_addr_low;
+                        pc_next = utilPkg::combine_byte_to_short(i_addr_high, i_addr_low);
                     }
                 } else if i_ope_kind == OperatorsPkg::OpeKind::Bne {
                     if (if_register_slv.p & 8'b00000010) == 0 {
-                        pc_next = (i_addr_high << 8) + i_addr_low;
+                        pc_next = utilPkg::combine_byte_to_short(i_addr_high, i_addr_low);
                     }
                 } else if i_ope_kind == OperatorsPkg::OpeKind::Beq {
                     if (if_register_slv.p & 8'b00000010) != 0 {
-                        pc_next = (i_addr_high << 8) + i_addr_low;
+                        pc_next = utilPkg::combine_byte_to_short(i_addr_high, i_addr_low);
                     }
                 } else if i_ope_kind == OperatorsPkg::OpeKind::Tax {
                     x_next              = if_register_slv.a;
