@@ -18,10 +18,12 @@ module main (
     let i_gpio_0_3: logic    = gpio_0_3;
     let i_gpio_0_6: logic    = gpio_0_6;
 
-    let cts        : logic = i_gpio_0_3;
-    let resb       : logic = i_gpio_0_6;
-    let reset      : logic = i_rst || resb;
-    inst if_register: RegisterIf;
+    let cts           : logic = i_gpio_0_3;
+    let resb          : logic = i_gpio_0_6;
+    let reset         : logic = i_rst || resb;
+    inst if_register   : RegisterIf;
+    inst if_memory     : MemoryIf;
+    assign if_memory.data = o_ram_data;
 
     var mode                 : ModePkg::CpuMode;
     var o_tmp_mode           : ModePkg::CpuMode;
@@ -52,6 +54,7 @@ module main (
     var o_debug_rw       : logic;
     var o_debug_finish   : logic;
     inst if_debug_register: RegisterIf;
+    inst if_debug_memory  : MemoryIf;
     var o_debug_rts      : logic;
     inst debug: Debug (
         i_clk                             ,
@@ -61,11 +64,23 @@ module main (
         i_we           : i_debug_tx_en    ,
         if_register_mst: if_debug_register,
         if_register_slv: if_register      ,
+        if_memory_mst  : if_debug_memory  ,
+        if_memory_slv  : if_memory        ,
         o_tx           : o_debug_tx       ,
         o_busy         : o_debug_busy     ,
         o_rts          : o_debug_rts      ,
         o_rw           : o_debug_rw       ,
         o_finish       : o_debug_finish   ,
+    );
+
+    var o_ram_data: logic<8>;
+    inst ram: Ram (
+        i_clk                       ,
+        i_rst                       ,
+        i_we  : if_debug_memory.we  ,
+        i_addr: if_debug_memory.addr,
+        i_data: if_debug_memory.data,
+        o_data: o_ram_data          ,
     );
 
     assign gpio_0_0 = if mode == ModePkg::CpuMode::debug {

@@ -1,0 +1,65 @@
+module Ram (
+    i_clk : input  logic    ,
+    i_rst : input  logic    ,
+    i_we  : input  logic    ,
+    i_addr: input  logic<16>,
+    i_data: input  logic<8> ,
+    o_data: output logic<8> ,
+) {
+    var wram          : logic<8> [12'h800] ;
+    var wram_mirror   : logic<8> [13'h1800];
+    var ppu_reg_mirror: logic<8> [13'h1800];
+    var func_apu_io   : logic<8> [4'h0008] ;
+    var erom          : logic<8> [13'h1FE0];
+    var eram          : logic<8> [14'h2000];
+    // var prom1: logic<8> [14'h4000];
+    // var prom2: logic<8> [14'h4000];
+
+    always_ff (posedge i_clk, async_high i_rst) {
+        if_reset {
+            for i: u32 in 0..12'h800 {
+                wram[i] = 0;
+            }
+            for i: u32 in 0..13'h1800 {
+                wram_mirror[i]    = 0;
+                ppu_reg_mirror[i] = 0;
+            }
+            for i: u32 in 0..4'h8 {
+                func_apu_io[i] = 0;
+            }
+            for i: u32 in 0..13'h1FE0 {
+                erom[i] = 0;
+            }
+            for i: u32 in 0..14'h2000 {
+                eram[i] = 0;
+            }
+        } else {
+            o_data = 0;
+            if i_we {
+                if i_addr >= 16'h0000 && i_addr <= 16'h07FF {
+                    wram[i_addr] = i_data;
+                } else if i_addr >= 16'h0800 && i_addr <= 16'h1FFF {
+                    wram_mirror[i_addr - 16'h0800] = i_data;
+                } else if i_addr >= 16'h2000 && i_addr <= 16'h2007 {
+                    // TODO: implement
+                } else if i_addr >= 16'h2008 && i_addr <= 16'h3FFF {
+                    ppu_reg_mirror[i_addr - 16'h2008] = i_data;
+                } else if i_addr >= 16'h4000 && i_addr <= 16'h4017 {
+                    // TODO: implement
+                } else if i_addr >= 16'h4018 && i_addr <= 16'h401F {
+                    func_apu_io[i_addr - 16'h4018] = i_data;
+                } else if i_addr >= 16'h4020 && i_addr <= 16'h5FFF {
+                    erom[i_addr - 16'h4020] = i_data;
+                } else if i_addr >= 16'h6000 && i_addr <= 16'h7FFF {
+                    eram[i_addr - 16'h6000] = i_data;
+                } else if i_addr >= 16'h8000 && i_addr <= 16'hBFFF {
+                    // TODO: implement
+                } else if i_addr >= 16'hCFFF && i_addr <= 16'hFFFF {
+                    // TODO: implement
+                }
+            } else {
+                o_data = wram[i_addr];
+            }
+        }
+    }
+}

@@ -1,0 +1,15 @@
+interface MemoryIf {
+    var we  : logic    ;
+    var addr: logic<16>;
+    var data: logic<8> ;
+
+    modport Master {
+        we  : output,
+        addr: output,
+        data: output,
+    }
+
+    modport Slave {
+        data: input,
+    }
+}
