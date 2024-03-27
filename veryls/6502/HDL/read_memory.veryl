@@ -1,16 +1,18 @@
 module ReadMemory (
-    i_clk             : input  logic   ,
-    i_rst             : input  logic   ,
-    i_en              : input  logic   ,
-    i_we              : input  logic   ,
-    i_rx              : input  logic   ,
-    i_target_low_addr : input  logic<8>,
-    i_target_high_addr: input  logic<8>,
-    o_data            : output logic<8>,
-    o_tx              : output logic   ,
-    o_rts             : output logic   ,
-    o_busy            : output logic   ,
-    o_finish          : output logic   ,
+    i_clk             : input   logic              ,
+    i_rst             : input   logic              ,
+    i_en              : input   logic              ,
+    i_we              : input   logic              ,
+    i_rx              : input   logic              ,
+    i_target_low_addr : input   logic           <8>,
+    i_target_high_addr: input   logic           <8>,
+    if_memory_mst     : modport MemoryIf::Master   ,
+    if_memory_slv     : modport MemoryIf::Slave    ,
+    o_data            : output  logic           <8>,
+    o_tx              : output  logic              ,
+    o_rts             : output  logic              ,
+    o_busy            : output  logic              ,
+    o_finish          : output  logic              ,
 ) {
     var o_rts_next   : logic    ;
     var o_busy_next  : logic    ;
@@ -74,6 +76,7 @@ module ReadMemory (
     } else {
         1
     };
+    // assign o_data = if_memory_slv.data;
     assign o_data = o_memory_rx_data;
     assign o_tx   = if i_low_tx_en {
         o_low_tx_tx
@@ -84,12 +87,16 @@ module ReadMemory (
     };
 
     always_comb {
-        status_next   = status;
-        o_finish_next = o_finish;
+        status_next        = status;
+        o_finish_next      = o_finish;
+        if_memory_mst.we   = 0;
+        if_memory_mst.addr = 0;
         case status {
             Status::Ready: {
                 if i_en {
-                    status_next = Status::LowTx;
+                    if_memory_mst.we   = 0;
+                    if_memory_mst.addr = utilPkg::combine_byte_to_short(i_high_tx_data, i_low_tx_data);
+                    status_next        = Status::LowTx;
                 }
             }
             Status::LowTx: {

@@ -16,3 +16,5 @@
 **/*.qsf
 **/*.stp
 !DE0-CV_pin.qsf
+6502.*
+!6502.sdc

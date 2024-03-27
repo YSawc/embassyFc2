@@ -8,8 +8,10 @@ module OpeReadAndStoreToAccOrMemory (
     i_ope_kind        : input   OperatorsPkg::OpeKind    ,
     i_target_low_addr : input   logic                 <8>,
     i_target_high_addr: input   logic                 <8>,
-    if_register_slv   : modport RegisterIf::Slave        ,
     if_register_mst   : modport RegisterIf::Master       ,
+    if_register_slv   : modport RegisterIf::Slave        ,
+    if_memory_mst     : modport MemoryIf::Master         ,
+    if_memory_slv     : modport MemoryIf::Slave          ,
     o_tx              : output  logic                    ,
     o_rts             : output  logic                    ,
     o_busy            : output  logic                    ,
@@ -32,27 +34,33 @@ module OpeReadAndStoreToAccOrMemory (
     var o_busy_next  : logic    ;
     var o_finish_next: logic    ;
 
-    let i_read_memory_en    : logic    = status == Status::ReadMemory;
-    var o_read_memory_data  : logic<8>;
-    var o_read_memory_tx    : logic   ;
-    var o_read_memory_rts   : logic   ;
-    var o_read_memory_busy  : logic   ;
-    var o_read_memory_finish: logic   ;
+    let i_read_memory_en     : logic    = status == Status::ReadMemory;
+    var o_read_memory_data   : logic<8>;
+    var o_read_memory_tx     : logic   ;
+    var o_read_memory_rts    : logic   ;
+    var o_read_memory_busy   : logic   ;
+    var o_read_memory_finish : logic   ;
+    inst if_read_memory_memory: MemoryIf;
+    always_comb {
+        if_memory_mst.we   = if_read_memory_memory.we;
+        if_memory_mst.addr = if_read_memory_memory.addr;
+    }
     inst read_memory: ReadMemory (
-        i_clk                                   ,
-        i_rst                                   ,
-        i_en              : i_read_memory_en    ,
-        i_we                                    ,
-        i_rx                                    ,
-        i_target_low_addr                       ,
-        i_target_high_addr                      ,
-        o_data            : o_read_memory_data  ,
-        o_tx              : o_read_memory_tx    ,
-        o_rts             : o_read_memory_rts   ,
-        o_busy            : o_read_memory_busy  ,
-        o_finish          : o_read_memory_finish,
+        i_clk                                    ,
+        i_rst                                    ,
+        i_en              : i_read_memory_en     ,
+        i_we                                     ,
+        i_rx                                     ,
+        i_target_low_addr                        ,
+        i_target_high_addr                       ,
+        if_memory_mst     : if_read_memory_memory,
+        if_memory_slv                            ,
+        o_data            : o_read_memory_data   ,
+        o_tx              : o_read_memory_tx     ,
+        o_rts             : o_read_memory_rts    ,
+        o_busy            : o_read_memory_busy   ,
+        o_finish          : o_read_memory_finish ,
     );
-
     var i_assign_data     : logic<8>;
     var i_assign_data_next: logic<8>;
     let i_memory_tx_en    : logic    = i_en && status == Status::WriteMemory;

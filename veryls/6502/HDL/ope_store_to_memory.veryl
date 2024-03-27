@@ -7,8 +7,10 @@ module OpeStoreToMemory (
     i_ope_kind        : input   OperatorsPkg::OpeKind   ,
     i_target_low_addr : input   logic                <8>,
     i_target_high_addr: input   logic                <8>,
-    if_register_slv   : modport RegisterIf::Slave       ,
     if_register_mst   : modport RegisterIf::Master      ,
+    if_register_slv   : modport RegisterIf::Slave       ,
+    if_memory_mst     : modport MemoryIf::Master        ,
+    if_memory_slv     : modport MemoryIf::Slave         ,
     o_tx              : output  logic                   ,
     o_busy            : output  logic                   ,
     o_finish          : output  logic                   ,
@@ -35,22 +37,30 @@ module OpeStoreToMemory (
     var write_count              : logic <2> ;
     var write_count_next         : logic <2> ;
 
-    let i_write_memory_en    : logic = status == Status::WriteMemory;
-    var o_write_memory_tx    : logic;
-    var o_write_memory_busy  : logic;
-    var o_write_memory_finish: logic;
+    let i_write_memory_en     : logic = status == Status::WriteMemory;
+    var o_write_memory_tx     : logic;
+    var o_write_memory_busy   : logic;
+    var o_write_memory_finish : logic;
+    inst if_write_memory_memory: MemoryIf;
+    always_comb {
+        if_memory_mst.we   = if_write_memory_memory.we;
+        if_memory_mst.addr = if_write_memory_memory.addr;
+        if_memory_mst.data = if_write_memory_memory.data;
+    }
     inst write_memory: WriteMemory (
-        i_clk                                    ,
-        i_rst                                    ,
-        i_en              : i_write_memory_en    ,
-        i_we                                     ,
-        i_rx                                     ,
-        i_target_low_addr : tmp_target_low_addr  ,
-        i_target_high_addr: tmp_target_high_addr ,
-        i_send_data                              ,
-        o_tx              : o_write_memory_tx    ,
-        o_busy            : o_write_memory_busy  ,
-        o_finish          : o_write_memory_finish,
+        i_clk                                     ,
+        i_rst                                     ,
+        i_en              : i_write_memory_en     ,
+        i_we                                      ,
+        i_rx                                      ,
+        i_target_low_addr : tmp_target_low_addr   ,
+        i_target_high_addr: tmp_target_high_addr  ,
+        i_send_data                               ,
+        if_memory_mst     : if_write_memory_memory,
+        if_memory_slv                             ,
+        o_tx              : o_write_memory_tx     ,
+        o_busy            : o_write_memory_busy   ,
+        o_finish          : o_write_memory_finish ,
     );
 
     always_comb {

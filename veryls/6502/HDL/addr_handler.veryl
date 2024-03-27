@@ -5,8 +5,10 @@ module AddrHandler (
     i_we              : input   logic                    ,
     i_rx              : input   logic                    ,
     i_addr_mode       : input   OperatorsPkg::AddrMode   ,
-    if_register_slv   : modport RegisterIf::Slave        ,
     if_register_mst   : modport RegisterIf::Master       ,
+    if_register_slv   : modport RegisterIf::Slave        ,
+    if_memory_mst     : modport MemoryIf::Master         ,
+    if_memory_slv     : modport MemoryIf::Slave          ,
     o_target_low_addr : output  logic                 <8>,
     o_target_high_addr: output  logic                 <8>,
     o_tx              : output  logic                    ,
@@ -58,46 +60,52 @@ module AddrHandler (
         o_finish: o_target_high_addr_read_finish,
     );
 
-    let i_read_low_memory_en    : logic    = status == Status::ReadLowMemory;
-    var o_read_low_memory_data  : logic<8>;
-    var o_read_low_memory_tx    : logic   ;
-    var o_read_low_memory_rts   : logic   ;
-    var o_read_low_memory_busy  : logic   ;
-    var o_read_low_memory_finish: logic   ;
+    let i_read_low_memory_en     : logic    = status == Status::ReadLowMemory;
+    var o_read_low_memory_data   : logic<8>;
+    var o_read_low_memory_tx     : logic   ;
+    var o_read_low_memory_rts    : logic   ;
+    var o_read_low_memory_busy   : logic   ;
+    var o_read_low_memory_finish : logic   ;
+    inst if_read_low_memory_memory: MemoryIf;
     inst read_low_memory: ReadMemory (
-        i_clk                                       ,
-        i_rst                                       ,
-        i_en              : i_read_low_memory_en    ,
-        i_we                                        ,
-        i_rx                                        ,
-        i_target_low_addr : o_target_low_addr       ,
-        i_target_high_addr: 0                       ,
-        o_data            : o_read_low_memory_data  ,
-        o_tx              : o_read_low_memory_tx    ,
-        o_rts             : o_read_low_memory_rts   ,
-        o_busy            : o_read_low_memory_busy  ,
-        o_finish          : o_read_low_memory_finish,
-    );
-
-    let i_read_high_memory_en    : logic    = status == Status::ReadHighMemory;
-    var o_read_high_memory_data  : logic<8>;
-    var o_read_high_memory_tx    : logic   ;
-    var o_read_high_memory_rts   : logic   ;
-    var o_read_high_memory_busy  : logic   ;
-    var o_read_high_memory_finish: logic   ;
-    inst read_high_memory: ReadMemory (
         i_clk                                        ,
         i_rst                                        ,
-        i_en              : i_read_high_memory_en    ,
+        i_en              : i_read_low_memory_en     ,
         i_we                                         ,
         i_rx                                         ,
-        i_target_low_addr : o_target_high_addr       ,
+        i_target_low_addr : o_target_low_addr        ,
         i_target_high_addr: 0                        ,
-        o_data            : o_read_high_memory_data  ,
-        o_tx              : o_read_high_memory_tx    ,
-        o_rts             : o_read_high_memory_rts   ,
-        o_busy            : o_read_high_memory_busy  ,
-        o_finish          : o_read_high_memory_finish,
+        if_memory_mst     : if_read_low_memory_memory,
+        if_memory_slv                                ,
+        o_data            : o_read_low_memory_data   ,
+        o_tx              : o_read_low_memory_tx     ,
+        o_rts             : o_read_low_memory_rts    ,
+        o_busy            : o_read_low_memory_busy   ,
+        o_finish          : o_read_low_memory_finish ,
+    );
+
+    let i_read_high_memory_en     : logic    = status == Status::ReadHighMemory;
+    var o_read_high_memory_data   : logic<8>;
+    var o_read_high_memory_tx     : logic   ;
+    var o_read_high_memory_rts    : logic   ;
+    var o_read_high_memory_busy   : logic   ;
+    var o_read_high_memory_finish : logic   ;
+    inst if_read_high_memory_memory: MemoryIf;
+    inst read_high_memory: ReadMemory (
+        i_clk                                         ,
+        i_rst                                         ,
+        i_en              : i_read_high_memory_en     ,
+        i_we                                          ,
+        i_rx                                          ,
+        i_target_low_addr : o_target_high_addr        ,
+        i_target_high_addr: 0                         ,
+        if_memory_mst     : if_read_high_memory_memory,
+        if_memory_slv                                 ,
+        o_data            : o_read_high_memory_data   ,
+        o_tx              : o_read_high_memory_tx     ,
+        o_rts             : o_read_high_memory_rts    ,
+        o_busy            : o_read_high_memory_busy   ,
+        o_finish          : o_read_high_memory_finish ,
     );
 
     var status       : Status    ;
@@ -116,6 +124,9 @@ module AddrHandler (
         o_tx_next               = o_tx;
         o_p_next                = if_register_mst.p;
         o_pc_next               = if_register_mst.pc;
+        if_memory_mst.we        = 0;
+        if_memory_mst.addr      = 0;
+        if_memory_mst.data      = 0;
         case status {
             Status::Ready: {
                 o_p_next = if_register_slv.p;
@@ -170,8 +181,11 @@ module AddrHandler (
                 }
             }
             Status::ReadLowMemory: {
-                o_tx_next  = o_read_low_memory_tx;
-                o_rts_next = o_read_low_memory_rts;
+                o_tx_next          = o_read_low_memory_tx;
+                o_rts_next         = o_read_low_memory_rts;
+                if_memory_mst.we   = if_read_low_memory_memory.we;
+                if_memory_mst.addr = if_read_low_memory_memory.addr;
+                if_memory_mst.data = if_read_low_memory_memory.data;
                 if o_read_low_memory_finish {
                     o_target_low_addr_next = o_read_low_memory_data;
                     if i_addr_mode == OperatorsPkg::AddrMode::Ind || i_addr_mode == OperatorsPkg::AddrMode::IndX || i_addr_mode == OperatorsPkg::AddrMode::IndY {
@@ -182,8 +196,11 @@ module AddrHandler (
                 }
             }
             Status::ReadHighMemory: {
-                o_tx_next  = o_read_high_memory_tx;
-                o_rts_next = o_read_high_memory_rts;
+                o_tx_next          = o_read_high_memory_tx;
+                o_rts_next         = o_read_high_memory_rts;
+                if_memory_mst.we   = if_read_high_memory_memory.we;
+                if_memory_mst.addr = if_read_high_memory_memory.addr;
+                if_memory_mst.data = if_read_high_memory_memory.data;
                 if o_read_high_memory_finish {
                     o_target_high_addr_next = o_read_high_memory_data;
                     status_next             = Status::AdjustRegister;

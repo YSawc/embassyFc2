@@ -1,15 +1,17 @@
 module WriteMemory (
-    i_clk             : input  logic   ,
-    i_rst             : input  logic   ,
-    i_en              : input  logic   ,
-    i_we              : input  logic   ,
-    i_rx              : input  logic   ,
-    i_target_low_addr : input  logic<8>,
-    i_target_high_addr: input  logic<8>,
-    i_send_data       : input  logic<8>,
-    o_tx              : output logic   ,
-    o_busy            : output logic   ,
-    o_finish          : output logic   ,
+    i_clk             : input   logic              ,
+    i_rst             : input   logic              ,
+    i_en              : input   logic              ,
+    i_we              : input   logic              ,
+    i_rx              : input   logic              ,
+    i_target_low_addr : input   logic           <8>,
+    i_target_high_addr: input   logic           <8>,
+    if_memory_mst     : modport MemoryIf::Master   ,
+    if_memory_slv     : modport MemoryIf::Slave    ,
+    i_send_data       : input   logic           <8>,
+    o_tx              : output  logic              ,
+    o_busy            : output  logic              ,
+    o_finish          : output  logic              ,
 ) {
     var o_busy_next  : logic    ;
     var o_finish_next: logic    ;
@@ -69,14 +71,20 @@ module WriteMemory (
     );
 
     always_comb {
-        status_next   = status;
-        o_finish_next = o_finish;
-        o_tx_next     = o_tx;
+        status_next        = status;
+        o_finish_next      = o_finish;
+        o_tx_next          = o_tx;
+        if_memory_mst.we   = 0;
+        if_memory_mst.addr = 0;
+        if_memory_mst.data = 0;
         case status {
             Status::Ready: {
                 o_tx_next = 1;
                 if i_en {
-                    status_next = Status::LowTx;
+                    if_memory_mst.we   = 1;
+                    if_memory_mst.addr = utilPkg::combine_byte_to_short(i_high_tx_data, i_low_tx_data);
+                    if_memory_mst.data = i_send_data;
+                    status_next        = Status::LowTx;
                 }
             }
             Status::LowTx: {

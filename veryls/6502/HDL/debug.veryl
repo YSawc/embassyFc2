@@ -427,6 +427,7 @@ module Debug (
     var o_addr_handler_busy  : logic;
     var o_addr_handler_finish: logic;
     inst addr_handler_register: RegisterIf;
+    inst addr_handler_memory  : MemoryIf;
     var o_target_low_addr    : logic<8>;
     var o_target_high_addr   : logic<8>;
     var o_addr_handler_tx    : logic   ;
@@ -439,6 +440,8 @@ module Debug (
         i_addr_mode       : i_inst_casted_addr_mode,
         if_register_mst   : addr_handler_register  ,
         if_register_slv                            ,
+        if_memory_mst     : addr_handler_memory    ,
+        if_memory_slv                              ,
         o_target_low_addr                          ,
         o_target_high_addr                         ,
         o_tx              : o_addr_handler_tx      ,
@@ -463,6 +466,7 @@ module Debug (
 
     let i_ope_read_and_store_to_memory_en       : logic = status == Status::OpeReadAndStoreToMemory;
     inst if_ope_read_and_store_to_memory_register: RegisterIf;
+    inst if_ope_read_and_store_to_memory_memory  : MemoryIf;
     var o_ope_read_and_store_to_memory_tx       : logic;
     var o_ope_read_and_store_to_memory_rts      : logic;
     var o_ope_read_and_store_to_memory_busy     : logic;
@@ -478,6 +482,8 @@ module Debug (
         i_target_high_addr: o_target_high_addr                      ,
         if_register_mst   : if_ope_read_and_store_to_memory_register,
         if_register_slv                                             ,
+        if_memory_mst     : if_ope_read_and_store_to_memory_memory  ,
+        if_memory_slv                                               ,
         o_tx              : o_ope_read_and_store_to_memory_tx       ,
         o_rts             : o_ope_read_and_store_to_memory_rts      ,
         o_busy            : o_ope_read_and_store_to_memory_busy     ,
@@ -486,6 +492,7 @@ module Debug (
 
     let i_ope_read_and_store_to_register_en       : logic = status == Status::OpeReadAndStoreToRegister;
     inst if_ope_read_and_store_to_register_register: RegisterIf;
+    inst if_ope_read_and_store_to_register_memory  : MemoryIf;
     var o_ope_read_and_store_to_register_tx       : logic;
     var o_ope_read_and_store_to_register_rts      : logic;
     var o_ope_read_and_store_to_register_busy     : logic;
@@ -502,6 +509,8 @@ module Debug (
         i_target_high_addr: o_target_high_addr                        ,
         if_register_mst   : if_ope_read_and_store_to_register_register,
         if_register_slv                                               ,
+        if_memory_mst     : if_ope_read_and_store_to_register_memory  ,
+        if_memory_slv                                                 ,
         o_tx              : o_ope_read_and_store_to_register_tx       ,
         o_rts             : o_ope_read_and_store_to_register_rts      ,
         o_busy            : o_ope_read_and_store_to_register_busy     ,
@@ -514,6 +523,7 @@ module Debug (
     var o_ope_read_and_store_to_acc_or_memory_rts      : logic;
     var o_ope_read_and_store_to_acc_or_memory_busy     : logic;
     var o_ope_read_and_store_to_acc_or_memory_finish   : logic;
+    inst if_ope_read_and_store_to_acc_or_memory_memory  : MemoryIf;
     inst ope_read_and_store_to_acc_or_memory: OpeReadAndStoreToAccOrMemory (
         i_clk                                                              ,
         i_rst                                                              ,
@@ -526,6 +536,8 @@ module Debug (
         i_target_high_addr: o_target_high_addr                             ,
         if_register_mst   : if_ope_read_and_store_to_acc_or_memory_register,
         if_register_slv                                                    ,
+        if_memory_mst     : if_ope_read_and_store_to_acc_or_memory_memory  ,
+        if_memory_slv                                                      ,
         o_tx              : o_ope_read_and_store_to_acc_or_memory_tx       ,
         o_rts             : o_ope_read_and_store_to_acc_or_memory_rts      ,
         o_busy            : o_ope_read_and_store_to_acc_or_memory_busy     ,
@@ -534,6 +546,7 @@ module Debug (
 
     let i_ope_store_to_memory_en       : logic = status == Status::OpeStoreToMemory;
     inst if_ope_store_to_memory_register: RegisterIf;
+    inst if_ope_store_to_memory_memory  : MemoryIf;
     var o_ope_store_to_memory_tx       : logic<8>;
     var o_ope_store_to_memory_busy     : logic   ;
     var o_ope_store_to_memory_finish   : logic   ;
@@ -548,6 +561,8 @@ module Debug (
         i_target_high_addr: o_target_high_addr             ,
         if_register_mst   : if_ope_store_to_memory_register,
         if_register_slv                                    ,
+        if_memory_mst     : if_ope_store_to_memory_memory  ,
+        if_memory_slv                                      ,
         o_tx              : o_ope_store_to_memory_tx       ,
         o_busy            : o_ope_store_to_memory_busy     ,
         o_finish          : o_ope_store_to_memory_finish   ,
@@ -555,6 +570,7 @@ module Debug (
 
     let i_ope_compare_en       : logic = status == Status::OpeCompare;
     inst if_ope_compare_register: RegisterIf;
+    inst if_ope_compare_memory  : MemoryIf;
     var o_ope_compare_tx       : logic;
     var o_ope_compare_rts      : logic;
     var o_ope_compare_busy     : logic;
@@ -571,6 +587,8 @@ module Debug (
         i_target_high_addr: o_target_high_addr     ,
         if_register_mst   : if_ope_compare_register,
         if_register_slv                            ,
+        if_memory_mst     : if_ope_compare_memory  ,
+        if_memory_slv                              ,
         o_tx              : o_ope_compare_tx       ,
         o_rts             : o_ope_compare_rts      ,
         o_busy            : o_ope_compare_busy     ,
@@ -647,6 +665,9 @@ module Debug (
         o_s_next                      = if_register_mst.s;
         o_p_next                      = if_register_mst.p;
         o_pc_next                     = if_register_mst.pc;
+        if_memory_mst.we              = 0;
+        if_memory_mst.addr            = 0;
+        if_memory_mst.data            = 0;
         status_next                   = status;
         register_transfer_finish_next = register_transfer_finish;
         case status {
@@ -700,7 +721,10 @@ module Debug (
                 }
             }
             Status::AddrHandler: {
-                o_tx_next = o_addr_handler_tx;
+                o_tx_next          = o_addr_handler_tx;
+                if_memory_mst.we   = addr_handler_memory.we;
+                if_memory_mst.addr = addr_handler_memory.addr;
+                if_memory_mst.data = addr_handler_memory.data;
                 if o_addr_handler_finish {
                     o_p_next    = addr_handler_register.p;
                     o_pc_next   = addr_handler_register.pc;
@@ -725,7 +749,10 @@ module Debug (
                 }
             }
             Status::OpeReadAndStoreToMemory: {
-                o_tx_next = o_ope_read_and_store_to_memory_tx;
+                o_tx_next          = o_ope_read_and_store_to_memory_tx;
+                if_memory_mst.we   = if_ope_read_and_store_to_memory_memory.we;
+                if_memory_mst.addr = if_ope_read_and_store_to_memory_memory.addr;
+                if_memory_mst.data = if_ope_read_and_store_to_memory_memory.data;
                 if o_ope_read_and_store_to_memory_finish {
                     o_s_next    = if_ope_read_and_store_to_memory_register.s;
                     o_p_next    = if_ope_read_and_store_to_memory_register.p;
@@ -734,7 +761,10 @@ module Debug (
                 }
             }
             Status::OpeReadAndStoreToRegister: {
-                o_tx_next = o_ope_read_and_store_to_register_tx;
+                o_tx_next          = o_ope_read_and_store_to_register_tx;
+                if_memory_mst.we   = if_ope_read_and_store_to_register_memory.we;
+                if_memory_mst.addr = if_ope_read_and_store_to_register_memory.addr;
+                if_memory_mst.data = if_ope_read_and_store_to_register_memory.data;
                 if o_ope_read_and_store_to_register_finish {
                     o_a_next    = if_ope_read_and_store_to_register_register.a;
                     o_x_next    = if_ope_read_and_store_to_register_register.x;
@@ -746,7 +776,10 @@ module Debug (
                 }
             }
             Status::OpeReadAndStoreToAccOrMemory: {
-                o_tx_next = o_ope_read_and_store_to_acc_or_memory_tx;
+                o_tx_next          = o_ope_read_and_store_to_acc_or_memory_tx;
+                if_memory_mst.we   = if_ope_read_and_store_to_acc_or_memory_memory.we;
+                if_memory_mst.addr = if_ope_read_and_store_to_acc_or_memory_memory.addr;
+                if_memory_mst.data = if_ope_read_and_store_to_acc_or_memory_memory.data;
                 if o_ope_read_and_store_to_acc_or_memory_finish {
                     o_a_next    = if_ope_read_and_store_to_acc_or_memory_register.a;
                     o_p_next    = if_ope_read_and_store_to_acc_or_memory_register.p;
@@ -754,7 +787,10 @@ module Debug (
                 }
             }
             Status::OpeStoreToMemory: {
-                o_tx_next = o_ope_store_to_memory_tx;
+                o_tx_next          = o_ope_store_to_memory_tx;
+                if_memory_mst.we   = if_ope_store_to_memory_memory.we;
+                if_memory_mst.addr = if_ope_store_to_memory_memory.addr;
+                if_memory_mst.data = if_ope_store_to_memory_memory.data;
                 if o_ope_store_to_memory_finish {
                     status_next = Status::Ready;
                     o_s_next    = if_ope_store_to_memory_register.s;
@@ -763,8 +799,11 @@ module Debug (
                 }
             }
             Status::OpeCompare: {
-                o_tx_next = o_ope_compare_tx;
-                o_p_next  = if_ope_compare_register.p;
+                o_tx_next          = o_ope_compare_tx;
+                o_p_next           = if_ope_compare_register.p;
+                if_memory_mst.we   = if_ope_compare_memory.we;
+                if_memory_mst.addr = if_ope_compare_memory.addr;
+                if_memory_mst.data = if_ope_compare_memory.data;
                 if o_ope_compare_finish {
                     status_next = Status::Ready;
                 }
