@@ -14,6 +14,112 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
+pub fn test_adc_indx_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x69]);
+    check_valid_register_status(usart, TxReg::A, &[0x69]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x00, 0x02]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x00]);
+    check_valid_register_status(usart, TxReg::A, &[0x00]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000010]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0x01]);
+    check_valid_register_status(usart, TxReg::Y, &[0x01]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x6D, 0x00, 0x02]);
+    check_valid_register_status(usart, TxReg::A, &[0x69]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    info!("test_adc_indx_within_internal_memory passed!");
+}
+
+pub fn test_adc_zp_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x7F]);
+    check_valid_register_status(usart, TxReg::A, &[0x7F]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x78, 0x00]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x65, 0x78]);
+    check_valid_register_status(usart, TxReg::A, &[0xFE]);
+    check_valid_register_status(usart, TxReg::P, &[0b11000000]);
+    info!("test_adc_zp_within_internal_memory passed!");
+}
+
+pub fn test_adc_imm_without_carry_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x7F]);
+    check_valid_register_status(usart, TxReg::A, &[0x7F]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x69, 0x80]);
+    check_valid_register_status(usart, TxReg::A, &[0xFF]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_adc_imm_without_carry_within_internal_memory passed!");
+}
+
+pub fn test_adc_imm_with_carry_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x80]);
+    check_valid_register_status(usart, TxReg::A, &[0x80]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x69, 0x80]);
+    check_valid_register_status(usart, TxReg::A, &[0x00]);
+    check_valid_register_status(usart, TxReg::P, &[0b01000011]);
+    info!("test_adc_imm_with_carry_within_internal_memory passed!");
+}
+
+pub fn test_adc_imm_plus_carry_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xC9, 0x00]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000011]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x7F]);
+    check_valid_register_status(usart, TxReg::A, &[0x7F]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000001]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x69, 0x7F]);
+    check_valid_register_status(usart, TxReg::A, &[0xFF]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_adc_imm_plus_carry_within_internal_memory passed!");
+}
+
+pub fn test_adc_imm_with_overflow_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x7F]);
+    check_valid_register_status(usart, TxReg::A, &[0x7F]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x69, 0x1]);
+    check_valid_register_status(usart, TxReg::A, &[0x80]);
+    check_valid_register_status(usart, TxReg::P, &[0b11000000]);
+    info!("test_adc_imm_with_overflow_within_internal_memory passed!");
+}
+
 pub fn test_adc_abs_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
@@ -21,17 +127,122 @@ pub fn test_adc_abs_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
     usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
-
-    usart_write(usart, &[OpeMode::Inst as u8, 0xA9]);
-    usart.blocking_write(&[0x69]).unwrap();
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x69]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x78, 0x06]);
-    usart_write(usart, &[OpeMode::Inst as u8, 0xA9]);
-    usart.blocking_write(&[0x00]).unwrap();
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x00]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x6D, 0x78, 0x06]);
-
     check_valid_register_status(usart, TxReg::A, &[0x69]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     info!("test_adc_abs_within_internal_memory passed!");
+}
+
+pub fn test_adc_indy_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xC9, 0x00]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000011]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x7F]);
+    check_valid_register_status(usart, TxReg::A, &[0x7F]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000001]);
+
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x04]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x34, 0x00]);
+    check_valid_register_status(usart, TxReg::A, &[0x04]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000001]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x80]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x00, 0x04]);
+    check_valid_register_status(usart, TxReg::A, &[0x80]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000001]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x7F]);
+    check_valid_register_status(usart, TxReg::A, &[0x7F]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000001]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x71, 0x33]);
+    check_valid_register_status(usart, TxReg::A, &[0x00]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000011]);
+    info!("test_adc_indy_within_internal_memory passed!");
+}
+
+pub fn test_adc_zpx_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x78]);
+    check_valid_register_status(usart, TxReg::X, &[0x78]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x69]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x78, 0x00]);
+    check_valid_register_status(usart, TxReg::A, &[0x69]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x00]);
+    check_valid_register_status(usart, TxReg::A, &[0x00]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000010]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0x01]);
+    check_valid_register_status(usart, TxReg::Y, &[0x01]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x75, 0x00]);
+    check_valid_register_status(usart, TxReg::A, &[0x69]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    info!("test_adc_zpx_within_internal_memory passed!");
+}
+
+pub fn test_adc_absy_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x80]);
+    check_valid_register_status(usart, TxReg::A, &[0x80]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x00, 0x04]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0xFF]);
+    check_valid_register_status(usart, TxReg::A, &[0xFF]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xC9, 0xFF]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000011]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x7F]);
+    check_valid_register_status(usart, TxReg::A, &[0x7F]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000001]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x79, 0x00, 0x04]);
+    check_valid_register_status(usart, TxReg::A, &[0x00]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000011]);
+    info!("test_adc_absy_within_internal_memory passed!");
+}
+
+pub fn test_adc_absx_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x80]);
+    check_valid_register_status(usart, TxReg::A, &[0x80]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x78, 0x06]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x78]);
+    check_valid_register_status(usart, TxReg::X, &[0x78]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0xFF]);
+    check_valid_register_status(usart, TxReg::A, &[0xFF]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xC9, 0xFF]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000011]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x7F]);
+    check_valid_register_status(usart, TxReg::A, &[0x7F]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000001]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x7D, 0x00, 0x06]);
+    check_valid_register_status(usart, TxReg::A, &[0x00]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000011]);
+    info!("test_adc_absx_within_internal_memory passed!");
 }
 
 pub fn test_adc_indx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -59,18 +270,10 @@ pub fn test_adc_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(
-        usart,
-        &[
-            CpuMode::DebugWithinMockMemory as u8,
-            OpeMode::Inst as u8,
-            0xA9,
-            0x7F,
-        ],
-    );
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x7F]);
     check_valid_register_status(usart, TxReg::A, &[0x7F]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x65, 0x78]);
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x78, 0x00]);
     usart.blocking_write(&[0x7F]).unwrap();
@@ -262,6 +465,19 @@ fn main() -> ! {
     let _rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
+
+    test_adc_indx_within_internal_memory(&mut usart, &nop, &mut resb);
+    test_adc_zp_within_internal_memory(&mut usart, &nop, &mut resb);
+    test_adc_imm_without_carry_within_internal_memory(&mut usart, &nop, &mut resb);
+    test_adc_imm_with_carry_within_internal_memory(&mut usart, &nop, &mut resb);
+    test_adc_imm_plus_carry_within_internal_memory(&mut usart, &nop, &mut resb);
+    test_adc_imm_with_overflow_within_internal_memory(&mut usart, &nop, &mut resb);
+    test_adc_abs_within_internal_memory(&mut usart, &nop, &mut resb);
+    test_adc_indy_within_internal_memory(&mut usart, &nop, &mut resb);
+    test_adc_zpx_within_internal_memory(&mut usart, &nop, &mut resb);
+    test_adc_absy_within_internal_memory(&mut usart, &nop, &mut resb);
+    test_adc_absx_within_internal_memory(&mut usart, &nop, &mut resb);
+
     test_adc_indx_within_mocking_memory(&mut usart, &nop, &mut resb);
     test_adc_zp_within_mocking_memory(&mut usart, &nop, &mut resb);
     test_adc_imm_without_carry_within_mocking_memory(&mut usart, &nop, &mut resb);
