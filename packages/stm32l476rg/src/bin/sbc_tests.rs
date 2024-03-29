@@ -14,7 +14,7 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
-pub fn test_sbc_indx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_sbc_indx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -38,7 +38,7 @@ pub fn test_sbc_indx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_sbc_indx passed!");
 }
 
-pub fn test_sbc_zp<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_sbc_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -58,7 +58,7 @@ pub fn test_sbc_zp<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_sbc_zp passed!");
 }
 
-pub fn test_sbc_imm_without_carry<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_sbc_imm_without_carry_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -74,7 +74,7 @@ pub fn test_sbc_imm_without_carry<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_sbc_imm_without_carry passed!");
 }
 
-pub fn test_sbc_imm_with_carry<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_sbc_imm_with_carry_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -92,7 +92,7 @@ pub fn test_sbc_imm_with_carry<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_sbc_imm_with_carry passed!");
 }
 
-pub fn test_sbc_imm_with_overflow<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_sbc_imm_with_overflow_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -110,7 +110,7 @@ pub fn test_sbc_imm_with_overflow<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_sbc_imm_with_overflow passed!");
 }
 
-pub fn test_sbc_abs<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_sbc_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -130,7 +130,7 @@ pub fn test_sbc_abs<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_sbc_abs passed!");
 }
 
-pub fn test_sbc_indy<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_sbc_indy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -154,7 +154,7 @@ pub fn test_sbc_indy<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_sbc_indy passed!");
 }
 
-pub fn test_sbc_zpx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_sbc_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -177,7 +177,7 @@ pub fn test_sbc_zpx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_sbc_zpx passed!");
 }
 
-pub fn test_sbc_absy<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_sbc_absy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -197,7 +197,7 @@ pub fn test_sbc_absy<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_sbc_absy passed!");
 }
 
-pub fn test_sbc_absx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_sbc_absx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -231,16 +231,16 @@ fn main() -> ! {
     let _rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
-    test_sbc_indx(&mut usart, &nop, &mut resb);
-    test_sbc_zp(&mut usart, &nop, &mut resb);
-    test_sbc_imm_without_carry(&mut usart, &nop, &mut resb);
-    test_sbc_imm_with_carry(&mut usart, &nop, &mut resb);
-    test_sbc_imm_with_overflow(&mut usart, &nop, &mut resb);
-    test_sbc_abs(&mut usart, &nop, &mut resb);
-    test_sbc_indy(&mut usart, &nop, &mut resb);
-    test_sbc_zpx(&mut usart, &nop, &mut resb);
-    test_sbc_absy(&mut usart, &nop, &mut resb);
-    test_sbc_absx(&mut usart, &nop, &mut resb);
+    test_sbc_indx_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_sbc_zp_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_sbc_imm_without_carry_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_sbc_imm_with_carry_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_sbc_imm_with_overflow_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_sbc_abs_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_sbc_indy_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_sbc_zpx_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_sbc_absy_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_sbc_absx_within_mocking_memory(&mut usart, &nop, &mut resb);
     info!("all tests passed!");
     loop {}
 }

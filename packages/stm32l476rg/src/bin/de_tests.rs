@@ -14,7 +14,7 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
-pub fn test_dey_impl<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_dey_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -30,7 +30,7 @@ pub fn test_dey_impl<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_dey_impl passed!");
 }
 
-pub fn test_dey_impl_with_rising_z_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_dey_impl_with_rising_z_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -45,7 +45,7 @@ pub fn test_dey_impl_with_rising_z_flag<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_dey_impl_with_rising_z_flag passed!");
 }
 
-pub fn test_dey_impl_with_rising_n_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_dey_impl_with_rising_n_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -58,7 +58,11 @@ pub fn test_dey_impl_with_rising_n_flag<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_dey_impl_with_rising_n_flag passed!");
 }
 
-pub fn test_dey_impl_with_falling_n_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_dey_impl_with_falling_n_flag_within_mocking_memory<
+    T: BasicInstance,
+    P: Pin,
+    P2: Pin,
+>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -74,7 +78,7 @@ pub fn test_dey_impl_with_falling_n_flag<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_dey_impl_with_falling_n_flag passed!");
 }
 
-pub fn test_dex_impl<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_dex_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -90,7 +94,7 @@ pub fn test_dex_impl<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_dex_impl passed!");
 }
 
-pub fn test_dex_impl_with_rising_z_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_dex_impl_with_rising_z_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -105,7 +109,7 @@ pub fn test_dex_impl_with_rising_z_flag<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_dex_impl_with_rising_z_flag passed!");
 }
 
-pub fn test_dex_impl_with_rising_n_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_dex_impl_with_rising_n_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -118,7 +122,11 @@ pub fn test_dex_impl_with_rising_n_flag<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_dex_impl_with_rising_n_flag passed!");
 }
 
-pub fn test_dex_impl_with_falling_n_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_dex_impl_with_falling_n_flag_within_mocking_memory<
+    T: BasicInstance,
+    P: Pin,
+    P2: Pin,
+>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -134,7 +142,7 @@ pub fn test_dex_impl_with_falling_n_flag<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_dex_impl_with_falling_n_flag passed!");
 }
 
-pub fn test_dec_zp<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_dec_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -149,7 +157,7 @@ pub fn test_dec_zp<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_dec_zp passed!");
 }
 
-pub fn test_dec_abs<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_dec_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -164,7 +172,7 @@ pub fn test_dec_abs<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_dec_abs passed!");
 }
 
-pub fn test_dec_zpx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_dec_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -181,7 +189,7 @@ pub fn test_dec_zpx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_dec_zpx passed!");
 }
 
-pub fn test_dec_absx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_dec_absx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -209,18 +217,18 @@ fn main() -> ! {
     let _rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
-    test_dey_impl(&mut usart, &nop, &mut resb);
-    test_dey_impl_with_rising_z_flag(&mut usart, &nop, &mut resb);
-    test_dey_impl_with_rising_n_flag(&mut usart, &nop, &mut resb);
-    test_dey_impl_with_falling_n_flag(&mut usart, &nop, &mut resb);
-    test_dex_impl(&mut usart, &nop, &mut resb);
-    test_dex_impl_with_rising_z_flag(&mut usart, &nop, &mut resb);
-    test_dex_impl_with_rising_n_flag(&mut usart, &nop, &mut resb);
-    test_dex_impl_with_falling_n_flag(&mut usart, &nop, &mut resb);
-    test_dec_zp(&mut usart, &nop, &mut resb);
-    test_dec_abs(&mut usart, &nop, &mut resb);
-    test_dec_zpx(&mut usart, &nop, &mut resb);
-    test_dec_absx(&mut usart, &nop, &mut resb);
+    test_dey_impl_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_dey_impl_with_rising_z_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_dey_impl_with_rising_n_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_dey_impl_with_falling_n_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_dex_impl_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_dex_impl_with_rising_z_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_dex_impl_with_rising_n_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_dex_impl_with_falling_n_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_dec_zp_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_dec_abs_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_dec_zpx_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_dec_absx_within_mocking_memory(&mut usart, &nop, &mut resb);
     info!("all tests passed!");
     loop {}
 }

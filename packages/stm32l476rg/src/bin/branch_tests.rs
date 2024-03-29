@@ -14,7 +14,7 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
-pub fn test_bpl_rel_condition_neg_n<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_bpl_rel_condition_neg_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -30,7 +30,7 @@ pub fn test_bpl_rel_condition_neg_n<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_bpl_rel_condition_neg_n passed!");
 }
 
-pub fn test_bpl_rel_condition_n<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_bpl_rel_condition_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -49,7 +49,7 @@ pub fn test_bpl_rel_condition_n<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_bpl_rel_condition_n passed!");
 }
 
-pub fn test_bmi_rel_condition_neg_n<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_bmi_rel_condition_neg_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -65,7 +65,7 @@ pub fn test_bmi_rel_condition_neg_n<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_bmi_rel_condition_neg_n passed!");
 }
 
-pub fn test_bmi_rel_condition_n<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_bmi_rel_condition_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -85,7 +85,7 @@ pub fn test_bmi_rel_condition_n<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_bmi_rel_condition_n passed!");
 }
 
-pub fn test_bvc_rel_condition_neg_v<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_bvc_rel_condition_neg_v_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -101,7 +101,7 @@ pub fn test_bvc_rel_condition_neg_v<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_bvc_rel_condition_neg_v passed!");
 }
 
-pub fn test_bvc_rel_condition_v<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_bvc_rel_condition_v_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -127,7 +127,7 @@ pub fn test_bvc_rel_condition_v<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_bvc_rel_condition_v passed!");
 }
 
-pub fn test_bvs_rel_condition_neg_v<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_bvs_rel_condition_neg_v_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -143,7 +143,7 @@ pub fn test_bvs_rel_condition_neg_v<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_bvs_rel_condition_neg_v passed!");
 }
 
-pub fn test_bvs_rel_condition_v<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_bvs_rel_condition_v_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -169,7 +169,7 @@ pub fn test_bvs_rel_condition_v<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_bvs_rel_condition_v passed!");
 }
 
-pub fn test_bcc_rel_condition_neg_c<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_bcc_rel_condition_neg_c_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -185,7 +185,7 @@ pub fn test_bcc_rel_condition_neg_c<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_bcc_rel_condition_neg_c passed!");
 }
 
-pub fn test_bcc_rel_condition_c<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_bcc_rel_condition_c_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -204,7 +204,7 @@ pub fn test_bcc_rel_condition_c<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_bcc_rel_condition_c passed!");
 }
 
-pub fn test_bcs_rel_condition_neg_c<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_bcs_rel_condition_neg_c_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -220,7 +220,7 @@ pub fn test_bcs_rel_condition_neg_c<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_bcs_rel_condition_neg_c passed!");
 }
 
-pub fn test_bcs_rel_condition_c<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_bcs_rel_condition_c_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -238,7 +238,7 @@ pub fn test_bcs_rel_condition_c<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_bcs_rel_condition_c passed!");
 }
 
-pub fn test_bne_rel_condition_neg_z<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_bne_rel_condition_neg_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -254,7 +254,7 @@ pub fn test_bne_rel_condition_neg_z<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_bne_rel_condition_neg_z passed!");
 }
 
-pub fn test_bne_rel_condition_z<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_bne_rel_condition_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -275,7 +275,7 @@ pub fn test_bne_rel_condition_z<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_bne_rel_condition_z passed!");
 }
 
-pub fn test_beq_rel_condition_neg_z<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_beq_rel_condition_neg_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -291,7 +291,7 @@ pub fn test_beq_rel_condition_neg_z<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_beq_rel_condition_neg_z passed!");
 }
 
-pub fn test_beq_rel_condition_z<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_beq_rel_condition_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -322,22 +322,22 @@ fn main() -> ! {
     let _rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
-    test_bpl_rel_condition_neg_n(&mut usart, &nop, &mut resb);
-    test_bpl_rel_condition_n(&mut usart, &nop, &mut resb);
-    test_bmi_rel_condition_neg_n(&mut usart, &nop, &mut resb);
-    test_bmi_rel_condition_n(&mut usart, &nop, &mut resb);
-    test_bvc_rel_condition_neg_v(&mut usart, &nop, &mut resb);
-    test_bvc_rel_condition_v(&mut usart, &nop, &mut resb);
-    test_bvs_rel_condition_neg_v(&mut usart, &nop, &mut resb);
-    test_bvs_rel_condition_v(&mut usart, &nop, &mut resb);
-    test_bcc_rel_condition_neg_c(&mut usart, &nop, &mut resb);
-    test_bcc_rel_condition_c(&mut usart, &nop, &mut resb);
-    test_bcs_rel_condition_neg_c(&mut usart, &nop, &mut resb);
-    test_bcs_rel_condition_c(&mut usart, &nop, &mut resb);
-    test_bne_rel_condition_neg_z(&mut usart, &nop, &mut resb);
-    test_bne_rel_condition_z(&mut usart, &nop, &mut resb);
-    test_beq_rel_condition_neg_z(&mut usart, &nop, &mut resb);
-    test_beq_rel_condition_z(&mut usart, &nop, &mut resb);
+    test_bpl_rel_condition_neg_n_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_bpl_rel_condition_n_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_bmi_rel_condition_neg_n_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_bmi_rel_condition_n_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_bvc_rel_condition_neg_v_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_bvc_rel_condition_v_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_bvs_rel_condition_neg_v_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_bvs_rel_condition_v_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_bcc_rel_condition_neg_c_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_bcc_rel_condition_c_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_bcs_rel_condition_neg_c_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_bcs_rel_condition_c_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_bne_rel_condition_neg_z_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_bne_rel_condition_z_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_beq_rel_condition_neg_z_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_beq_rel_condition_z_within_mocking_memory(&mut usart, &nop, &mut resb);
     info!("all tests passed!");
     loop {}
 }

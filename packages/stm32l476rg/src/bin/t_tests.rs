@@ -14,7 +14,7 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
-pub fn test_txa_impl_with_no_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_txa_impl_with_no_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -32,7 +32,7 @@ pub fn test_txa_impl_with_no_flag<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_txa_impl_with_no_flag passed!");
 }
 
-pub fn test_txa_impl_with_z<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_txa_impl_with_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -49,7 +49,7 @@ pub fn test_txa_impl_with_z<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_txa_impl_with_z passed!");
 }
 
-pub fn test_txa_impl_with_n<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_txa_impl_with_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -70,7 +70,7 @@ pub fn test_txa_impl_with_n<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_txa_impl_with_n passed!");
 }
 
-pub fn test_tya_impl_with_no_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_tya_impl_with_no_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -88,7 +88,7 @@ pub fn test_tya_impl_with_no_flag<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_tya_impl_with_no_flag passed!");
 }
 
-pub fn test_tya_impl_with_z<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_tya_impl_with_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -105,7 +105,7 @@ pub fn test_tya_impl_with_z<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_tya_impl_with_z passed!");
 }
 
-pub fn test_tya_impl_with_n<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_tya_impl_with_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -126,7 +126,7 @@ pub fn test_tya_impl_with_n<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_tya_impl_with_n passed!");
 }
 
-pub fn test_txs_impl_with_no_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_txs_impl_with_no_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -144,7 +144,7 @@ pub fn test_txs_impl_with_no_flag<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_txs_impl_with_no_flag passed!");
 }
 
-pub fn test_txs_impl_in_condition_z<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_txs_impl_in_condition_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -161,7 +161,7 @@ pub fn test_txs_impl_in_condition_z<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_txs_impl_with_z passed!");
 }
 
-pub fn test_txs_impl_in_condition_n<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_txs_impl_in_condition_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -183,7 +183,7 @@ pub fn test_txs_impl_in_condition_n<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_txs_impl_with_n passed!");
 }
 
-pub fn test_tay_impl_with_no_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_tay_impl_with_no_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -201,7 +201,7 @@ pub fn test_tay_impl_with_no_flag<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_tay_impl_with_no_flag passed!");
 }
 
-pub fn test_tay_impl_with_z<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_tay_impl_with_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -218,7 +218,7 @@ pub fn test_tay_impl_with_z<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_tay_impl_with_z passed!");
 }
 
-pub fn test_tay_impl_with_n<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_tay_impl_with_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -239,7 +239,7 @@ pub fn test_tay_impl_with_n<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_tay_impl_with_n passed!");
 }
 
-pub fn test_tax_impl_with_no_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_tax_impl_with_no_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -257,7 +257,7 @@ pub fn test_tax_impl_with_no_flag<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_tax_impl_with_no_flag passed!");
 }
 
-pub fn test_tax_impl_with_z<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_tax_impl_with_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -274,7 +274,7 @@ pub fn test_tax_impl_with_z<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_tax_impl_with_z passed!");
 }
 
-pub fn test_tax_impl_with_n<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_tax_impl_with_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -295,7 +295,7 @@ pub fn test_tax_impl_with_n<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_tax_impl_with_n passed!");
 }
 
-pub fn test_tsx_impl_with_no_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_tsx_impl_with_no_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -321,7 +321,7 @@ pub fn test_tsx_impl_with_no_flag<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_tsx_impl_with_no_flag passed!");
 }
 
-pub fn test_tsx_impl_with_z<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_tsx_impl_with_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -341,7 +341,7 @@ pub fn test_tsx_impl_with_z<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_tsx_impl_with_z passed!");
 }
 
-pub fn test_tsx_impl_with_n<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_tsx_impl_with_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -369,24 +369,24 @@ fn main() -> ! {
     let _rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
-    test_txa_impl_with_no_flag(&mut usart, &nop, &mut resb);
-    test_txa_impl_with_z(&mut usart, &nop, &mut resb);
-    test_txa_impl_with_n(&mut usart, &nop, &mut resb);
-    test_tya_impl_with_no_flag(&mut usart, &nop, &mut resb);
-    test_tya_impl_with_z(&mut usart, &nop, &mut resb);
-    test_tya_impl_with_n(&mut usart, &nop, &mut resb);
-    test_txs_impl_with_no_flag(&mut usart, &nop, &mut resb);
-    test_txs_impl_in_condition_z(&mut usart, &nop, &mut resb);
-    test_txs_impl_in_condition_n(&mut usart, &nop, &mut resb);
-    test_tay_impl_with_no_flag(&mut usart, &nop, &mut resb);
-    test_tay_impl_with_z(&mut usart, &nop, &mut resb);
-    test_tay_impl_with_n(&mut usart, &nop, &mut resb);
-    test_tax_impl_with_no_flag(&mut usart, &nop, &mut resb);
-    test_tax_impl_with_z(&mut usart, &nop, &mut resb);
-    test_tax_impl_with_n(&mut usart, &nop, &mut resb);
-    test_tsx_impl_with_no_flag(&mut usart, &nop, &mut resb);
-    test_tsx_impl_with_z(&mut usart, &nop, &mut resb);
-    test_tsx_impl_with_n(&mut usart, &nop, &mut resb);
+    test_txa_impl_with_no_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_txa_impl_with_z_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_txa_impl_with_n_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_tya_impl_with_no_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_tya_impl_with_z_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_tya_impl_with_n_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_txs_impl_with_no_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_txs_impl_in_condition_z_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_txs_impl_in_condition_n_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_tay_impl_with_no_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_tay_impl_with_z_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_tay_impl_with_n_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_tax_impl_with_no_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_tax_impl_with_z_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_tax_impl_with_n_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_tsx_impl_with_no_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_tsx_impl_with_z_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_tsx_impl_with_n_within_mocking_memory(&mut usart, &nop, &mut resb);
     info!("all tests passed!");
     loop {}
 }

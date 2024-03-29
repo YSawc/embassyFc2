@@ -14,7 +14,7 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
-pub fn test_sta_indx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_sta_indx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -49,7 +49,7 @@ pub fn test_sta_indx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_sta_indx passed!");
 }
 
-pub fn test_sta_zp<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_sta_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -74,7 +74,7 @@ pub fn test_sta_zp<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_sta_zp passed!");
 }
 
-pub fn test_sta_abs<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_sta_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -99,7 +99,7 @@ pub fn test_sta_abs<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_sta_abs passed!");
 }
 
-pub fn test_sta_indy<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_sta_indy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -131,7 +131,7 @@ pub fn test_sta_indy<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_sta_indy passed!");
 }
 
-pub fn test_sta_zpx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_sta_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -158,7 +158,7 @@ pub fn test_sta_zpx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_sta_zpx passed!");
 }
 
-pub fn test_sta_absy<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_sta_absy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -185,7 +185,7 @@ pub fn test_sta_absy<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_sta_absy passed!");
 }
 
-pub fn test_sta_absx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_sta_absx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -212,7 +212,7 @@ pub fn test_sta_absx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_sta_absx passed!");
 }
 
-pub fn test_stx_zp<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_stx_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -237,7 +237,7 @@ pub fn test_stx_zp<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_stx_zp passed!");
 }
 
-pub fn test_stx_abs<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_stx_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -262,7 +262,7 @@ pub fn test_stx_abs<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_stx_abs passed!");
 }
 
-pub fn test_stx_zpy<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_stx_zpy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -289,7 +289,7 @@ pub fn test_stx_zpy<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_stx_zpy passed!");
 }
 
-pub fn test_sty_zp<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_sty_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -314,7 +314,7 @@ pub fn test_sty_zp<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_sty_zp passed!");
 }
 
-pub fn test_sty_abs<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_sty_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -339,7 +339,7 @@ pub fn test_sty_abs<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_sty_zpx passed!");
 }
 
-pub fn test_sty_zpx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_sty_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -376,19 +376,19 @@ fn main() -> ! {
     let rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
-    test_sta_indx(&mut usart, &nop, &rw, &mut resb);
-    test_sta_zp(&mut usart, &nop, &rw, &mut resb);
-    test_sta_abs(&mut usart, &nop, &rw, &mut resb);
-    test_sta_indy(&mut usart, &nop, &rw, &mut resb);
-    test_sta_zpx(&mut usart, &nop, &rw, &mut resb);
-    test_sta_absy(&mut usart, &nop, &rw, &mut resb);
-    test_sta_absx(&mut usart, &nop, &rw, &mut resb);
-    test_stx_zp(&mut usart, &nop, &rw, &mut resb);
-    test_stx_abs(&mut usart, &nop, &rw, &mut resb);
-    test_stx_zpy(&mut usart, &nop, &rw, &mut resb);
-    test_sty_zp(&mut usart, &nop, &rw, &mut resb);
-    test_sty_abs(&mut usart, &nop, &rw, &mut resb);
-    test_sty_zpx(&mut usart, &nop, &rw, &mut resb);
+    test_sta_indx_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_sta_zp_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_sta_abs_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_sta_indy_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_sta_zpx_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_sta_absy_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_sta_absx_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_stx_zp_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_stx_abs_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_stx_zpy_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_sty_zp_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_sty_abs_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_sty_zpx_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
     info!("all tests passed!");
     loop {}
 }

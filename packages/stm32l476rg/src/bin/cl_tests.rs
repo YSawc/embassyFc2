@@ -14,7 +14,7 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
-pub fn test_clc_impl<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_clc_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -29,7 +29,7 @@ pub fn test_clc_impl<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_clc_impl passed!");
 }
 
-pub fn test_cld_impl<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_cld_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -44,7 +44,7 @@ pub fn test_cld_impl<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_cld_impl passed!");
 }
 
-pub fn test_cli_impl<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_cli_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -59,7 +59,7 @@ pub fn test_cli_impl<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_cli_impl passed!");
 }
 
-pub fn test_clv_impl<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_clv_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -88,10 +88,10 @@ fn main() -> ! {
     let _rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
-    test_clc_impl(&mut usart, &nop, &mut resb);
-    test_cld_impl(&mut usart, &nop, &mut resb);
-    test_cli_impl(&mut usart, &nop, &mut resb);
-    test_clv_impl(&mut usart, &nop, &mut resb);
+    test_clc_impl_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_cld_impl_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_cli_impl_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_clv_impl_within_mocking_memory(&mut usart, &nop, &mut resb);
     info!("all tests passed!");
     loop {}
 }

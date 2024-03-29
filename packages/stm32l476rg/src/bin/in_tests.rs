@@ -14,7 +14,7 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
-pub fn test_inc_abs<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_inc_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -37,7 +37,7 @@ pub fn test_inc_abs<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_inc_abs passed!");
 }
 
-pub fn test_inc_absx_without_carry<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_inc_absx_without_carry_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -59,7 +59,7 @@ pub fn test_inc_absx_without_carry<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_inc_absx_without_carry passed!");
 }
 
-pub fn test_inc_absx_with_carry<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_inc_absx_with_carry_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -78,7 +78,7 @@ pub fn test_inc_absx_with_carry<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_inc_absx_with_carry passed!");
 }
 
-pub fn test_inc_zp_without_triger_of_p<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_inc_zp_without_triger_of_p_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -100,7 +100,7 @@ pub fn test_inc_zp_without_triger_of_p<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_inc_zp_without_triger_of_p passed!");
 }
 
-pub fn test_inc_zp_with_zero_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_inc_zp_with_zero_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -122,7 +122,7 @@ pub fn test_inc_zp_with_zero_flag<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_inc_zp_with_zero_flag passed!");
 }
 
-pub fn test_inc_zp_with_negative_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_inc_zp_with_negative_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -144,7 +144,7 @@ pub fn test_inc_zp_with_negative_flag<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_inc_zp_with_negative_flag passed!");
 }
 
-pub fn test_inc_zpx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_inc_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -168,7 +168,12 @@ pub fn test_inc_zpx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_inc_zpx passed!");
 }
 
-pub fn test_inx_impl_without_flag<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_inx_impl_without_flag_within_mocking_memory<
+    T: BasicInstance,
+    P: Pin,
+    P2: Pin,
+    P3: Pin,
+>(
     usart: &mut Uart<T>,
     rw: &Input<P>,
     nop: &Input<P2>,
@@ -188,7 +193,7 @@ pub fn test_inx_impl_without_flag<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
 }
 
-pub fn test_inx_impl_with_zero<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_inx_impl_with_zero_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     rw: &Input<P>,
     nop: &Input<P2>,
@@ -207,7 +212,12 @@ pub fn test_inx_impl_with_zero<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     check_valid_register_status(usart, TxReg::P, &[0b11000000]);
 }
 
-pub fn test_iny_impl_without_flag<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_iny_impl_without_flag_within_mocking_memory<
+    T: BasicInstance,
+    P: Pin,
+    P2: Pin,
+    P3: Pin,
+>(
     usart: &mut Uart<T>,
     rw: &Input<P>,
     nop: &Input<P2>,
@@ -227,7 +237,12 @@ pub fn test_iny_impl_without_flag<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
 }
 
-pub fn test_iny_impl_with_negative<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_iny_impl_with_negative_within_mocking_memory<
+    T: BasicInstance,
+    P: Pin,
+    P2: Pin,
+    P3: Pin,
+>(
     usart: &mut Uart<T>,
     rw: &Input<P>,
     nop: &Input<P2>,
@@ -258,17 +273,17 @@ fn main() -> ! {
     let rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
-    test_inc_abs(&mut usart, &nop, &mut resb);
-    test_inc_absx_without_carry(&mut usart, &nop, &mut resb);
-    test_inc_absx_with_carry(&mut usart, &nop, &mut resb);
-    test_inc_zp_without_triger_of_p(&mut usart, &nop, &mut resb);
-    test_inc_zp_with_zero_flag(&mut usart, &nop, &mut resb);
-    test_inc_zp_with_negative_flag(&mut usart, &nop, &mut resb);
-    test_inc_zpx(&mut usart, &nop, &mut resb);
-    test_inx_impl_without_flag(&mut usart, &rw, &nop, &mut resb);
-    test_inx_impl_with_zero(&mut usart, &rw, &nop, &mut resb);
-    test_iny_impl_without_flag(&mut usart, &rw, &nop, &mut resb);
-    test_iny_impl_with_negative(&mut usart, &rw, &nop, &mut resb);
+    test_inc_abs_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_inc_absx_without_carry_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_inc_absx_with_carry_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_inc_zp_without_triger_of_p_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_inc_zp_with_zero_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_inc_zp_with_negative_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_inc_zpx_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_inx_impl_without_flag_within_mocking_memory(&mut usart, &rw, &nop, &mut resb);
+    test_inx_impl_with_zero_within_mocking_memory(&mut usart, &rw, &nop, &mut resb);
+    test_iny_impl_without_flag_within_mocking_memory(&mut usart, &rw, &nop, &mut resb);
+    test_iny_impl_with_negative_within_mocking_memory(&mut usart, &rw, &nop, &mut resb);
     info!("all tests passed!");
     loop {}
 }

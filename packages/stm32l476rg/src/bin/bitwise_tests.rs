@@ -14,7 +14,7 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
-pub fn test_ora_indx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_ora_indx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -33,7 +33,7 @@ pub fn test_ora_indx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_ora_indx passed!");
 }
 
-pub fn test_ora_zp<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_ora_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -51,7 +51,7 @@ pub fn test_ora_zp<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_ora_zp passed!");
 }
 
-pub fn test_ora_imm_without_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_ora_imm_without_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -64,7 +64,7 @@ pub fn test_ora_imm_without_flag<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_ora_imm_without_flag passed!");
 }
 
-pub fn test_ora_imm_with_z<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_ora_imm_with_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -77,7 +77,7 @@ pub fn test_ora_imm_with_z<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_ora_imm_with_z passed!");
 }
 
-pub fn test_ora_imm_with_n<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_ora_imm_with_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -90,7 +90,7 @@ pub fn test_ora_imm_with_n<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_ora_imm_with_n passed!");
 }
 
-pub fn test_ora_abs<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_ora_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -105,7 +105,7 @@ pub fn test_ora_abs<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_ora_abs passed!");
 }
 
-pub fn test_ora_indy<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_ora_indy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -127,7 +127,7 @@ pub fn test_ora_indy<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_ora_indy passed!");
 }
 
-pub fn test_ora_zpx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_ora_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -145,7 +145,7 @@ pub fn test_ora_zpx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_ora_zpx passed!");
 }
 
-pub fn test_ora_absy<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_ora_absy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -163,7 +163,7 @@ pub fn test_ora_absy<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_ora_absy passed!");
 }
 
-pub fn test_ora_absx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_ora_absx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -181,7 +181,7 @@ pub fn test_ora_absx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_ora_absx passed!");
 }
 
-pub fn test_and_indx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_and_indx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -203,7 +203,7 @@ pub fn test_and_indx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_and_indx passed!");
 }
 
-pub fn test_and_zp<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_and_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -221,7 +221,7 @@ pub fn test_and_zp<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_and_zp passed!");
 }
 
-pub fn test_and_imm_without_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_and_imm_without_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -237,7 +237,7 @@ pub fn test_and_imm_without_flag<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_and_imm_without_flag passed!");
 }
 
-pub fn test_and_imm_with_z<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_and_imm_with_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -253,7 +253,7 @@ pub fn test_and_imm_with_z<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_and_imm_with_z passed!");
 }
 
-pub fn test_and_imm_with_n<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_and_imm_with_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -269,7 +269,7 @@ pub fn test_and_imm_with_n<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_and_imm_with_n passed!");
 }
 
-pub fn test_and_abs<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_and_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -286,7 +286,7 @@ pub fn test_and_abs<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_and_abs passed!");
 }
 
-pub fn test_and_indy<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_and_indy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -308,7 +308,7 @@ pub fn test_and_indy<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_and_indy passed!");
 }
 
-pub fn test_and_zpx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_and_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -329,7 +329,7 @@ pub fn test_and_zpx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_and_zpx passed!");
 }
 
-pub fn test_and_absy<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_and_absy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -347,7 +347,7 @@ pub fn test_and_absy<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_and_absy passed!");
 }
 
-pub fn test_and_absx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_and_absx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -368,7 +368,7 @@ pub fn test_and_absx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_and_absx passed!");
 }
 
-pub fn test_eor_indx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_eor_indx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -390,7 +390,7 @@ pub fn test_eor_indx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_eor_indx passed!");
 }
 
-pub fn test_eor_zp<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_eor_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -408,7 +408,7 @@ pub fn test_eor_zp<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_eor_zp passed!");
 }
 
-pub fn test_eor_imm_without_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_eor_imm_without_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -424,7 +424,7 @@ pub fn test_eor_imm_without_flag<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_eor_imm_without_flag passed!");
 }
 
-pub fn test_eor_imm_with_z<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_eor_imm_with_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -440,7 +440,7 @@ pub fn test_eor_imm_with_z<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_eor_imm_with_z passed!");
 }
 
-pub fn test_eor_imm_with_n<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_eor_imm_with_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -456,7 +456,7 @@ pub fn test_eor_imm_with_n<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_eor_imm_with_n passed!");
 }
 
-pub fn test_eor_abs<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_eor_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -474,7 +474,7 @@ pub fn test_eor_abs<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_eor_abs passed!");
 }
 
-pub fn test_eor_indy<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_eor_indy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -496,7 +496,7 @@ pub fn test_eor_indy<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_eor_indy passed!");
 }
 
-pub fn test_eor_zpx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_eor_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -517,7 +517,7 @@ pub fn test_eor_zpx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_eor_zpx passed!");
 }
 
-pub fn test_eor_absy<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_eor_absy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -535,7 +535,7 @@ pub fn test_eor_absy<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_eor_absy passed!");
 }
 
-pub fn test_eor_absx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_eor_absx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -567,36 +567,36 @@ fn main() -> ! {
     let _rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
-    test_ora_indx(&mut usart, &nop, &mut resb);
-    test_ora_zp(&mut usart, &nop, &mut resb);
-    test_ora_imm_without_flag(&mut usart, &nop, &mut resb);
-    test_ora_imm_with_z(&mut usart, &nop, &mut resb);
-    test_ora_imm_with_n(&mut usart, &nop, &mut resb);
-    test_ora_abs(&mut usart, &nop, &mut resb);
-    test_ora_indy(&mut usart, &nop, &mut resb);
-    test_ora_zpx(&mut usart, &nop, &mut resb);
-    test_ora_absy(&mut usart, &nop, &mut resb);
-    test_ora_absx(&mut usart, &nop, &mut resb);
-    test_and_indx(&mut usart, &nop, &mut resb);
-    test_and_zp(&mut usart, &nop, &mut resb);
-    test_and_imm_without_flag(&mut usart, &nop, &mut resb);
-    test_and_imm_with_z(&mut usart, &nop, &mut resb);
-    test_and_imm_with_n(&mut usart, &nop, &mut resb);
-    test_and_abs(&mut usart, &nop, &mut resb);
-    test_and_indy(&mut usart, &nop, &mut resb);
-    test_and_zpx(&mut usart, &nop, &mut resb);
-    test_and_absy(&mut usart, &nop, &mut resb);
-    test_and_absx(&mut usart, &nop, &mut resb);
-    test_eor_indx(&mut usart, &nop, &mut resb);
-    test_eor_zp(&mut usart, &nop, &mut resb);
-    test_eor_imm_without_flag(&mut usart, &nop, &mut resb);
-    test_eor_imm_with_z(&mut usart, &nop, &mut resb);
-    test_eor_imm_with_n(&mut usart, &nop, &mut resb);
-    test_eor_abs(&mut usart, &nop, &mut resb);
-    test_eor_indy(&mut usart, &nop, &mut resb);
-    test_eor_zpx(&mut usart, &nop, &mut resb);
-    test_eor_absy(&mut usart, &nop, &mut resb);
-    test_eor_absx(&mut usart, &nop, &mut resb);
+    test_ora_indx_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_ora_zp_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_ora_imm_without_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_ora_imm_with_z_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_ora_imm_with_n_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_ora_abs_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_ora_indy_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_ora_zpx_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_ora_absy_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_ora_absx_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_and_indx_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_and_zp_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_and_imm_without_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_and_imm_with_z_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_and_imm_with_n_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_and_abs_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_and_indy_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_and_zpx_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_and_absy_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_and_absx_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_eor_indx_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_eor_zp_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_eor_imm_without_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_eor_imm_with_z_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_eor_imm_with_n_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_eor_abs_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_eor_indy_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_eor_zpx_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_eor_absy_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_eor_absx_within_mocking_memory(&mut usart, &nop, &mut resb);
     info!("all tests passed!");
     loop {}
 }

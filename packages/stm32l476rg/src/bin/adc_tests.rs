@@ -14,7 +14,7 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
-pub fn test_adc_abs_with_memory<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_adc_abs_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -34,7 +34,7 @@ pub fn test_adc_abs_with_memory<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_adc_abs passed!");
 }
 
-pub fn test_adc_indx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_adc_indx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -53,7 +53,7 @@ pub fn test_adc_indx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_adc_indx passed!");
 }
 
-pub fn test_adc_zp<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_adc_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -79,7 +79,7 @@ pub fn test_adc_zp<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_adc_zp passed!");
 }
 
-pub fn test_adc_imm_without_carry<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_adc_imm_without_carry_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -95,7 +95,7 @@ pub fn test_adc_imm_without_carry<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_adc_imm_without_carry passed!");
 }
 
-pub fn test_adc_imm_with_carry<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_adc_imm_with_carry_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -111,7 +111,7 @@ pub fn test_adc_imm_with_carry<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_adc_imm_with_carry passed!");
 }
 
-pub fn test_adc_imm_plus_carry<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_adc_imm_plus_carry_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -129,7 +129,7 @@ pub fn test_adc_imm_plus_carry<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_adc_imm_plus_carry passed!");
 }
 
-pub fn test_adc_imm_with_overflow<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_adc_imm_with_overflow_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -145,7 +145,7 @@ pub fn test_adc_imm_with_overflow<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_adc_imm_with_overflow passed!");
 }
 
-pub fn test_adc_abs<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_adc_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -160,7 +160,7 @@ pub fn test_adc_abs<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_adc_abs passed!");
 }
 
-pub fn test_adc_indy<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_adc_indy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -184,7 +184,7 @@ pub fn test_adc_indy<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_adc_indy passed!");
 }
 
-pub fn test_adc_zpx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_adc_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -202,7 +202,7 @@ pub fn test_adc_zpx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_adc_zpx passed!");
 }
 
-pub fn test_adc_absy<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_adc_absy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -225,7 +225,7 @@ pub fn test_adc_absy<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_adc_absy passed!");
 }
 
-pub fn test_adc_absx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_adc_absx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -262,17 +262,17 @@ fn main() -> ! {
     let _rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
-    test_adc_indx(&mut usart, &nop, &mut resb);
-    test_adc_zp(&mut usart, &nop, &mut resb);
-    test_adc_imm_without_carry(&mut usart, &nop, &mut resb);
-    test_adc_imm_with_carry(&mut usart, &nop, &mut resb);
-    test_adc_imm_plus_carry(&mut usart, &nop, &mut resb);
-    test_adc_imm_with_overflow(&mut usart, &nop, &mut resb);
-    test_adc_abs(&mut usart, &nop, &mut resb);
-    test_adc_indy(&mut usart, &nop, &mut resb);
-    test_adc_zpx(&mut usart, &nop, &mut resb);
-    test_adc_absy(&mut usart, &nop, &mut resb);
-    test_adc_absx(&mut usart, &nop, &mut resb);
+    test_adc_indx_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_adc_zp_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_adc_imm_without_carry_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_adc_imm_with_carry_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_adc_imm_plus_carry_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_adc_imm_with_overflow_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_adc_abs_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_adc_indy_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_adc_zpx_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_adc_absy_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_adc_absx_within_mocking_memory(&mut usart, &nop, &mut resb);
     info!("all tests passed!");
     loop {}
 }

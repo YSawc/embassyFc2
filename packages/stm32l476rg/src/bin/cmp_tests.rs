@@ -14,7 +14,7 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
-pub fn test_cmp_indx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_cmp_indx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -42,7 +42,7 @@ pub fn test_cmp_indx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_cmp_indx passed!");
 }
 
-pub fn test_cmp_zp<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_cmp_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -66,7 +66,7 @@ pub fn test_cmp_zp<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_cmp_zp passed!");
 }
 
-pub fn test_cmp_imm<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_cmp_imm_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -88,7 +88,7 @@ pub fn test_cmp_imm<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_cmp_imm passed!");
 }
 
-pub fn test_cmp_abs<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_cmp_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -112,7 +112,7 @@ pub fn test_cmp_abs<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_cmp_abs passed!");
 }
 
-pub fn test_cmp_indy<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_cmp_indy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -143,7 +143,7 @@ pub fn test_cmp_indy<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_cmp_indy passed!");
 }
 
-pub fn test_cmp_zpx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_cmp_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -170,7 +170,7 @@ pub fn test_cmp_zpx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_cmp_zpx passed!");
 }
 
-pub fn test_cmp_absy<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_cmp_absy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -187,7 +187,7 @@ pub fn test_cmp_absy<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_cmp_absy passed!");
 }
 
-pub fn test_cmp_absx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_cmp_absx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -224,14 +224,14 @@ fn main() -> ! {
     .unwrap();
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
-    test_cmp_indx(&mut usart, &nop, &mut resb);
-    test_cmp_zp(&mut usart, &nop, &mut resb);
-    test_cmp_imm(&mut usart, &nop, &mut resb);
-    test_cmp_abs(&mut usart, &nop, &mut resb);
-    test_cmp_indy(&mut usart, &nop, &mut resb);
-    test_cmp_zpx(&mut usart, &nop, &mut resb);
-    test_cmp_absy(&mut usart, &nop, &mut resb);
-    test_cmp_absx(&mut usart, &nop, &mut resb);
+    test_cmp_indx_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_cmp_zp_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_cmp_imm_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_cmp_abs_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_cmp_indy_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_cmp_zpx_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_cmp_absy_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_cmp_absx_within_mocking_memory(&mut usart, &nop, &mut resb);
     info!("all tests passed!");
     loop {}
 }

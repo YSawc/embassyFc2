@@ -14,7 +14,7 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
-pub fn test_bit_zp_without_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_bit_zp_without_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -32,7 +32,7 @@ pub fn test_bit_zp_without_flag<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_bit_zp_without_flag passed!");
 }
 
-pub fn test_bit_zp_with_n<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_bit_zp_with_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -50,7 +50,7 @@ pub fn test_bit_zp_with_n<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_bit_zp_with_n passed!");
 }
 
-pub fn test_bit_zp_with_nv<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_bit_zp_with_nv_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -68,7 +68,7 @@ pub fn test_bit_zp_with_nv<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_bit_zp_with_nv passed!");
 }
 
-pub fn test_bit_zp_with_z<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_bit_zp_with_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -83,7 +83,7 @@ pub fn test_bit_zp_with_z<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_bit_zp_with_z passed!");
 }
 
-pub fn test_bit_abs<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_bit_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -112,12 +112,12 @@ fn main() -> ! {
     let _rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
-    test_bit_zp_without_flag(&mut usart, &nop, &mut resb);
-    test_bit_zp_with_n(&mut usart, &nop, &mut resb);
-    test_bit_zp_with_nv(&mut usart, &nop, &mut resb);
-    test_bit_zp_with_z(&mut usart, &nop, &mut resb);
-    test_bit_zp_with_z(&mut usart, &nop, &mut resb);
-    test_bit_abs(&mut usart, &nop, &mut resb);
+    test_bit_zp_without_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_bit_zp_with_n_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_bit_zp_with_nv_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_bit_zp_with_z_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_bit_zp_with_z_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_bit_abs_within_mocking_memory(&mut usart, &nop, &mut resb);
     info!("all tests passed!");
     loop {}
 }

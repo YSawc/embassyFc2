@@ -14,7 +14,7 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
-pub fn test_lda_indx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_lda_indx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -50,7 +50,7 @@ pub fn test_lda_indx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_lda_indx passed!");
 }
 
-pub fn test_lda_zp<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_lda_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -74,7 +74,7 @@ pub fn test_lda_zp<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_lda_zp passed!");
 }
 
-pub fn test_lda_imm<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_lda_imm_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -96,7 +96,7 @@ pub fn test_lda_imm<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_lda_imm passed!");
 }
 
-pub fn test_lda_abs<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_lda_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -120,7 +120,7 @@ pub fn test_lda_abs<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_lda_abs passed!");
 }
 
-pub fn test_lda_indy<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_lda_indy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -152,7 +152,7 @@ pub fn test_lda_indy<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_lda_indy passed!");
 }
 
-pub fn test_lda_zpx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_lda_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -178,7 +178,7 @@ pub fn test_lda_zpx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_lda_zpx passed!");
 }
 
-pub fn test_lda_absy<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_lda_absy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -205,7 +205,7 @@ pub fn test_lda_absy<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_lda_absy passed!");
 }
 
-pub fn test_lda_absx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_lda_absx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -233,7 +233,7 @@ pub fn test_lda_absx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_lda_absx passed!");
 }
 
-pub fn test_ldx_imm<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_ldx_imm_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -255,7 +255,7 @@ pub fn test_ldx_imm<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_ldx_imm passed!");
 }
 
-pub fn test_ldx_zp<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_ldx_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -279,7 +279,7 @@ pub fn test_ldx_zp<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_ldx_zp passed!");
 }
 
-pub fn test_ldx_abs<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_ldx_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -303,7 +303,7 @@ pub fn test_ldx_abs<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_ldx_abs passed!");
 }
 
-pub fn test_ldx_zpy<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_ldx_zpy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -325,7 +325,7 @@ pub fn test_ldx_zpy<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_ldx_zpy passed!");
 }
 
-pub fn test_ldx_absy<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_ldx_absy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -353,7 +353,7 @@ pub fn test_ldx_absy<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_ldx_absy passed!");
 }
 
-pub fn test_ldy_imm<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_ldy_imm_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -375,7 +375,7 @@ pub fn test_ldy_imm<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_ldy_imm passed!");
 }
 
-pub fn test_ldy_zp<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_ldy_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -399,7 +399,7 @@ pub fn test_ldy_zp<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_ldy_zp passed!");
 }
 
-pub fn test_ldy_abs<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_ldy_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -423,7 +423,7 @@ pub fn test_ldy_abs<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_ldy_abs passed!");
 }
 
-pub fn test_ldy_zpx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_ldy_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -446,7 +446,7 @@ pub fn test_ldy_zpx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_ldy_zpx passed!");
 }
 
-pub fn test_ldy_absx<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_ldy_absx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -489,24 +489,24 @@ fn main() -> ! {
             0xa9,
         ],
     );
-    test_lda_indx(&mut usart, &nop, &rw, &mut resb);
-    test_lda_zp(&mut usart, &nop, &rw, &mut resb);
-    test_lda_imm(&mut usart, &nop, &rw, &mut resb);
-    test_lda_abs(&mut usart, &nop, &rw, &mut resb);
-    test_lda_indy(&mut usart, &nop, &rw, &mut resb);
-    test_lda_zpx(&mut usart, &nop, &rw, &mut resb);
-    test_lda_absy(&mut usart, &nop, &rw, &mut resb);
-    test_lda_absx(&mut usart, &nop, &rw, &mut resb);
-    test_ldx_imm(&mut usart, &nop, &rw, &mut resb);
-    test_ldx_zp(&mut usart, &nop, &rw, &mut resb);
-    test_ldx_abs(&mut usart, &nop, &rw, &mut resb);
-    test_ldx_zpy(&mut usart, &nop, &rw, &mut resb);
-    test_ldx_absy(&mut usart, &nop, &rw, &mut resb);
-    test_ldy_imm(&mut usart, &nop, &rw, &mut resb);
-    test_ldy_zp(&mut usart, &nop, &rw, &mut resb);
-    test_ldy_abs(&mut usart, &nop, &rw, &mut resb);
-    test_ldy_zpx(&mut usart, &nop, &rw, &mut resb);
-    test_ldy_absx(&mut usart, &nop, &rw, &mut resb);
+    test_lda_indx_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_lda_zp_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_lda_imm_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_lda_abs_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_lda_indy_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_lda_zpx_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_lda_absy_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_lda_absx_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_ldx_imm_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_ldx_zp_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_ldx_abs_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_ldx_zpy_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_ldx_absy_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_ldy_imm_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_ldy_zp_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_ldy_abs_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_ldy_zpx_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_ldy_absx_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
     info!("all tests passed!");
     loop {}
 }

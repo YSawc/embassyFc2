@@ -14,7 +14,7 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
-pub fn test_cpx_imm<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_cpx_imm_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -36,7 +36,7 @@ pub fn test_cpx_imm<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_cpx_imm passed!");
 }
 
-pub fn test_cpx_zp<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_cpx_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -60,7 +60,7 @@ pub fn test_cpx_zp<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_cpx_zp passed!");
 }
 
-pub fn test_cpx_abs<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_cpx_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -84,7 +84,7 @@ pub fn test_cpx_abs<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_cpx_abs passed!");
 }
 
-pub fn test_cpy_imm<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_cpy_imm_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -106,7 +106,7 @@ pub fn test_cpy_imm<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_cpy_imm passed!");
 }
 
-pub fn test_cpy_zp<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_cpy_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -130,7 +130,7 @@ pub fn test_cpy_zp<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_cpy_zp passed!");
 }
 
-pub fn test_cpy_abs<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_cpy_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -164,12 +164,12 @@ fn main() -> ! {
     .unwrap();
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
-    test_cpx_imm(&mut usart, &nop, &mut resb);
-    test_cpx_zp(&mut usart, &nop, &mut resb);
-    test_cpx_abs(&mut usart, &nop, &mut resb);
-    test_cpy_imm(&mut usart, &nop, &mut resb);
-    test_cpy_zp(&mut usart, &nop, &mut resb);
-    test_cpy_abs(&mut usart, &nop, &mut resb);
+    test_cpx_imm_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_cpx_zp_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_cpx_abs_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_cpy_imm_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_cpy_zp_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_cpy_abs_within_mocking_memory(&mut usart, &nop, &mut resb);
     info!("all tests passed!");
     loop {}
 }

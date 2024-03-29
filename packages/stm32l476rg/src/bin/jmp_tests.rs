@@ -14,7 +14,7 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
-pub fn test_jsr_abs<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_jsr_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -33,7 +33,7 @@ pub fn test_jsr_abs<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_jsr_abs passed!");
 }
 
-pub fn test_jmp_abs<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_jmp_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -55,7 +55,7 @@ pub fn test_jmp_abs<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     info!("test_jmp_abs passed!");
 }
 
-pub fn test_jmp_ind<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+pub fn test_jmp_ind_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     rw: &Input<P2>,
@@ -92,9 +92,9 @@ fn main() -> ! {
     let rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
-    test_jsr_abs(&mut usart, &nop, &mut resb);
-    test_jmp_abs(&mut usart, &nop, &rw, &mut resb);
-    test_jmp_ind(&mut usart, &nop, &rw, &mut resb);
+    test_jsr_abs_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_jmp_abs_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
+    test_jmp_ind_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
     info!("all tests passed!");
     loop {}
 }

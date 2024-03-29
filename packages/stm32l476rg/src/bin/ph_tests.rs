@@ -14,7 +14,7 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
-pub fn test_php_impl_within_n<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_php_impl_within_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -32,7 +32,7 @@ pub fn test_php_impl_within_n<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_php_impl_within_n passed!");
 }
 
-pub fn test_php_impl_within_cz<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_php_impl_within_cz_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -52,7 +52,7 @@ pub fn test_php_impl_within_cz<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_php_impl_within_cz passed!");
 }
 
-pub fn test_php_impl_within_none_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_php_impl_within_none_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -65,7 +65,7 @@ pub fn test_php_impl_within_none_flag<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_php_impl_within_none_flag passed!");
 }
 
-pub fn test_pha_impl<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_pha_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -99,10 +99,10 @@ fn main() -> ! {
     let _rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
-    test_php_impl_within_n(&mut usart, &nop, &mut resb);
-    test_php_impl_within_cz(&mut usart, &nop, &mut resb);
-    test_php_impl_within_none_flag(&mut usart, &nop, &mut resb);
-    test_pha_impl(&mut usart, &nop, &mut resb);
+    test_php_impl_within_n_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_php_impl_within_cz_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_php_impl_within_none_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_pha_impl_within_mocking_memory(&mut usart, &nop, &mut resb);
     info!("all tests passed!");
     loop {}
 }

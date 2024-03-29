@@ -14,7 +14,7 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
-pub fn test_asl_zp<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_asl_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -29,7 +29,7 @@ pub fn test_asl_zp<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_asl_zp passed!");
 }
 
-pub fn test_asl_acc_without_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_asl_acc_without_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -45,7 +45,7 @@ pub fn test_asl_acc_without_flag<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_asl_acc_without_flag passed!");
 }
 
-pub fn test_asl_acc_with_n<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_asl_acc_with_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -60,7 +60,7 @@ pub fn test_asl_acc_with_n<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_asl_acc_with_n passed!");
 }
 
-pub fn test_asl_acc_with_cz<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_asl_acc_with_cz_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -76,7 +76,7 @@ pub fn test_asl_acc_with_cz<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_asl_acc_with_cz passed!");
 }
 
-pub fn test_asl_abs<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_asl_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -91,7 +91,7 @@ pub fn test_asl_abs<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_asl_abs passed!");
 }
 
-pub fn test_asl_zpx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_asl_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -109,7 +109,7 @@ pub fn test_asl_zpx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_asl_zpx passed!");
 }
 
-pub fn test_asl_absx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_asl_absx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -127,7 +127,7 @@ pub fn test_asl_absx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_asl_absx passed!");
 }
 
-pub fn test_rol_zp<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_rol_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -142,7 +142,7 @@ pub fn test_rol_zp<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_rol_zp passed!");
 }
 
-pub fn test_rol_acc_without_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_rol_acc_without_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -158,7 +158,7 @@ pub fn test_rol_acc_without_flag<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_rol_acc_without_flag passed!");
 }
 
-pub fn test_rol_acc_with_c<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_rol_acc_with_c_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -176,7 +176,7 @@ pub fn test_rol_acc_with_c<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_rol_acc_with_c passed!");
 }
 
-pub fn test_rol_acc_with_z<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_rol_acc_with_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -189,7 +189,7 @@ pub fn test_rol_acc_with_z<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_rol_acc_with_z passed!");
 }
 
-pub fn test_rol_acc_with_n<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_rol_acc_with_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -205,7 +205,7 @@ pub fn test_rol_acc_with_n<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_rol_acc_with_n passed!");
 }
 
-pub fn test_rol_abs<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_rol_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -220,7 +220,7 @@ pub fn test_rol_abs<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_rol_abs passed!");
 }
 
-pub fn test_rol_zpx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_rol_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -240,7 +240,7 @@ pub fn test_rol_zpx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_rol_zpx passed!");
 }
 
-pub fn test_rol_absx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_rol_absx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -260,7 +260,7 @@ pub fn test_rol_absx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_rol_absx passed!");
 }
 
-pub fn test_lsr_zp<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_lsr_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -275,7 +275,7 @@ pub fn test_lsr_zp<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_lsr_zp passed!");
 }
 
-pub fn test_lsr_acc_without_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_lsr_acc_without_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -291,7 +291,7 @@ pub fn test_lsr_acc_without_flag<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_lsr_acc_without_flag passed!");
 }
 
-pub fn test_lsr_acc_with_cz<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_lsr_acc_with_cz_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -307,7 +307,7 @@ pub fn test_lsr_acc_with_cz<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_lsr_acc_with_cz passed!");
 }
 
-pub fn test_lsr_abs<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_lsr_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -322,7 +322,7 @@ pub fn test_lsr_abs<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_lsr_abs passed!");
 }
 
-pub fn test_lsr_zpx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_lsr_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -340,7 +340,7 @@ pub fn test_lsr_zpx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_lsr_zpx passed!");
 }
 
-pub fn test_lsr_absx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_lsr_absx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -358,7 +358,7 @@ pub fn test_lsr_absx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_lsr_absx passed!");
 }
 
-pub fn test_ror_zp<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_ror_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -375,7 +375,7 @@ pub fn test_ror_zp<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_ror_zp passed!");
 }
 
-pub fn test_ror_acc_without_flag<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_ror_acc_without_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -391,7 +391,7 @@ pub fn test_ror_acc_without_flag<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_ror_acc_without_flag passed!");
 }
 
-pub fn test_ror_acc_with_zc<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_ror_acc_with_zc_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -407,7 +407,7 @@ pub fn test_ror_acc_with_zc<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_ror_acc_with_c passed!");
 }
 
-pub fn test_ror_acc_with_cn<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_ror_acc_with_cn_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -425,7 +425,7 @@ pub fn test_ror_acc_with_cn<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_ror_acc_with_n passed!");
 }
 
-pub fn test_ror_abs<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_ror_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -440,7 +440,7 @@ pub fn test_ror_abs<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_ror_abs passed!");
 }
 
-pub fn test_ror_zpx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_ror_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -458,7 +458,7 @@ pub fn test_ror_zpx<T: BasicInstance, P: Pin, P2: Pin>(
     info!("test_ror_zpx passed!");
 }
 
-pub fn test_ror_absx<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_ror_absx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -489,34 +489,34 @@ fn main() -> ! {
     let _rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
-    test_asl_zp(&mut usart, &nop, &mut resb);
-    test_asl_acc_without_flag(&mut usart, &nop, &mut resb);
-    test_asl_acc_with_n(&mut usart, &nop, &mut resb);
-    test_asl_acc_with_cz(&mut usart, &nop, &mut resb);
-    test_asl_abs(&mut usart, &nop, &mut resb);
-    test_asl_zpx(&mut usart, &nop, &mut resb);
-    test_asl_absx(&mut usart, &nop, &mut resb);
-    test_rol_zp(&mut usart, &nop, &mut resb);
-    test_rol_acc_without_flag(&mut usart, &nop, &mut resb);
-    test_rol_acc_with_c(&mut usart, &nop, &mut resb);
-    test_rol_acc_with_z(&mut usart, &nop, &mut resb);
-    test_rol_acc_with_n(&mut usart, &nop, &mut resb);
-    test_rol_abs(&mut usart, &nop, &mut resb);
-    test_rol_zpx(&mut usart, &nop, &mut resb);
-    test_rol_absx(&mut usart, &nop, &mut resb);
-    test_lsr_zp(&mut usart, &nop, &mut resb);
-    test_lsr_acc_without_flag(&mut usart, &nop, &mut resb);
-    test_lsr_acc_with_cz(&mut usart, &nop, &mut resb);
-    test_lsr_abs(&mut usart, &nop, &mut resb);
-    test_lsr_zpx(&mut usart, &nop, &mut resb);
-    test_lsr_absx(&mut usart, &nop, &mut resb);
-    test_ror_zp(&mut usart, &nop, &mut resb);
-    test_ror_acc_without_flag(&mut usart, &nop, &mut resb);
-    test_ror_acc_with_zc(&mut usart, &nop, &mut resb);
-    test_ror_acc_with_cn(&mut usart, &nop, &mut resb);
-    test_ror_abs(&mut usart, &nop, &mut resb);
-    test_ror_zpx(&mut usart, &nop, &mut resb);
-    test_ror_absx(&mut usart, &nop, &mut resb);
+    test_asl_zp_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_asl_acc_without_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_asl_acc_with_n_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_asl_acc_with_cz_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_asl_abs_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_asl_zpx_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_asl_absx_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_rol_zp_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_rol_acc_without_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_rol_acc_with_c_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_rol_acc_with_z_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_rol_acc_with_n_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_rol_abs_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_rol_zpx_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_rol_absx_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_lsr_zp_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_lsr_acc_without_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_lsr_acc_with_cz_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_lsr_abs_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_lsr_zpx_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_lsr_absx_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_ror_zp_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_ror_acc_without_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_ror_acc_with_zc_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_ror_acc_with_cn_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_ror_abs_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_ror_zpx_within_mocking_memory(&mut usart, &nop, &mut resb);
+    test_ror_absx_within_mocking_memory(&mut usart, &nop, &mut resb);
     info!("all tests passed!");
     loop {}
 }
