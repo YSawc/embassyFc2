@@ -39,7 +39,7 @@ pub fn test_brk_impl_without_b_flag_within_mocking_memory<T: BasicInstance, P: P
     check_valid_register_status(usart, TxReg::PC, &[0x40, 0xC6]);
     check_valid_register_status(usart, TxReg::S, &[0xFC]);
     check_valid_register_status(usart, TxReg::P, &[0b10010100]);
-    info!("test_brk_impl_without_b_flag passed!");
+    info!("test_brk_impl_without_b_flag_within_mocking_memory passed!");
 }
 
 pub fn test_brk_impl_with_b_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -71,7 +71,7 @@ pub fn test_brk_impl_with_b_flag_within_mocking_memory<T: BasicInstance, P: Pin,
     check_valid_register_status(usart, TxReg::PC, &[0x41, 0xC6]);
     check_valid_register_status(usart, TxReg::S, &[0xFC]);
     check_valid_register_status(usart, TxReg::P, &[0b10010100]);
-    info!("test_brk_impl_with_b_flag passed!");
+    info!("test_brk_impl_with_b_flag_within_mocking_memory passed!");
 }
 
 #[cortex_m_rt::entry]

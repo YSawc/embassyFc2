@@ -30,7 +30,7 @@ pub fn test_jsr_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::PC, &[0x2D, 0xC7]);
     check_valid_register_status(usart, TxReg::S, &[0xFD]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_jsr_abs passed!");
+    info!("test_jsr_abs_within_mocking_memory passed!");
 }
 
 pub fn test_jmp_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
@@ -52,7 +52,7 @@ pub fn test_jmp_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3:
     usart_write(usart, &[0xf5, 0xc5]);
     check_valid_register_status(usart, TxReg::PC, &[0xf5, 0xc5]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_jmp_abs passed!");
+    info!("test_jmp_abs_within_mocking_memory passed!");
 }
 
 pub fn test_jmp_ind_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
@@ -78,7 +78,7 @@ pub fn test_jmp_ind_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3:
     usart.blocking_write(&[0xdb]).unwrap();
     check_valid_register_status(usart, TxReg::PC, &[0x7e, 0xdb]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_jmp_ind passed!");
+    info!("test_jmp_ind_within_mocking_memory passed!");
 }
 
 #[cortex_m_rt::entry]

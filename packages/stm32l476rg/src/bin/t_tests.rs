@@ -29,7 +29,7 @@ pub fn test_txa_impl_with_no_flag_within_mocking_memory<T: BasicInstance, P: Pin
     check_valid_register_status(usart, TxReg::X, &[0x39]);
     check_valid_register_status(usart, TxReg::A, &[0x39]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_txa_impl_with_no_flag passed!");
+    info!("test_txa_impl_with_no_flag_within_mocking_memory passed!");
 }
 
 pub fn test_txa_impl_with_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -46,7 +46,7 @@ pub fn test_txa_impl_with_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: 
     check_valid_register_status(usart, TxReg::X, &[0x00]);
     check_valid_register_status(usart, TxReg::A, &[0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00000010]);
-    info!("test_txa_impl_with_z passed!");
+    info!("test_txa_impl_with_z_within_mocking_memory passed!");
 }
 
 pub fn test_txa_impl_with_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -67,7 +67,7 @@ pub fn test_txa_impl_with_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: 
     check_valid_register_status(usart, TxReg::X, &[0x80]);
     check_valid_register_status(usart, TxReg::A, &[0x80]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
-    info!("test_txa_impl_with_n passed!");
+    info!("test_txa_impl_with_n_within_mocking_memory passed!");
 }
 
 pub fn test_tya_impl_with_no_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -85,7 +85,7 @@ pub fn test_tya_impl_with_no_flag_within_mocking_memory<T: BasicInstance, P: Pin
     check_valid_register_status(usart, TxReg::Y, &[0x39]);
     check_valid_register_status(usart, TxReg::A, &[0x39]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_tya_impl_with_no_flag passed!");
+    info!("test_tya_impl_with_no_flag_within_mocking_memory passed!");
 }
 
 pub fn test_tya_impl_with_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -102,7 +102,7 @@ pub fn test_tya_impl_with_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: 
     check_valid_register_status(usart, TxReg::Y, &[0x00]);
     check_valid_register_status(usart, TxReg::A, &[0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00000010]);
-    info!("test_tya_impl_with_z passed!");
+    info!("test_tya_impl_with_z_within_mocking_memory passed!");
 }
 
 pub fn test_tya_impl_with_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -123,7 +123,7 @@ pub fn test_tya_impl_with_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: 
     check_valid_register_status(usart, TxReg::Y, &[0x80]);
     check_valid_register_status(usart, TxReg::A, &[0x80]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
-    info!("test_tya_impl_with_n passed!");
+    info!("test_tya_impl_with_n_within_mocking_memory passed!");
 }
 
 pub fn test_txs_impl_with_no_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -141,7 +141,7 @@ pub fn test_txs_impl_with_no_flag_within_mocking_memory<T: BasicInstance, P: Pin
     check_valid_register_status(usart, TxReg::X, &[0x39]);
     check_valid_register_status(usart, TxReg::S, &[0x39]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_txs_impl_with_no_flag passed!");
+    info!("test_txs_impl_with_no_flag_within_mocking_memory passed!");
 }
 
 pub fn test_txs_impl_in_condition_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -158,7 +158,7 @@ pub fn test_txs_impl_in_condition_z_within_mocking_memory<T: BasicInstance, P: P
     check_valid_register_status(usart, TxReg::X, &[0x00]);
     check_valid_register_status(usart, TxReg::S, &[0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_txs_impl_with_z passed!");
+    info!("test_txs_impl_with_z_within_mocking_memory passed!");
 }
 
 pub fn test_txs_impl_in_condition_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -180,7 +180,7 @@ pub fn test_txs_impl_in_condition_n_within_mocking_memory<T: BasicInstance, P: P
     check_valid_register_status(usart, TxReg::X, &[0x80]);
     check_valid_register_status(usart, TxReg::S, &[0x80]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_txs_impl_with_n passed!");
+    info!("test_txs_impl_with_n_within_mocking_memory passed!");
 }
 
 pub fn test_tay_impl_with_no_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -198,7 +198,7 @@ pub fn test_tay_impl_with_no_flag_within_mocking_memory<T: BasicInstance, P: Pin
     check_valid_register_status(usart, TxReg::A, &[0x39]);
     check_valid_register_status(usart, TxReg::Y, &[0x39]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_tay_impl_with_no_flag passed!");
+    info!("test_tay_impl_with_no_flag_within_mocking_memory passed!");
 }
 
 pub fn test_tay_impl_with_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -215,7 +215,7 @@ pub fn test_tay_impl_with_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: 
     check_valid_register_status(usart, TxReg::A, &[0x00]);
     check_valid_register_status(usart, TxReg::Y, &[0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00000010]);
-    info!("test_tay_impl_with_z passed!");
+    info!("test_tay_impl_with_z_within_mocking_memory passed!");
 }
 
 pub fn test_tay_impl_with_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -236,7 +236,7 @@ pub fn test_tay_impl_with_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: 
     check_valid_register_status(usart, TxReg::A, &[0x80]);
     check_valid_register_status(usart, TxReg::Y, &[0x80]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
-    info!("test_tay_impl_with_n passed!");
+    info!("test_tay_impl_with_n_within_mocking_memory passed!");
 }
 
 pub fn test_tax_impl_with_no_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -254,7 +254,7 @@ pub fn test_tax_impl_with_no_flag_within_mocking_memory<T: BasicInstance, P: Pin
     check_valid_register_status(usart, TxReg::A, &[0x39]);
     check_valid_register_status(usart, TxReg::X, &[0x39]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_tax_impl_with_no_flag passed!");
+    info!("test_tax_impl_with_no_flag_within_mocking_memory passed!");
 }
 
 pub fn test_tax_impl_with_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -271,7 +271,7 @@ pub fn test_tax_impl_with_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: 
     check_valid_register_status(usart, TxReg::A, &[0x00]);
     check_valid_register_status(usart, TxReg::X, &[0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00000010]);
-    info!("test_tax_impl_with_z passed!");
+    info!("test_tax_impl_with_z_within_mocking_memory passed!");
 }
 
 pub fn test_tax_impl_with_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -292,7 +292,7 @@ pub fn test_tax_impl_with_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: 
     check_valid_register_status(usart, TxReg::A, &[0x80]);
     check_valid_register_status(usart, TxReg::X, &[0x80]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
-    info!("test_tax_impl_with_n passed!");
+    info!("test_tax_impl_with_n_within_mocking_memory passed!");
 }
 
 pub fn test_tsx_impl_with_no_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -318,7 +318,7 @@ pub fn test_tsx_impl_with_no_flag_within_mocking_memory<T: BasicInstance, P: Pin
     check_valid_register_status(usart, TxReg::S, &[0x01]);
     check_valid_register_status(usart, TxReg::X, &[0x01]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_tsx_impl_with_no_flag passed!");
+    info!("test_tsx_impl_with_no_flag_within_mocking_memory passed!");
 }
 
 pub fn test_tsx_impl_with_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -338,7 +338,7 @@ pub fn test_tsx_impl_with_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: 
     check_valid_register_status(usart, TxReg::S, &[0x00]);
     check_valid_register_status(usart, TxReg::X, &[0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00000010]);
-    info!("test_tsx_impl_with_z passed!");
+    info!("test_tsx_impl_with_z_within_mocking_memory passed!");
 }
 
 pub fn test_tsx_impl_with_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -355,7 +355,7 @@ pub fn test_tsx_impl_with_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: 
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
     check_valid_register_status(usart, TxReg::X, &[0xFF]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
-    info!("test_tsx_impl_with_n passed!");
+    info!("test_tsx_impl_with_n_within_mocking_memory passed!");
 }
 
 #[cortex_m_rt::entry]

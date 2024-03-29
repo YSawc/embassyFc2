@@ -36,7 +36,7 @@ pub fn test_plp_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart.blocking_write(&[0b00000011]).unwrap();
     check_valid_register_status(usart, TxReg::P, &[0b00000011]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
-    info!("test_plp_impl passed!");
+    info!("test_plp_impl_within_mocking_memory passed!");
 }
 
 pub fn test_pla_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -64,7 +64,7 @@ pub fn test_pla_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::A, &[0x82]);
     check_valid_register_status(usart, TxReg::P, &[0b10000001]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
-    info!("test_pla_impl passed!");
+    info!("test_pla_impl_within_mocking_memory passed!");
 }
 
 #[cortex_m_rt::entry]

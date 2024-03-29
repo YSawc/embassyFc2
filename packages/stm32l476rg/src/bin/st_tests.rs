@@ -46,7 +46,7 @@ pub fn test_sta_indx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3
     usart.blocking_write(&[0xBA]).unwrap();
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0x59, 0xBA, 0x03]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_sta_indx passed!");
+    info!("test_sta_indx_within_mocking_memory passed!");
 }
 
 pub fn test_sta_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
@@ -71,7 +71,7 @@ pub fn test_sta_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: 
     usart.blocking_write(&[0x45]).unwrap();
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0x45, 0x00, 0xBB]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
-    info!("test_sta_zp passed!");
+    info!("test_sta_zp_within_mocking_memory passed!");
 }
 
 pub fn test_sta_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
@@ -96,7 +96,7 @@ pub fn test_sta_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3:
     usart_write(usart, &[0x11, 0x33]);
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0x11, 0x33, 0x2A]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_sta_abs passed!");
+    info!("test_sta_abs_within_mocking_memory passed!");
 }
 
 pub fn test_sta_indy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
@@ -128,7 +128,7 @@ pub fn test_sta_indy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3
     usart_write(usart, &[0xFF]);
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0x33, 0x00, 0xFF]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_sta_indy passed!");
+    info!("test_sta_indy_within_mocking_memory passed!");
 }
 
 pub fn test_sta_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
@@ -155,7 +155,7 @@ pub fn test_sta_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3:
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0x56, 0x00, 0xBB]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
 
-    info!("test_sta_zpx passed!");
+    info!("test_sta_zpx_within_mocking_memory passed!");
 }
 
 pub fn test_sta_absy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
@@ -182,7 +182,7 @@ pub fn test_sta_absy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3
     usart_write(usart, &[0x23, 0x34]);
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0x13, 0x35, 0x2A]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_sta_absy passed!");
+    info!("test_sta_absy_within_mocking_memory passed!");
 }
 
 pub fn test_sta_absx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
@@ -209,7 +209,7 @@ pub fn test_sta_absx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3
     usart_write(usart, &[0x80, 0x20]);
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFB, 0x20, 0xA7]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
-    info!("test_sta_absx passed!");
+    info!("test_sta_absx_within_mocking_memory passed!");
 }
 
 pub fn test_stx_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
@@ -234,7 +234,7 @@ pub fn test_stx_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: 
     usart.blocking_write(&[0x45]).unwrap();
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0x45, 0x00, 0xAA]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
-    info!("test_stx_zp passed!");
+    info!("test_stx_zp_within_mocking_memory passed!");
 }
 
 pub fn test_stx_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
@@ -259,7 +259,7 @@ pub fn test_stx_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3:
     usart_write(usart, &[0xBB, 0x03]);
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0xBB, 0x03, 0xA0]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
-    info!("test_stx_abs passed!");
+    info!("test_stx_abs_within_mocking_memory passed!");
 }
 
 pub fn test_stx_zpy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
@@ -286,7 +286,7 @@ pub fn test_stx_zpy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3:
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0x56, 0x00, 0x6C]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
 
-    info!("test_stx_zpy passed!");
+    info!("test_stx_zpy_within_mocking_memory passed!");
 }
 
 pub fn test_sty_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
@@ -311,7 +311,7 @@ pub fn test_sty_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: 
     usart.blocking_write(&[0x45]).unwrap();
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0x45, 0x00, 0x2C]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_sty_zp passed!");
+    info!("test_sty_zp_within_mocking_memory passed!");
 }
 
 pub fn test_sty_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
@@ -336,7 +336,7 @@ pub fn test_sty_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3:
     usart_write(usart, &[0x00, 0xA9]);
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0x00, 0xA9, 0x44]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_sty_zpx passed!");
+    info!("test_sty_zpx_within_mocking_memory passed!");
 }
 
 pub fn test_sty_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
@@ -362,7 +362,7 @@ pub fn test_sty_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3:
     usart.blocking_write(&[0x45]).unwrap();
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0x11, 0x00, 0x90]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
-    info!("test_sty_zpx passed!");
+    info!("test_sty_zpx_within_mocking_memory passed!");
 }
 
 #[cortex_m_rt::entry]

@@ -27,7 +27,7 @@ pub fn test_bpl_rel_condition_neg_n_within_mocking_memory<T: BasicInstance, P: P
     usart_write(usart, &[OpeMode::Inst as u8, 0x10, 0x04]);
     check_valid_register_status(usart, TxReg::PC, &[0xB8, 0xC7]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_bpl_rel_condition_neg_n passed!");
+    info!("test_bpl_rel_condition_neg_n_within_mocking_memory passed!");
 }
 
 pub fn test_bpl_rel_condition_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -46,7 +46,7 @@ pub fn test_bpl_rel_condition_n_within_mocking_memory<T: BasicInstance, P: Pin, 
     usart_write(usart, &[OpeMode::Inst as u8, 0x10, 0x03]);
     check_valid_register_status(usart, TxReg::PC, &[0xBD, 0xC7]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
-    info!("test_bpl_rel_condition_n passed!");
+    info!("test_bpl_rel_condition_n_within_mocking_memory passed!");
 }
 
 pub fn test_bmi_rel_condition_neg_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -62,7 +62,7 @@ pub fn test_bmi_rel_condition_neg_n_within_mocking_memory<T: BasicInstance, P: P
     usart_write(usart, &[OpeMode::Inst as u8, 0x30, 0x07]);
     check_valid_register_status(usart, TxReg::PC, &[0x3E, 0xC8]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_bmi_rel_condition_neg_n passed!");
+    info!("test_bmi_rel_condition_neg_n_within_mocking_memory passed!");
 }
 
 pub fn test_bmi_rel_condition_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -82,7 +82,7 @@ pub fn test_bmi_rel_condition_n_within_mocking_memory<T: BasicInstance, P: Pin, 
     check_valid_register_status(usart, TxReg::PC, &[0x9F, 0xD9]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
 
-    info!("test_bmi_rel_condition_n passed!");
+    info!("test_bmi_rel_condition_n_within_mocking_memory passed!");
 }
 
 pub fn test_bvc_rel_condition_neg_v_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -98,7 +98,7 @@ pub fn test_bvc_rel_condition_neg_v_within_mocking_memory<T: BasicInstance, P: P
     usart_write(usart, &[OpeMode::Inst as u8, 0x50, 0x02]);
     check_valid_register_status(usart, TxReg::PC, &[0xC9, 0xD9]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_bvc_rel_condition_neg_v passed!");
+    info!("test_bvc_rel_condition_neg_v_within_mocking_memory passed!");
 }
 
 pub fn test_bvc_rel_condition_v_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -124,7 +124,7 @@ pub fn test_bvc_rel_condition_v_within_mocking_memory<T: BasicInstance, P: Pin, 
     check_valid_register_status(usart, TxReg::PC, &[0xAB, 0xD9]);
     check_valid_register_status(usart, TxReg::P, &[0b11000000]);
 
-    info!("test_bvc_rel_condition_v passed!");
+    info!("test_bvc_rel_condition_v_within_mocking_memory passed!");
 }
 
 pub fn test_bvs_rel_condition_neg_v_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -140,7 +140,7 @@ pub fn test_bvs_rel_condition_neg_v_within_mocking_memory<T: BasicInstance, P: P
     usart_write(usart, &[OpeMode::Inst as u8, 0x70, 0x04]);
     check_valid_register_status(usart, TxReg::PC, &[0xF0, 0xD9]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_bvs_rel_condition_neg_v passed!");
+    info!("test_bvs_rel_condition_neg_v_within_mocking_memory passed!");
 }
 
 pub fn test_bvs_rel_condition_v_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -166,7 +166,7 @@ pub fn test_bvs_rel_condition_v_within_mocking_memory<T: BasicInstance, P: Pin, 
     check_valid_register_status(usart, TxReg::PC, &[0xE2, 0xD9]);
     check_valid_register_status(usart, TxReg::P, &[0b11000000]);
 
-    info!("test_bvs_rel_condition_v passed!");
+    info!("test_bvs_rel_condition_v_within_mocking_memory passed!");
 }
 
 pub fn test_bcc_rel_condition_neg_c_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -182,7 +182,7 @@ pub fn test_bcc_rel_condition_neg_c_within_mocking_memory<T: BasicInstance, P: P
     usart_write(usart, &[OpeMode::Inst as u8, 0x90, 0x02]);
     check_valid_register_status(usart, TxReg::PC, &[0xC9, 0xD9]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_bcc_rel_condition_neg_c passed!");
+    info!("test_bcc_rel_condition_neg_c_within_mocking_memory passed!");
 }
 
 pub fn test_bcc_rel_condition_c_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -201,7 +201,7 @@ pub fn test_bcc_rel_condition_c_within_mocking_memory<T: BasicInstance, P: Pin, 
     check_valid_register_status(usart, TxReg::PC, &[0xAB, 0xD9]);
     check_valid_register_status(usart, TxReg::P, &[0b00000011]);
 
-    info!("test_bcc_rel_condition_c passed!");
+    info!("test_bcc_rel_condition_c_within_mocking_memory passed!");
 }
 
 pub fn test_bcs_rel_condition_neg_c_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -217,7 +217,7 @@ pub fn test_bcs_rel_condition_neg_c_within_mocking_memory<T: BasicInstance, P: P
     usart_write(usart, &[OpeMode::Inst as u8, 0xB0, 0x02]);
     check_valid_register_status(usart, TxReg::PC, &[0xE0, 0xD9]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_bcs_rel_condition_neg_c passed!");
+    info!("test_bcs_rel_condition_neg_c_within_mocking_memory passed!");
 }
 
 pub fn test_bcs_rel_condition_c_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -235,7 +235,7 @@ pub fn test_bcs_rel_condition_c_within_mocking_memory<T: BasicInstance, P: Pin, 
     usart_write(usart, &[OpeMode::Inst as u8, 0xB0, 0x02]);
     check_valid_register_status(usart, TxReg::PC, &[0xE2, 0xD9]);
     check_valid_register_status(usart, TxReg::P, &[0b00000011]);
-    info!("test_bcs_rel_condition_c passed!");
+    info!("test_bcs_rel_condition_c_within_mocking_memory passed!");
 }
 
 pub fn test_bne_rel_condition_neg_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -251,7 +251,7 @@ pub fn test_bne_rel_condition_neg_z_within_mocking_memory<T: BasicInstance, P: P
     usart_write(usart, &[OpeMode::Inst as u8, 0xD0, 0x02]);
     check_valid_register_status(usart, TxReg::PC, &[0xC9, 0xD9]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_bne_rel_condition_neg_z passed!");
+    info!("test_bne_rel_condition_neg_z_within_mocking_memory passed!");
 }
 
 pub fn test_bne_rel_condition_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -272,7 +272,7 @@ pub fn test_bne_rel_condition_z_within_mocking_memory<T: BasicInstance, P: Pin, 
     check_valid_register_status(usart, TxReg::PC, &[0xAB, 0xD9]);
     check_valid_register_status(usart, TxReg::P, &[0b00000010]);
 
-    info!("test_bne_rel_condition_z passed!");
+    info!("test_bne_rel_condition_z_within_mocking_memory passed!");
 }
 
 pub fn test_beq_rel_condition_neg_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -288,7 +288,7 @@ pub fn test_beq_rel_condition_neg_z_within_mocking_memory<T: BasicInstance, P: P
     usart_write(usart, &[OpeMode::Inst as u8, 0xF0, 0x02]);
     check_valid_register_status(usart, TxReg::PC, &[0xE0, 0xD9]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_beq_rel_condition_neg_z passed!");
+    info!("test_beq_rel_condition_neg_z_within_mocking_memory passed!");
 }
 
 pub fn test_beq_rel_condition_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -308,7 +308,7 @@ pub fn test_beq_rel_condition_z_within_mocking_memory<T: BasicInstance, P: Pin, 
     usart_write(usart, &[OpeMode::Inst as u8, 0xF0, 0x02]);
     check_valid_register_status(usart, TxReg::PC, &[0xE2, 0xD9]);
     check_valid_register_status(usart, TxReg::P, &[0b00000010]);
-    info!("test_beq_rel_condition_z passed!");
+    info!("test_beq_rel_condition_z_within_mocking_memory passed!");
 }
 
 #[cortex_m_rt::entry]

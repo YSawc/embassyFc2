@@ -26,7 +26,7 @@ pub fn test_clc_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::P, &[0b00000001]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x18]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_clc_impl passed!");
+    info!("test_clc_impl_within_mocking_memory passed!");
 }
 
 pub fn test_cld_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -41,7 +41,7 @@ pub fn test_cld_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::P, &[0b00001000]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xD8]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_cld_impl passed!");
+    info!("test_cld_impl_within_mocking_memory passed!");
 }
 
 pub fn test_cli_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -56,7 +56,7 @@ pub fn test_cli_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::P, &[0b00000100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x58]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_cli_impl passed!");
+    info!("test_cli_impl_within_mocking_memory passed!");
 }
 
 pub fn test_clv_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -74,7 +74,7 @@ pub fn test_clv_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::P, &[0b11000000]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xB8]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
-    info!("test_clv_impl passed!");
+    info!("test_clv_impl_within_mocking_memory passed!");
 }
 
 #[cortex_m_rt::entry]

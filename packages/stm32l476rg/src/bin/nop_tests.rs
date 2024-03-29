@@ -29,7 +29,7 @@ pub fn test_nop_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::PC, &[0xF6, 0xC5]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_brk_impl_without_b_flag passed!");
+    info!("test_brk_impl_without_b_flag_within_mocking_memory passed!");
 }
 
 #[cortex_m_rt::entry]

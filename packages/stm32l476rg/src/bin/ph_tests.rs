@@ -29,7 +29,7 @@ pub fn test_php_impl_within_n_within_mocking_memory<T: BasicInstance, P: Pin, P2
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFE, 0x01, 0b10000000]);
     check_valid_register_status(usart, TxReg::A, &[0x80]);
     check_valid_register_status(usart, TxReg::S, &[0xFE]);
-    info!("test_php_impl_within_n passed!");
+    info!("test_php_impl_within_n_within_mocking_memory passed!");
 }
 
 pub fn test_php_impl_within_cz_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -49,7 +49,7 @@ pub fn test_php_impl_within_cz_within_mocking_memory<T: BasicInstance, P: Pin, P
     usart_write(usart, &[OpeMode::Inst as u8, 0x08]);
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFE, 0x01, 0b00000011]);
     check_valid_register_status(usart, TxReg::S, &[0xFE]);
-    info!("test_php_impl_within_cz passed!");
+    info!("test_php_impl_within_cz_within_mocking_memory passed!");
 }
 
 pub fn test_php_impl_within_none_flag_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -62,7 +62,7 @@ pub fn test_php_impl_within_none_flag_within_mocking_memory<T: BasicInstance, P:
     usart_write(usart, &[OpeMode::Inst as u8, 0x08]);
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFE, 0x01, 0b00000000]);
     check_valid_register_status(usart, TxReg::S, &[0xFE]);
-    info!("test_php_impl_within_none_flag passed!");
+    info!("test_php_impl_within_none_flag_within_mocking_memory passed!");
 }
 
 pub fn test_pha_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -85,7 +85,7 @@ pub fn test_pha_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[OpeMode::Inst as u8, 0x48]);
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFD, 0x01, 0x82]);
     check_valid_register_status(usart, TxReg::S, &[0xFD]);
-    info!("test_pha_impl passed!");
+    info!("test_pha_impl_within_mocking_memory passed!");
 }
 
 #[cortex_m_rt::entry]

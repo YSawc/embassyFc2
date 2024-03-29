@@ -35,7 +35,7 @@ pub fn test_sbc_indx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart.blocking_write(&[0x41]).unwrap();
     check_valid_register_status(usart, TxReg::A, &[0xFF]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
-    info!("test_sbc_indx passed!");
+    info!("test_sbc_indx_within_mocking_memory passed!");
 }
 
 pub fn test_sbc_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -55,7 +55,7 @@ pub fn test_sbc_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart.blocking_write(&[0x3F]).unwrap();
     check_valid_register_status(usart, TxReg::A, &[0x01]);
     check_valid_register_status(usart, TxReg::P, &[0b00000001]);
-    info!("test_sbc_zp passed!");
+    info!("test_sbc_zp_within_mocking_memory passed!");
 }
 
 pub fn test_sbc_imm_without_carry_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -71,7 +71,7 @@ pub fn test_sbc_imm_without_carry_within_mocking_memory<T: BasicInstance, P: Pin
     usart_write(usart, &[OpeMode::Inst as u8, 0xE9, 0x00]);
     check_valid_register_status(usart, TxReg::A, &[0x7F]);
     check_valid_register_status(usart, TxReg::P, &[0b01000001]);
-    info!("test_sbc_imm_without_carry passed!");
+    info!("test_sbc_imm_without_carry_within_mocking_memory passed!");
 }
 
 pub fn test_sbc_imm_with_carry_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -89,7 +89,7 @@ pub fn test_sbc_imm_with_carry_within_mocking_memory<T: BasicInstance, P: Pin, P
     usart_write(usart, &[OpeMode::Inst as u8, 0xE9, 0x40]);
     check_valid_register_status(usart, TxReg::A, &[0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00000011]);
-    info!("test_sbc_imm_with_carry passed!");
+    info!("test_sbc_imm_with_carry_within_mocking_memory passed!");
 }
 
 pub fn test_sbc_imm_with_overflow_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -107,7 +107,7 @@ pub fn test_sbc_imm_with_overflow_within_mocking_memory<T: BasicInstance, P: Pin
     usart_write(usart, &[OpeMode::Inst as u8, 0xE9, 0x41]);
     check_valid_register_status(usart, TxReg::A, &[0xFF]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
-    info!("test_sbc_imm_with_overflow passed!");
+    info!("test_sbc_imm_with_overflow_within_mocking_memory passed!");
 }
 
 pub fn test_sbc_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -127,7 +127,7 @@ pub fn test_sbc_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart.blocking_write(&[0x3F]).unwrap();
     check_valid_register_status(usart, TxReg::A, &[0x01]);
     check_valid_register_status(usart, TxReg::P, &[0b00000001]);
-    info!("test_sbc_abs passed!");
+    info!("test_sbc_abs_within_mocking_memory passed!");
 }
 
 pub fn test_sbc_indy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -151,7 +151,7 @@ pub fn test_sbc_indy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart.blocking_write(&[0x40]).unwrap();
     check_valid_register_status(usart, TxReg::A, &[0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00000011]);
-    info!("test_sbc_indy passed!");
+    info!("test_sbc_indy_within_mocking_memory passed!");
 }
 
 pub fn test_sbc_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -174,7 +174,7 @@ pub fn test_sbc_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart.blocking_write(&[0x41]).unwrap();
     check_valid_register_status(usart, TxReg::A, &[0xFF]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
-    info!("test_sbc_zpx passed!");
+    info!("test_sbc_zpx_within_mocking_memory passed!");
 }
 
 pub fn test_sbc_absy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -194,7 +194,7 @@ pub fn test_sbc_absy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart.blocking_write(&[0x7F]).unwrap();
     check_valid_register_status(usart, TxReg::A, &[0x02]);
     check_valid_register_status(usart, TxReg::P, &[0b01000001]);
-    info!("test_sbc_absy passed!");
+    info!("test_sbc_absy_within_mocking_memory passed!");
 }
 
 pub fn test_sbc_absx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -217,7 +217,7 @@ pub fn test_sbc_absx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart.blocking_write(&[0x40]).unwrap();
     check_valid_register_status(usart, TxReg::A, &[0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00000011]);
-    info!("test_sbc_absx passed!");
+    info!("test_sbc_absx_within_mocking_memory passed!");
 }
 
 #[cortex_m_rt::entry]

@@ -24,7 +24,7 @@ pub fn test_sec_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x38]);
     check_valid_register_status(usart, TxReg::P, &[0b00000001]);
-    info!("test_sec_impl passed!");
+    info!("test_sec_impl_within_mocking_memory passed!");
 }
 
 pub fn test_sed_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -37,7 +37,7 @@ pub fn test_sed_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xF8]);
     check_valid_register_status(usart, TxReg::P, &[0b00001000]);
-    info!("test_sed_impl passed!");
+    info!("test_sed_impl_within_mocking_memory passed!");
 }
 
 pub fn test_sei_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -50,7 +50,7 @@ pub fn test_sei_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x78]);
     check_valid_register_status(usart, TxReg::P, &[0b00000100]);
-    info!("test_sei_impl passed!");
+    info!("test_sei_impl_within_mocking_memory passed!");
 }
 
 #[cortex_m_rt::entry]

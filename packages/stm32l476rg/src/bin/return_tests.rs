@@ -58,7 +58,7 @@ pub fn test_rti_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::PC, &[0xAD, 0xCE]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
     check_valid_register_status(usart, TxReg::P, &[0x45]);
-    info!("test_rti_abs passed!");
+    info!("test_rti_abs_within_mocking_memory passed!");
 }
 
 pub fn test_rts_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -85,7 +85,7 @@ pub fn test_rts_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::PC, &[0x00, 0xC6]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_rts_abs passed!");
+    info!("test_rts_abs_within_mocking_memory passed!");
 }
 
 #[cortex_m_rt::entry]

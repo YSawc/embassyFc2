@@ -29,7 +29,7 @@ pub fn test_bit_zp_without_flag_within_mocking_memory<T: BasicInstance, P: Pin, 
     usart.blocking_write(&[0x02]).unwrap();
     check_valid_register_status(usart, TxReg::A, &[0x3A]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
-    info!("test_bit_zp_without_flag passed!");
+    info!("test_bit_zp_without_flag_within_mocking_memory passed!");
 }
 
 pub fn test_bit_zp_with_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -47,7 +47,7 @@ pub fn test_bit_zp_with_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pi
     usart.blocking_write(&[0x80]).unwrap();
     check_valid_register_status(usart, TxReg::A, &[0x80]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
-    info!("test_bit_zp_with_n passed!");
+    info!("test_bit_zp_with_n_within_mocking_memory passed!");
 }
 
 pub fn test_bit_zp_with_nv_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -65,7 +65,7 @@ pub fn test_bit_zp_with_nv_within_mocking_memory<T: BasicInstance, P: Pin, P2: P
     usart.blocking_write(&[0xFF]).unwrap();
     check_valid_register_status(usart, TxReg::A, &[0xFF]);
     check_valid_register_status(usart, TxReg::P, &[0b11000000]);
-    info!("test_bit_zp_with_nv passed!");
+    info!("test_bit_zp_with_nv_within_mocking_memory passed!");
 }
 
 pub fn test_bit_zp_with_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -80,7 +80,7 @@ pub fn test_bit_zp_with_z_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pi
     usart.blocking_write(&[0x00]).unwrap();
     check_valid_register_status(usart, TxReg::A, &[0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00000010]);
-    info!("test_bit_zp_with_z passed!");
+    info!("test_bit_zp_with_z_within_mocking_memory passed!");
 }
 
 pub fn test_bit_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
@@ -98,7 +98,7 @@ pub fn test_bit_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart.blocking_write(&[0xC0]).unwrap();
     check_valid_register_status(usart, TxReg::A, &[0x05]);
     check_valid_register_status(usart, TxReg::P, &[0b11000010]);
-    info!("test_bit_abs passed!");
+    info!("test_bit_abs_within_mocking_memory passed!");
 }
 
 #[cortex_m_rt::entry]
