@@ -20,7 +20,7 @@ pub fn test_jsr_abs<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x4C, 0xF5, 0xC5]);
     check_valid_register_status(usart, TxReg::PC, &[0xF5, 0xc5]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
@@ -40,7 +40,14 @@ pub fn test_jmp_abs<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0x4c]);
+    usart_write(
+        usart,
+        &[
+            CpuMode::DebugWithinMockMemory as u8,
+            OpeMode::Inst as u8,
+            0x4c,
+        ],
+    );
     check_rw_is_high(&rw);
     usart_write(usart, &[0xf5, 0xc5]);
     check_valid_register_status(usart, TxReg::PC, &[0xf5, 0xc5]);
@@ -55,7 +62,14 @@ pub fn test_jmp_ind<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8, OpeMode::Inst as u8, 0x6c]);
+    usart_write(
+        usart,
+        &[
+            CpuMode::DebugWithinMockMemory as u8,
+            OpeMode::Inst as u8,
+            0x6c,
+        ],
+    );
     check_rw_is_high(&rw);
     usart_write(usart, &[0x00, 0x02]);
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x00, 0x00]);

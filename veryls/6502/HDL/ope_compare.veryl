@@ -1,21 +1,22 @@
 module OpeCompare (
-    i_clk             : input   logic                    ,
-    i_rst             : input   logic                    ,
-    i_en              : input   logic                    ,
-    i_we              : input   logic                    ,
-    i_rx              : input   logic                    ,
-    i_ope_kind        : input   OperatorsPkg::OpeKind    ,
-    i_addr_mode       : input   OperatorsPkg::AddrMode   ,
-    i_target_low_addr : input   logic                 <8>,
-    i_target_high_addr: input   logic                 <8>,
-    if_register_mst   : modport RegisterIf::Master       ,
-    if_register_slv   : modport RegisterIf::Slave        ,
-    if_memory_mst     : modport MemoryIf::Master         ,
-    if_memory_slv     : modport MemoryIf::Slave          ,
-    o_tx              : output  logic                    ,
-    o_rts             : output  logic                    ,
-    o_busy            : output  logic                    ,
-    o_finish          : output  logic                    ,
+    i_clk                 : input   logic                    ,
+    i_rst                 : input   logic                    ,
+    i_en                  : input   logic                    ,
+    i_we                  : input   logic                    ,
+    i_rx                  : input   logic                    ,
+    i_debug_mock_memory_en: input   logic                    ,
+    i_ope_kind            : input   OperatorsPkg::OpeKind    ,
+    i_addr_mode           : input   OperatorsPkg::AddrMode   ,
+    i_target_low_addr     : input   logic                 <8>,
+    i_target_high_addr    : input   logic                 <8>,
+    if_register_mst       : modport RegisterIf::Master       ,
+    if_register_slv       : modport RegisterIf::Slave        ,
+    if_memory_mst         : modport MemoryIf::Master         ,
+    if_memory_slv         : modport MemoryIf::Slave          ,
+    o_tx                  : output  logic                    ,
+    o_rts                 : output  logic                    ,
+    o_busy                : output  logic                    ,
+    o_finish              : output  logic                    ,
 ) {
     enum Status: logic<2> {
         Ready,
@@ -39,20 +40,21 @@ module OpeCompare (
     var o_read_memory_finish : logic   ;
     inst if_read_memory_memory: MemoryIf;
     inst read_memory: ReadMemory (
-        i_clk                                    ,
-        i_rst                                    ,
-        i_en              : i_read_memory_en     ,
-        i_we                                     ,
-        i_rx                                     ,
-        i_target_low_addr                        ,
-        i_target_high_addr                       ,
-        if_memory_mst     : if_read_memory_memory,
-        if_memory_slv                            ,
-        o_data            : o_read_memory_data   ,
-        o_tx              : o_read_memory_tx     ,
-        o_rts             : o_read_memory_rts    ,
-        o_busy            : o_read_memory_busy   ,
-        o_finish          : o_read_memory_finish ,
+        i_clk                                        ,
+        i_rst                                        ,
+        i_en                  : i_read_memory_en     ,
+        i_we                                         ,
+        i_rx                                         ,
+        i_debug_mock_memory_en                       ,
+        i_target_low_addr                            ,
+        i_target_high_addr                           ,
+        if_memory_mst         : if_read_memory_memory,
+        if_memory_slv                                ,
+        o_data                : o_read_memory_data   ,
+        o_tx                  : o_read_memory_tx     ,
+        o_rts                 : o_read_memory_rts    ,
+        o_busy                : o_read_memory_busy   ,
+        o_finish              : o_read_memory_finish ,
     );
 
     assign o_tx = if status == Status::ReadMemory {
@@ -61,11 +63,19 @@ module OpeCompare (
         1
     };
 
+    var if_memory_mst_en_next  : logic    ;
+    var if_memory_mst_we_next  : logic    ;
+    var if_memory_mst_addr_next: logic<16>;
+    var if_memory_mst_data_next: logic<8> ;
     always_comb {
-        o_p_next          = if_register_mst.p;
-        status_next       = status;
-        o_finish_next     = o_finish;
-        compare_data_next = compare_data;
+        o_p_next                = if_register_mst.p;
+        status_next             = status;
+        o_finish_next           = o_finish;
+        compare_data_next       = compare_data;
+        if_memory_mst_en_next   = if_memory_mst.en;
+        if_memory_mst_we_next   = if_memory_mst.we;
+        if_memory_mst_addr_next = if_memory_mst.addr;
+        if_memory_mst_data_next = if_memory_mst.data;
         case status {
             Status::Ready: {
                 o_p_next = if_register_slv.p;
@@ -79,6 +89,10 @@ module OpeCompare (
                 }
             }
             Status::ReadMemory: {
+                if_memory_mst_en_next   = if_read_memory_memory.en;
+                if_memory_mst_we_next   = if_read_memory_memory.we;
+                if_memory_mst_addr_next = if_read_memory_memory.addr;
+                if_memory_mst_data_next = if_read_memory_memory.data;
                 if o_read_memory_finish {
                     compare_data_next = o_read_memory_data;
                     status_next       = Status::Compare;
@@ -103,17 +117,25 @@ module OpeCompare (
 
     always_ff (posedge i_clk, async_high i_rst) {
         if_reset {
-            compare_data      = 0;
-            if_register_mst.p = 0;
-            status            = Status::Ready;
-            o_busy            = 0;
-            o_finish          = 0;
+            compare_data       = 0;
+            if_register_mst.p  = 0;
+            if_memory_mst.en   = 0;
+            if_memory_mst.we   = 0;
+            if_memory_mst.addr = 0;
+            if_memory_mst.data = 0;
+            status             = Status::Ready;
+            o_busy             = 0;
+            o_finish           = 0;
         } else {
-            compare_data      = compare_data_next;
-            if_register_mst.p = o_p_next;
-            status            = status_next;
-            o_busy            = o_busy_next;
-            o_finish          = o_finish_next;
+            compare_data       = compare_data_next;
+            if_register_mst.p  = o_p_next;
+            if_memory_mst.en   = if_memory_mst_en_next;
+            if_memory_mst.we   = if_memory_mst_we_next;
+            if_memory_mst.addr = if_memory_mst_addr_next;
+            if_memory_mst.data = if_memory_mst_data_next;
+            status             = status_next;
+            o_busy             = o_busy_next;
+            o_finish           = o_finish_next;
         }
     }
 }

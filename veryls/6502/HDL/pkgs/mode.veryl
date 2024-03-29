@@ -1,8 +1,9 @@
 package ModePkg {
     enum CpuMode: logic<8> {
-        nop,
-        normal,
-        debug, // [mode, subcommand]
+        Nop,
+        Normal,
+        DebugWithinMockMemory,
+        DebugWithinInternalMemory,
     }
 
     enum OpeMode: logic<3> {

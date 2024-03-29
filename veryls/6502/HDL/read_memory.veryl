@@ -1,18 +1,21 @@
-module ReadMemory (
-    i_clk             : input   logic              ,
-    i_rst             : input   logic              ,
-    i_en              : input   logic              ,
-    i_we              : input   logic              ,
-    i_rx              : input   logic              ,
-    i_target_low_addr : input   logic           <8>,
-    i_target_high_addr: input   logic           <8>,
-    if_memory_mst     : modport MemoryIf::Master   ,
-    if_memory_slv     : modport MemoryIf::Slave    ,
-    o_data            : output  logic           <8>,
-    o_tx              : output  logic              ,
-    o_rts             : output  logic              ,
-    o_busy            : output  logic              ,
-    o_finish          : output  logic              ,
+module ReadMemory #(
+    param READ_LOCK_COUNT: logic<8> = 6,
+) (
+    i_clk                 : input   logic              ,
+    i_rst                 : input   logic              ,
+    i_en                  : input   logic              ,
+    i_we                  : input   logic              ,
+    i_rx                  : input   logic              ,
+    i_debug_mock_memory_en: input   logic              ,
+    i_target_low_addr     : input   logic           <8>,
+    i_target_high_addr    : input   logic           <8>,
+    if_memory_mst         : modport MemoryIf::Master   ,
+    if_memory_slv         : modport MemoryIf::Slave    ,
+    o_data                : output  logic           <8>,
+    o_tx                  : output  logic              ,
+    o_rts                 : output  logic              ,
+    o_busy                : output  logic              ,
+    o_finish              : output  logic              ,
 ) {
     var o_rts_next   : logic    ;
     var o_busy_next  : logic    ;
@@ -21,6 +24,7 @@ module ReadMemory (
     var status_next  : Status   ;
     enum Status: logic <3> {
         Ready,
+        ReadMemory,
         LowTx,
         HighTx,
         MemoryRx,
@@ -76,9 +80,9 @@ module ReadMemory (
     } else {
         1
     };
-    // assign o_data = if_memory_slv.data;
-    assign o_data = o_memory_rx_data;
-    assign o_tx   = if i_low_tx_en {
+    var o_data_next: logic<8>;
+    // assign o_data = o_memory_rx_data;
+    assign o_tx = if i_low_tx_en {
         o_low_tx_tx
     } else if i_high_tx_en {
         o_high_tx_tx
@@ -86,17 +90,39 @@ module ReadMemory (
         1
     };
 
+    var wait_c_next            : logic<3> ;
+    var wait_c                 : logic<3> ;
+    var if_memory_mst_en_next  : logic    ;
+    var if_memory_mst_we_next  : logic    ;
+    var if_memory_mst_addr_next: logic<16>;
     always_comb {
-        status_next        = status;
-        o_finish_next      = o_finish;
-        if_memory_mst.we   = 0;
-        if_memory_mst.addr = 0;
+        status_next             = status;
+        o_finish_next           = o_finish;
+        if_memory_mst_en_next   = if_memory_mst.en;
+        if_memory_mst_we_next   = if_memory_mst.we;
+        if_memory_mst_addr_next = if_memory_mst.addr;
+        o_data_next             = o_data;
+        wait_c_next             = wait_c;
         case status {
             Status::Ready: {
                 if i_en {
-                    if_memory_mst.we   = 0;
-                    if_memory_mst.addr = utilPkg::combine_byte_to_short(i_high_tx_data, i_low_tx_data);
-                    status_next        = Status::LowTx;
+                    if i_debug_mock_memory_en {
+                        status_next = Status::LowTx;
+                    } else {
+                        if_memory_mst_en_next   = 1;
+                        if_memory_mst_addr_next = utilPkg::combine_byte_to_short(i_high_tx_data, i_low_tx_data);
+                        status_next             = Status::ReadMemory;
+                    }
+                }
+            }
+            Status::ReadMemory: {
+                if wait_c_next >= READ_LOCK_COUNT {
+                    wait_c_next           = 0;
+                    if_memory_mst_en_next = 0;
+                    o_data_next           = if_memory_slv.data;
+                    status_next           = Status::Finish;
+                } else {
+                    wait_c_next += 1;
                 }
             }
             Status::LowTx: {
@@ -110,6 +136,7 @@ module ReadMemory (
                 }
             }
             Status::MemoryRx: {
+                o_data_next = o_memory_rx_data;
                 if o_memory_rx_finish {
                     status_next = Status::Finish;
                 }
@@ -123,15 +150,25 @@ module ReadMemory (
 
     always_ff (posedge i_clk, async_high i_rst) {
         if_reset {
-            o_busy   = 0;
-            o_finish = 0;
-            status   = Status::Ready;
-            o_rts    = 1;
+            o_busy             = 0;
+            o_finish           = 0;
+            status             = Status::Ready;
+            o_rts              = 1;
+            if_memory_mst.en   = 0;
+            if_memory_mst.we   = 0;
+            if_memory_mst.addr = 0;
+            o_data             = 0;
+            wait_c             = 0;
         } else {
-            o_busy   = o_busy_next;
-            o_finish = o_finish_next;
-            status   = status_next;
-            o_rts    = o_rts_next;
+            o_busy             = o_busy_next;
+            o_finish           = o_finish_next;
+            status             = status_next;
+            o_rts              = o_rts_next;
+            if_memory_mst.en   = if_memory_mst_en_next;
+            if_memory_mst.we   = if_memory_mst_we_next;
+            if_memory_mst.addr = if_memory_mst_addr_next;
+            o_data             = o_data_next;
+            wait_c             = wait_c_next;
         }
     }
 }

@@ -1,9 +1,11 @@
 interface MemoryIf {
+    var en  : logic    ;
     var we  : logic    ;
     var addr: logic<16>;
     var data: logic<8> ;
 
     modport Master {
+        en  : output,
         we  : output,
         addr: output,
         data: output,

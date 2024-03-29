@@ -20,7 +20,7 @@ pub fn test_plp_impl<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x82]);
     check_valid_register_status(usart, TxReg::A, &[0x82]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xCD, 0x78, 0x06]);
@@ -45,7 +45,7 @@ pub fn test_pla_impl<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x82]);
     check_valid_register_status(usart, TxReg::A, &[0x82]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xCD, 0x78, 0x06]);

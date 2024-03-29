@@ -1,21 +1,22 @@
 module OpeReadAndStoreToRegister (
-    i_clk             : input   logic                    ,
-    i_rst             : input   logic                    ,
-    i_en              : input   logic                    ,
-    i_we              : input   logic                    ,
-    i_rx              : input   logic                    ,
-    i_ope_kind        : input   OperatorsPkg::OpeKind    ,
-    i_addr_mode       : input   OperatorsPkg::AddrMode   ,
-    i_target_low_addr : input   logic                 <8>,
-    i_target_high_addr: input   logic                 <8>,
-    if_register_slv   : modport RegisterIf::Slave        ,
-    if_register_mst   : modport RegisterIf::Master       ,
-    if_memory_mst     : modport MemoryIf::Master         ,
-    if_memory_slv     : modport MemoryIf::Slave          ,
-    o_tx              : output  logic                    ,
-    o_rts             : output  logic                    ,
-    o_busy            : output  logic                    ,
-    o_finish          : output  logic                    ,
+    i_clk                 : input   logic                    ,
+    i_rst                 : input   logic                    ,
+    i_en                  : input   logic                    ,
+    i_we                  : input   logic                    ,
+    i_rx                  : input   logic                    ,
+    i_debug_mock_memory_en: input   logic                    ,
+    i_ope_kind            : input   OperatorsPkg::OpeKind    ,
+    i_addr_mode           : input   OperatorsPkg::AddrMode   ,
+    i_target_low_addr     : input   logic                 <8>,
+    i_target_high_addr    : input   logic                 <8>,
+    if_register_slv       : modport RegisterIf::Slave        ,
+    if_register_mst       : modport RegisterIf::Master       ,
+    if_memory_mst         : modport MemoryIf::Master         ,
+    if_memory_slv         : modport MemoryIf::Slave          ,
+    o_tx                  : output  logic                    ,
+    o_rts                 : output  logic                    ,
+    o_busy                : output  logic                    ,
+    o_finish              : output  logic                    ,
 ) {
     enum Status: logic<2> {
         Ready,
@@ -55,25 +56,22 @@ module OpeReadAndStoreToRegister (
     var o_read_memory_busy   : logic   ;
     var o_read_memory_finish : logic   ;
     inst if_read_memory_memory: MemoryIf;
-    always_comb {
-        if_memory_mst.we   = if_read_memory_memory.we;
-        if_memory_mst.addr = if_read_memory_memory.addr;
-    }
     inst read_memory: ReadMemory (
-        i_clk                                    ,
-        i_rst                                    ,
-        i_en              : i_read_memory_en     ,
-        i_we                                     ,
-        i_rx                                     ,
-        i_target_low_addr : tmp_target_low_addr  ,
-        i_target_high_addr: tmp_target_high_addr ,
-        if_memory_mst     : if_read_memory_memory,
-        if_memory_slv                            ,
-        o_data            : o_read_memory_data   ,
-        o_tx              : o_read_memory_tx     ,
-        o_rts             : o_read_memory_rts    ,
-        o_busy            : o_read_memory_busy   ,
-        o_finish          : o_read_memory_finish ,
+        i_clk                                        ,
+        i_rst                                        ,
+        i_en                  : i_read_memory_en     ,
+        i_we                                         ,
+        i_rx                                         ,
+        i_debug_mock_memory_en                       ,
+        i_target_low_addr     : tmp_target_low_addr  ,
+        i_target_high_addr    : tmp_target_high_addr ,
+        if_memory_mst         : if_read_memory_memory,
+        if_memory_slv                                ,
+        o_data                : o_read_memory_data   ,
+        o_tx                  : o_read_memory_tx     ,
+        o_rts                 : o_read_memory_rts    ,
+        o_busy                : o_read_memory_busy   ,
+        o_finish              : o_read_memory_finish ,
     );
 
     assign o_tx = if status == Status::ReadMemory {
@@ -88,6 +86,10 @@ module OpeReadAndStoreToRegister (
         1
     };
 
+    var if_memory_mst_en_next  : logic    ;
+    var if_memory_mst_we_next  : logic    ;
+    var if_memory_mst_addr_next: logic<16>;
+    var if_memory_mst_data_next: logic<8> ;
     always_comb {
         status_next               = status;
         o_finish_next             = o_finish;
@@ -104,6 +106,10 @@ module OpeReadAndStoreToRegister (
         o_pc_low_tmp_next         = pc_low_tmp;
         o_pc_high_tmp_next        = pc_high_tmp;
         o_p_tmp_next              = p_tmp;
+        if_memory_mst_en_next     = if_memory_mst.en;
+        if_memory_mst_we_next     = if_memory_mst.we;
+        if_memory_mst_addr_next   = if_memory_mst.addr;
+        if_memory_mst_data_next   = if_memory_mst.data;
         case status {
             Status::Ready: {
                 if i_en {
@@ -145,6 +151,10 @@ module OpeReadAndStoreToRegister (
                 }
             }
             Status::ReadMemory: {
+                if_memory_mst_en_next   = if_read_memory_memory.en;
+                if_memory_mst_we_next   = if_read_memory_memory.we;
+                if_memory_mst_addr_next = if_read_memory_memory.addr;
+                if_memory_mst_data_next = if_read_memory_memory.data;
                 if o_read_memory_finish {
                     register_data_next = o_read_memory_data;
                     status_next        = Status::WriteRegister;
@@ -232,6 +242,10 @@ module OpeReadAndStoreToRegister (
             pc_low_tmp           = 0;
             pc_high_tmp          = 0;
             p_tmp                = 0;
+            if_memory_mst.en     = 0;
+            if_memory_mst.we     = 0;
+            if_memory_mst.addr   = 0;
+            if_memory_mst.data   = 0;
         } else {
             register_data        = register_data_next;
             if_register_mst.a    = o_a_next;
@@ -249,6 +263,10 @@ module OpeReadAndStoreToRegister (
             pc_low_tmp           = o_pc_low_tmp_next;
             pc_high_tmp          = o_pc_high_tmp_next;
             p_tmp                = o_p_tmp_next;
+            if_memory_mst.en     = if_memory_mst_en_next;
+            if_memory_mst.we     = if_memory_mst_we_next;
+            if_memory_mst.addr   = if_memory_mst_addr_next;
+            if_memory_mst.data   = if_memory_mst_data_next;
         }
     }
 }

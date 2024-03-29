@@ -20,7 +20,7 @@ pub fn test_rti_impl<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0xCE]);
     check_valid_register_status(usart, TxReg::A, &[0xCE]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
@@ -67,7 +67,7 @@ pub fn test_rts_impl<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x4C, 0xFC, 0xC5]);
     check_valid_register_status(usart, TxReg::PC, &[0xFC, 0xc5]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);

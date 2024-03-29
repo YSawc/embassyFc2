@@ -27,7 +27,7 @@ module main (
 
     var mode                 : ModePkg::CpuMode;
     var o_tmp_mode           : ModePkg::CpuMode;
-    let i_mode_handler_en    : logic            = (mode == ModePkg::CpuMode::nop);
+    let i_mode_handler_en    : logic            = (mode == ModePkg::CpuMode::Nop);
     var o_mode_handler_rts   : logic           ;
     var o_mode_handler_busy  : logic           ;
     var o_mode_handler_finish: logic           ;
@@ -42,48 +42,51 @@ module main (
         o_finish: o_mode_handler_finish,
     );
     assign mode = if o_debug_finish {
-        ModePkg::CpuMode::nop
+        ModePkg::CpuMode::Nop
     } else {
         o_tmp_mode
     };
 
-    let i_debug_en       : logic = mode == ModePkg::CpuMode::debug;
-    let i_debug_tx_en    : logic = ~cts;
-    var o_debug_busy     : logic;
-    var o_debug_tx       : logic;
-    var o_debug_rw       : logic;
-    var o_debug_finish   : logic;
-    inst if_debug_register: RegisterIf;
-    inst if_debug_memory  : MemoryIf;
-    var o_debug_rts      : logic;
+    let i_debug_en            : logic = (mode == ModePkg::CpuMode::DebugWithinMockMemory || mode == ModePkg::CpuMode::DebugWithinInternalMemory);
+    let i_debug_mock_memory_en: logic = mode == ModePkg::CpuMode::DebugWithinMockMemory;
+    let i_debug_tx_en         : logic = ~cts;
+    var o_debug_busy          : logic;
+    var o_debug_tx            : logic;
+    var o_debug_rw            : logic;
+    var o_debug_finish        : logic;
+    inst if_debug_register     : RegisterIf;
+    inst if_debug_memory       : MemoryIf;
+    var o_debug_rts           : logic;
     inst debug: Debug (
-        i_clk                             ,
-        i_rst          : reset            ,
-        i_en           : i_debug_en       ,
-        i_rx                              ,
-        i_we           : i_debug_tx_en    ,
-        if_register_mst: if_debug_register,
-        if_register_slv: if_register      ,
-        if_memory_mst  : if_debug_memory  ,
-        if_memory_slv  : if_memory        ,
-        o_tx           : o_debug_tx       ,
-        o_busy         : o_debug_busy     ,
-        o_rts          : o_debug_rts      ,
-        o_rw           : o_debug_rw       ,
-        o_finish       : o_debug_finish   ,
+        i_clk                                    ,
+        i_rst                 : reset            ,
+        i_en                  : i_debug_en       ,
+        i_rx                                     ,
+        i_we                  : i_debug_tx_en    ,
+        i_debug_mock_memory_en                   ,
+        if_register_mst       : if_debug_register,
+        if_register_slv       : if_register      ,
+        if_memory_mst         : if_debug_memory  ,
+        if_memory_slv         : if_memory        ,
+        o_tx                  : o_debug_tx       ,
+        o_busy                : o_debug_busy     ,
+        o_rts                 : o_debug_rts      ,
+        o_rw                  : o_debug_rw       ,
+        o_finish              : o_debug_finish   ,
     );
 
     var o_ram_data: logic<8>;
     inst ram: Ram (
         i_clk                       ,
         i_rst                       ,
+        i_en  : if_debug_memory.en  ,
         i_we  : if_debug_memory.we  ,
         i_addr: if_debug_memory.addr,
         i_data: if_debug_memory.data,
         o_data: o_ram_data          ,
     );
 
-    assign gpio_0_0 = if mode == ModePkg::CpuMode::debug {
+    assign gpio_0_0 = if (mode == ModePkg::CpuMode::DebugWithinMockMemory || mode == ModePkg::CpuMode::DebugWithinInternalMemory) {
         if i_debug_tx_en {
             o_debug_tx
         } else {
@@ -105,7 +108,7 @@ module main (
         1
     };
 
-    assign gpio_0_5 = mode == ModePkg::CpuMode::nop;
+    assign gpio_0_5 = mode == ModePkg::CpuMode::Nop;
     always_ff (posedge i_clk, async_high i_rst) {
         if_reset {
             if_register.a  = 0;

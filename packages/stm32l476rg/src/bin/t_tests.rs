@@ -20,7 +20,7 @@ pub fn test_txa_impl_with_no_flag<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x39]);
     check_valid_register_status(usart, TxReg::X, &[0x39]);
     check_valid_register_status(usart, TxReg::A, &[0x00]);
@@ -38,7 +38,7 @@ pub fn test_txa_impl_with_z<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     check_valid_register_status(usart, TxReg::X, &[0x00]);
     check_valid_register_status(usart, TxReg::A, &[0x00]);
     check_valid_register_status(usart, TxReg::P, &[0x00]);
@@ -55,7 +55,7 @@ pub fn test_txa_impl_with_n<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x80]);
     check_valid_register_status(usart, TxReg::X, &[0x80]);
     check_valid_register_status(usart, TxReg::A, &[0x00]);
@@ -76,7 +76,7 @@ pub fn test_tya_impl_with_no_flag<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0x39]);
     check_valid_register_status(usart, TxReg::Y, &[0x39]);
     check_valid_register_status(usart, TxReg::A, &[0x00]);
@@ -94,7 +94,7 @@ pub fn test_tya_impl_with_z<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     check_valid_register_status(usart, TxReg::Y, &[0x00]);
     check_valid_register_status(usart, TxReg::A, &[0x00]);
     check_valid_register_status(usart, TxReg::P, &[0x00]);
@@ -111,7 +111,7 @@ pub fn test_tya_impl_with_n<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0x80]);
     check_valid_register_status(usart, TxReg::Y, &[0x80]);
     check_valid_register_status(usart, TxReg::A, &[0x00]);
@@ -132,7 +132,7 @@ pub fn test_txs_impl_with_no_flag<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x39]);
     check_valid_register_status(usart, TxReg::X, &[0x39]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
@@ -150,7 +150,7 @@ pub fn test_txs_impl_in_condition_z<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     check_valid_register_status(usart, TxReg::X, &[0x00]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
     check_valid_register_status(usart, TxReg::P, &[0x00]);
@@ -167,7 +167,7 @@ pub fn test_txs_impl_in_condition_n<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x80]);
     check_valid_register_status(usart, TxReg::X, &[0x80]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
@@ -189,7 +189,7 @@ pub fn test_tay_impl_with_no_flag<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x39]);
     check_valid_register_status(usart, TxReg::A, &[0x39]);
     check_valid_register_status(usart, TxReg::Y, &[0x00]);
@@ -207,7 +207,7 @@ pub fn test_tay_impl_with_z<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     check_valid_register_status(usart, TxReg::A, &[0x00]);
     check_valid_register_status(usart, TxReg::Y, &[0x00]);
     check_valid_register_status(usart, TxReg::P, &[0x00]);
@@ -224,7 +224,7 @@ pub fn test_tay_impl_with_n<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x80]);
     check_valid_register_status(usart, TxReg::A, &[0x80]);
     check_valid_register_status(usart, TxReg::Y, &[0x00]);
@@ -245,7 +245,7 @@ pub fn test_tax_impl_with_no_flag<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x39]);
     check_valid_register_status(usart, TxReg::A, &[0x39]);
     check_valid_register_status(usart, TxReg::X, &[0x00]);
@@ -263,7 +263,7 @@ pub fn test_tax_impl_with_z<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     check_valid_register_status(usart, TxReg::A, &[0x00]);
     check_valid_register_status(usart, TxReg::X, &[0x00]);
     check_valid_register_status(usart, TxReg::P, &[0x00]);
@@ -280,7 +280,7 @@ pub fn test_tax_impl_with_n<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x80]);
     check_valid_register_status(usart, TxReg::A, &[0x80]);
     check_valid_register_status(usart, TxReg::X, &[0x00]);
@@ -301,7 +301,7 @@ pub fn test_tsx_impl_with_no_flag<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x01]);
     check_valid_register_status(usart, TxReg::X, &[0x01]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
@@ -327,7 +327,7 @@ pub fn test_tsx_impl_with_z<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x9A]);
     check_valid_register_status(usart, TxReg::X, &[0x00]);
     check_valid_register_status(usart, TxReg::S, &[0x00]);
@@ -347,7 +347,7 @@ pub fn test_tsx_impl_with_n<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
     check_valid_register_status(usart, TxReg::X, &[0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);

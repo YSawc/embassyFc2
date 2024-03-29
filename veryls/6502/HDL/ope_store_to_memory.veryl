@@ -1,19 +1,20 @@
 module OpeStoreToMemory (
-    i_clk             : input   logic                   ,
-    i_rst             : input   logic                   ,
-    i_en              : input   logic                   ,
-    i_we              : input   logic                   ,
-    i_rx              : input   logic                   ,
-    i_ope_kind        : input   OperatorsPkg::OpeKind   ,
-    i_target_low_addr : input   logic                <8>,
-    i_target_high_addr: input   logic                <8>,
-    if_register_mst   : modport RegisterIf::Master      ,
-    if_register_slv   : modport RegisterIf::Slave       ,
-    if_memory_mst     : modport MemoryIf::Master        ,
-    if_memory_slv     : modport MemoryIf::Slave         ,
-    o_tx              : output  logic                   ,
-    o_busy            : output  logic                   ,
-    o_finish          : output  logic                   ,
+    i_clk                 : input   logic                   ,
+    i_rst                 : input   logic                   ,
+    i_en                  : input   logic                   ,
+    i_we                  : input   logic                   ,
+    i_rx                  : input   logic                   ,
+    i_debug_mock_memory_en: input   logic                   ,
+    i_ope_kind            : input   OperatorsPkg::OpeKind   ,
+    i_target_low_addr     : input   logic                <8>,
+    i_target_high_addr    : input   logic                <8>,
+    if_register_mst       : modport RegisterIf::Master      ,
+    if_register_slv       : modport RegisterIf::Slave       ,
+    if_memory_mst         : modport MemoryIf::Master        ,
+    if_memory_slv         : modport MemoryIf::Slave         ,
+    o_tx                  : output  logic                   ,
+    o_busy                : output  logic                   ,
+    o_finish              : output  logic                   ,
 ) {
     enum Status: logic<2> {
         Ready,
@@ -42,27 +43,26 @@ module OpeStoreToMemory (
     var o_write_memory_busy   : logic;
     var o_write_memory_finish : logic;
     inst if_write_memory_memory: MemoryIf;
-    always_comb {
-        if_memory_mst.we   = if_write_memory_memory.we;
-        if_memory_mst.addr = if_write_memory_memory.addr;
-        if_memory_mst.data = if_write_memory_memory.data;
-    }
     inst write_memory: WriteMemory (
-        i_clk                                     ,
-        i_rst                                     ,
-        i_en              : i_write_memory_en     ,
-        i_we                                      ,
-        i_rx                                      ,
-        i_target_low_addr : tmp_target_low_addr   ,
-        i_target_high_addr: tmp_target_high_addr  ,
-        i_send_data                               ,
-        if_memory_mst     : if_write_memory_memory,
-        if_memory_slv                             ,
-        o_tx              : o_write_memory_tx     ,
-        o_busy            : o_write_memory_busy   ,
-        o_finish          : o_write_memory_finish ,
+        i_clk                                         ,
+        i_rst                                         ,
+        i_en                  : i_write_memory_en     ,
+        i_we                                          ,
+        i_rx                                          ,
+        i_debug_mock_memory_en                        ,
+        i_target_low_addr     : tmp_target_low_addr   ,
+        i_target_high_addr    : tmp_target_high_addr  ,
+        i_send_data                                   ,
+        if_memory_mst         : if_write_memory_memory,
+        if_memory_slv                                 ,
+        o_tx                  : o_write_memory_tx     ,
+        o_busy                : o_write_memory_busy   ,
+        o_finish              : o_write_memory_finish ,
     );
-
+    var if_memory_mst_en_next  : logic    ;
+    var if_memory_mst_we_next  : logic    ;
+    var if_memory_mst_addr_next: logic<16>;
+    var if_memory_mst_data_next: logic<8> ;
     always_comb {
         o_tx_next                 = o_tx;
         status_next               = status;
@@ -74,6 +74,10 @@ module OpeStoreToMemory (
         pc_next                   = if_register_mst.pc;
         i_send_data_next          = i_send_data;
         write_count_next          = write_count;
+        if_memory_mst_en_next     = if_memory_mst.en;
+        if_memory_mst_we_next     = if_memory_mst.we;
+        if_memory_mst_addr_next   = if_memory_mst.addr;
+        if_memory_mst_data_next   = if_memory_mst.data;
         case status {
             Status::Ready: {
                 if i_en {
@@ -119,7 +123,11 @@ module OpeStoreToMemory (
                 }
             }
             Status::WriteMemory: {
-                o_tx_next = o_write_memory_tx;
+                o_tx_next               = o_write_memory_tx;
+                if_memory_mst_en_next   = if_write_memory_memory.en;
+                if_memory_mst_we_next   = if_write_memory_memory.we;
+                if_memory_mst_addr_next = if_write_memory_memory.addr;
+                if_memory_mst_data_next = if_write_memory_memory.data;
                 if o_write_memory_finish {
                     if i_ope_kind == OperatorsPkg::OpeKind::Jsr {
                         if write_count == 0 {
@@ -154,6 +162,10 @@ module OpeStoreToMemory (
             if_register_mst.pc   = 0;
             i_send_data          = 0;
             write_count          = 0;
+            if_memory_mst.en     = 0;
+            if_memory_mst.we     = 0;
+            if_memory_mst.addr   = 0;
+            if_memory_mst.data   = 0;
         } else {
             o_tx                 = o_tx_next;
             o_busy               = o_busy_next;
@@ -166,6 +178,10 @@ module OpeStoreToMemory (
             if_register_mst.pc   = pc_next;
             i_send_data          = i_send_data_next;
             write_count          = write_count_next;
+            if_memory_mst.en     = if_memory_mst_en_next;
+            if_memory_mst.we     = if_memory_mst_we_next;
+            if_memory_mst.addr   = if_memory_mst_addr_next;
+            if_memory_mst.data   = if_memory_mst_data_next;
         }
     }
 }

@@ -20,7 +20,7 @@ pub fn test_sbc_indx<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xC9, 0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00000011]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x40]);
@@ -44,7 +44,7 @@ pub fn test_sbc_zp<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xC9, 0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00000011]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x40]);
@@ -64,7 +64,7 @@ pub fn test_sbc_imm_without_carry<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x80]);
     check_valid_register_status(usart, TxReg::A, &[0x80]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
@@ -80,7 +80,7 @@ pub fn test_sbc_imm_with_carry<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xC9, 0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00000011]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x40]);
@@ -98,7 +98,7 @@ pub fn test_sbc_imm_with_overflow<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xC9, 0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00000011]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x40]);
@@ -116,7 +116,7 @@ pub fn test_sbc_abs<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xC9, 0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00000011]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x40]);
@@ -136,7 +136,7 @@ pub fn test_sbc_indy<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xC9, 0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00000011]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x40]);
@@ -160,7 +160,7 @@ pub fn test_sbc_zpx<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xC9, 0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00000011]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x40]);
@@ -183,7 +183,7 @@ pub fn test_sbc_absy<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xC9, 0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00000011]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x81]);
@@ -203,7 +203,7 @@ pub fn test_sbc_absx<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xC9, 0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00000011]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x78]);

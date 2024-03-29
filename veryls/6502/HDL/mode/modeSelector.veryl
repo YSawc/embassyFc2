@@ -31,7 +31,7 @@ module ModeSelector (
                 if i_data >= 2 && i_data <= 8'hfe {
                     o_mode_next = i_data as ModePkg::CpuMode;
                 } else {
-                    o_mode_next = ModePkg::CpuMode::nop;
+                    o_mode_next = ModePkg::CpuMode::Nop;
                 }
                 status_next = Status::Finish;
             }
@@ -44,7 +44,7 @@ module ModeSelector (
 
     always_ff (posedge i_clk, async_high i_rst) {
         if_reset {
-            o_mode   = ModePkg::CpuMode::nop;
+            o_mode   = ModePkg::CpuMode::Nop;
             status   = Status::Ready;
             o_finish = 0;
         } else {

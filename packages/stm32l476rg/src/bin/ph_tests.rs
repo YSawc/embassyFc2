@@ -20,7 +20,7 @@ pub fn test_php_impl_within_n<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x80]);
     check_valid_register_status(usart, TxReg::A, &[0x80]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
@@ -38,7 +38,7 @@ pub fn test_php_impl_within_cz<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x80]);
     check_valid_register_status(usart, TxReg::A, &[0x80]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xCD, 0x78, 0x06]);
@@ -58,7 +58,7 @@ pub fn test_php_impl_within_none_flag<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x08]);
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFE, 0x01, 0b00000000]);
     check_valid_register_status(usart, TxReg::S, &[0xFE]);
@@ -71,7 +71,7 @@ pub fn test_pha_impl<T: BasicInstance, P: Pin, P2: Pin>(
     resb: &mut Output<P2>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::Debug as u8]);
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x82]);
     check_valid_register_status(usart, TxReg::A, &[0x82]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xCD, 0x78, 0x06]);

@@ -2,7 +2,8 @@
 pub enum CpuMode {
     Nop,
     Normal,
-    Debug,
+    DebugWithinMockMemory,
+    DebugWithinInternalMemory,
 }
 
 #[derive(Clone, Copy, Debug)]
