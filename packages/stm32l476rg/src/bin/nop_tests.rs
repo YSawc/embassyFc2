@@ -14,6 +14,24 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
+pub fn test_nop_impl_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x4C, 0xF5, 0xC5]);
+    check_valid_register_status(usart, TxReg::PC, &[0xF5, 0xC5]);
+    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xEA]);
+    check_valid_register_status(usart, TxReg::PC, &[0xF6, 0xC5]);
+    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    info!("test_brk_impl_without_b_flag_within_internal_memory passed!");
+}
+
 pub fn test_nop_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
@@ -43,6 +61,8 @@ fn main() -> ! {
     let _rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
+    test_nop_impl_within_internal_memory(&mut usart, &nop, &mut resb);
+
     test_nop_impl_within_mocking_memory(&mut usart, &nop, &mut resb);
     info!("all tests passed!");
     loop {}

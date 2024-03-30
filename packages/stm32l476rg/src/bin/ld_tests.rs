@@ -14,6 +14,395 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
+pub fn test_lda_indx_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0xFF]);
+    check_valid_register_status(usart, TxReg::A, &[0xFF]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x33, 0x00]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0xF0]);
+    check_valid_register_status(usart, TxReg::A, &[0xF0]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x34, 0x00]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0xCF]);
+    check_valid_register_status(usart, TxReg::A, &[0xCF]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0xFF, 0xF0]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA2]);
+    check_rw_is_high(&rw);
+    usart.blocking_write(&[0x18]).unwrap();
+    check_valid_register_status(usart, TxReg::X, &[0x18]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9]);
+    usart.blocking_write(&[0x40]).unwrap();
+    check_valid_register_status(usart, TxReg::A, &[0x40]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA1]);
+    usart.blocking_write(&[0x1B]).unwrap();
+    check_valid_register_status(usart, TxReg::A, &[0xCF]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_lda_indx_within_internal_memory passed!");
+}
+
+pub fn test_lda_zp_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x45]);
+    check_valid_register_status(usart, TxReg::A, &[0x45]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x25, 0x00]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xa5]);
+    check_rw_is_high(&rw);
+    usart.blocking_write(&[0x25]).unwrap();
+    check_valid_register_status(usart, TxReg::A, &[0x45]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    info!("test_lda_zp_within_internal_memory passed!");
+}
+
+pub fn test_lda_imm_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xa9]);
+    check_rw_is_high(&rw);
+    usart.blocking_write(&[0x34]).unwrap();
+    check_valid_register_status(usart, TxReg::A, &[0x34]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    info!("test_lda_imm_within_internal_memory passed!");
+}
+
+pub fn test_lda_abs_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x80, 0x01]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xAD]);
+    check_rw_is_high(&rw);
+    usart_write(usart, &[0x80, 0x01]);
+    check_valid_register_status(usart, TxReg::A, &[0x00]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000010]);
+    info!("test_lda_abs_within_internal_memory passed!");
+}
+
+pub fn test_lda_indy_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x89, 0x00]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x03]);
+    check_valid_register_status(usart, TxReg::A, &[0x03]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x8A, 0x00]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x89]);
+    check_valid_register_status(usart, TxReg::A, &[0x89]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x01]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x00, 0x03]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0x00]);
+    check_valid_register_status(usart, TxReg::Y, &[0x00]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000010]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xB1]);
+    check_rw_is_high(&rw);
+    usart_write(usart, &[0x89]);
+    check_valid_register_status(usart, TxReg::A, &[0x89]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_lda_indy_within_internal_memory passed!");
+}
+
+pub fn test_lda_zpx_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x0C]);
+    check_valid_register_status(usart, TxReg::A, &[0x0C]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x65, 0x06]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA2]);
+    check_rw_is_high(&rw);
+    usart.blocking_write(&[0x05]).unwrap();
+    check_valid_register_status(usart, TxReg::X, &[0x05]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xB5, 0x60]);
+    check_valid_register_status(usart, TxReg::A, &[0x0C]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    info!("test_lda_zpx_within_internal_memory passed!");
+}
+
+pub fn test_lda_absy_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0xBB]);
+    check_valid_register_status(usart, TxReg::A, &[0xBB]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x74, 0x41]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0x44]);
+    check_valid_register_status(usart, TxReg::Y, &[0x44]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xB9]);
+    check_rw_is_high(&rw);
+    usart_write(usart, &[0x30, 0x41]);
+    check_valid_register_status(usart, TxReg::A, &[0xBB]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_lda_absy_within_internal_memory passed!");
+}
+
+pub fn test_lda_absx_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0xD4]);
+    check_valid_register_status(usart, TxReg::A, &[0xD4]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x1C, 0x0A]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x75]);
+    check_valid_register_status(usart, TxReg::X, &[0x75]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xBD]);
+    check_rw_is_high(&rw);
+    usart_write(usart, &[0xA7, 0x09]);
+    check_valid_register_status(usart, TxReg::A, &[0xD4]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_lda_absx_within_internal_memory passed!");
+}
+
+pub fn test_ldx_imm_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xa2]);
+    check_rw_is_high(&rw);
+    usart.blocking_write(&[0x45]).unwrap();
+    check_valid_register_status(usart, TxReg::X, &[0x45]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    info!("test_ldx_imm_within_internal_memory passed!");
+}
+
+pub fn test_ldx_zp_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x90]);
+    check_valid_register_status(usart, TxReg::A, &[0x90]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0xF0, 0x00]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xa6]);
+    check_rw_is_high(&rw);
+    usart.blocking_write(&[0xF0]).unwrap();
+    check_valid_register_status(usart, TxReg::X, &[0x90]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_ldx_zp_within_internal_memory passed!");
+}
+
+pub fn test_ldx_abs_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0xFB]);
+    check_valid_register_status(usart, TxReg::A, &[0xFB]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0xFF, 0x07]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xAE]);
+    check_rw_is_high(&rw);
+    usart.blocking_write(&[0xFF, 0x07]).unwrap();
+    check_valid_register_status(usart, TxReg::X, &[0xFB]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_ldx_abs_within_internal_memory passed!");
+}
+
+pub fn test_ldx_zpy_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x3B]);
+    check_valid_register_status(usart, TxReg::A, &[0x3B]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x51, 0x00]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0xC0]);
+    check_valid_register_status(usart, TxReg::Y, &[0xC0]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xB6]);
+    check_rw_is_high(&rw);
+    usart.blocking_write(&[0x91]).unwrap();
+    check_valid_register_status(usart, TxReg::X, &[0x3B]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    info!("test_ldx_zpy_within_internal_memory passed!");
+}
+
+pub fn test_ldx_absy_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x33]);
+    check_valid_register_status(usart, TxReg::A, &[0x33]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x78, 0x06]);
+
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0x78]);
+    check_valid_register_status(usart, TxReg::Y, &[0x78]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xBE]);
+    check_rw_is_high(&rw);
+    usart.blocking_write(&[0x00, 0x06]).unwrap();
+    check_valid_register_status(usart, TxReg::X, &[0x33]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    info!("test_ldx_absy_within_internal_memory passed!");
+}
+
+pub fn test_ldy_imm_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xa0]);
+    check_rw_is_high(&rw);
+    usart.blocking_write(&[0xba]).unwrap();
+    check_valid_register_status(usart, TxReg::Y, &[0xba]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_ldy_imm_within_internal_memory passed!");
+}
+
+pub fn test_ldy_zp_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0xDD]);
+    check_valid_register_status(usart, TxReg::A, &[0xDD]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0xC3, 0x00]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA4]);
+    check_rw_is_high(&rw);
+    usart.blocking_write(&[0xC3]).unwrap();
+    check_valid_register_status(usart, TxReg::Y, &[0xDD]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_ldy_zp_within_internal_memory passed!");
+}
+
+pub fn test_ldy_abs_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x55]);
+    check_valid_register_status(usart, TxReg::A, &[0x55]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x78, 0x06]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xAC]);
+    check_rw_is_high(&rw);
+    usart.blocking_write(&[0x78, 0x06]).unwrap();
+    check_valid_register_status(usart, TxReg::Y, &[0x55]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    info!("test_ldy_abs_within_internal_memory passed!");
+}
+
+pub fn test_ldy_zpx_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0xAA]);
+    check_valid_register_status(usart, TxReg::A, &[0xAA]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x33, 0x00]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0x01]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x00]);
+    check_valid_register_status(usart, TxReg::X, &[0x00]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000010]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xB4]);
+    check_rw_is_high(&rw);
+    usart.blocking_write(&[0x33]).unwrap();
+    check_valid_register_status(usart, TxReg::Y, &[0xAA]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_ldy_zpx_within_internal_memory passed!");
+}
+
+pub fn test_ldy_absx_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x89, 0x06]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x8A]);
+    check_valid_register_status(usart, TxReg::X, &[0x8A]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xBC]);
+    check_rw_is_high(&rw);
+    usart.blocking_write(&[0xFF, 0x05]).unwrap();
+    check_valid_register_status(usart, TxReg::Y, &[0x00]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000010]);
+    info!("test_ldy_absx_within_internal_memory passed!");
+}
+
 pub fn test_lda_indx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
@@ -21,14 +410,8 @@ pub fn test_lda_indx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(
-        usart,
-        &[
-            CpuMode::DebugWithinMockMemory as u8,
-            OpeMode::Inst as u8,
-            0xA2,
-        ],
-    );
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA2]);
     check_rw_is_high(&rw);
     usart.blocking_write(&[0x18]).unwrap();
     check_valid_register_status(usart, TxReg::X, &[0x18]);
@@ -57,14 +440,8 @@ pub fn test_lda_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: 
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(
-        usart,
-        &[
-            CpuMode::DebugWithinMockMemory as u8,
-            OpeMode::Inst as u8,
-            0xa5,
-        ],
-    );
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xa5]);
     check_rw_is_high(&rw);
     usart.blocking_write(&[0x25]).unwrap();
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x25, 0x00]);
@@ -81,14 +458,8 @@ pub fn test_lda_imm_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3:
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(
-        usart,
-        &[
-            CpuMode::DebugWithinMockMemory as u8,
-            OpeMode::Inst as u8,
-            0xa9,
-        ],
-    );
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xa9]);
     check_rw_is_high(&rw);
     usart.blocking_write(&[0x34]).unwrap();
     check_valid_register_status(usart, TxReg::A, &[0x34]);
@@ -103,14 +474,8 @@ pub fn test_lda_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3:
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(
-        usart,
-        &[
-            CpuMode::DebugWithinMockMemory as u8,
-            OpeMode::Inst as u8,
-            0xAD,
-        ],
-    );
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xAD]);
     check_rw_is_high(&rw);
     usart_write(usart, &[0x80, 0x01]);
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x80, 0x01]);
@@ -127,15 +492,8 @@ pub fn test_lda_indy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(
-        usart,
-        &[
-            CpuMode::DebugWithinMockMemory as u8,
-            OpeMode::Inst as u8,
-            0xA0,
-            0x00,
-        ],
-    );
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0x00]);
     check_valid_register_status(usart, TxReg::Y, &[0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00000010]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xB1]);
@@ -159,14 +517,8 @@ pub fn test_lda_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3:
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(
-        usart,
-        &[
-            CpuMode::DebugWithinMockMemory as u8,
-            OpeMode::Inst as u8,
-            0xA2,
-        ],
-    );
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA2]);
     check_rw_is_high(&rw);
     usart.blocking_write(&[0x05]).unwrap();
     check_valid_register_status(usart, TxReg::X, &[0x05]);
@@ -185,15 +537,8 @@ pub fn test_lda_absy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(
-        usart,
-        &[
-            CpuMode::DebugWithinMockMemory as u8,
-            OpeMode::Inst as u8,
-            0xA0,
-            0x44,
-        ],
-    );
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0x44]);
     check_valid_register_status(usart, TxReg::Y, &[0x44]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xB9]);
     check_rw_is_high(&rw);
@@ -212,15 +557,8 @@ pub fn test_lda_absx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(
-        usart,
-        &[
-            CpuMode::DebugWithinMockMemory as u8,
-            OpeMode::Inst as u8,
-            0xA2,
-            0x75,
-        ],
-    );
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x75]);
     check_valid_register_status(usart, TxReg::X, &[0x75]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xBD]);
@@ -240,14 +578,8 @@ pub fn test_ldx_imm_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3:
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(
-        usart,
-        &[
-            CpuMode::DebugWithinMockMemory as u8,
-            OpeMode::Inst as u8,
-            0xa2,
-        ],
-    );
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xa2]);
     check_rw_is_high(&rw);
     usart.blocking_write(&[0x45]).unwrap();
     check_valid_register_status(usart, TxReg::X, &[0x45]);
@@ -262,14 +594,8 @@ pub fn test_ldx_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: 
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(
-        usart,
-        &[
-            CpuMode::DebugWithinMockMemory as u8,
-            OpeMode::Inst as u8,
-            0xa6,
-        ],
-    );
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xa6]);
     check_rw_is_high(&rw);
     usart.blocking_write(&[0xF0]).unwrap();
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0xF0, 0x00]);
@@ -286,14 +612,8 @@ pub fn test_ldx_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3:
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(
-        usart,
-        &[
-            CpuMode::DebugWithinMockMemory as u8,
-            OpeMode::Inst as u8,
-            0xAE,
-        ],
-    );
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xAE]);
     check_rw_is_high(&rw);
     usart.blocking_write(&[0xFF, 0x07]).unwrap();
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0xFF, 0x07]);
@@ -310,9 +630,7 @@ pub fn test_ldx_zpy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3:
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart
-        .blocking_write(&[CpuMode::DebugWithinMockMemory as u8])
-        .unwrap();
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0xC0]);
     check_valid_register_status(usart, TxReg::Y, &[0xC0]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xB6]);
@@ -332,15 +650,8 @@ pub fn test_ldx_absy_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(
-        usart,
-        &[
-            CpuMode::DebugWithinMockMemory as u8,
-            OpeMode::Inst as u8,
-            0xA0,
-            0x78,
-        ],
-    );
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0x78]);
     check_valid_register_status(usart, TxReg::Y, &[0x78]);
     check_valid_register_status(usart, TxReg::P, &[0b00000000]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xBE]);
@@ -360,14 +671,8 @@ pub fn test_ldy_imm_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3:
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(
-        usart,
-        &[
-            CpuMode::DebugWithinMockMemory as u8,
-            OpeMode::Inst as u8,
-            0xa0,
-        ],
-    );
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xa0]);
     check_rw_is_high(&rw);
     usart.blocking_write(&[0xba]).unwrap();
     check_valid_register_status(usart, TxReg::Y, &[0xba]);
@@ -382,14 +687,8 @@ pub fn test_ldy_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3: 
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(
-        usart,
-        &[
-            CpuMode::DebugWithinMockMemory as u8,
-            OpeMode::Inst as u8,
-            0xA4,
-        ],
-    );
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA4]);
     check_rw_is_high(&rw);
     usart.blocking_write(&[0xC3]).unwrap();
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0xC3, 0x00]);
@@ -406,14 +705,8 @@ pub fn test_ldy_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3:
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(
-        usart,
-        &[
-            CpuMode::DebugWithinMockMemory as u8,
-            OpeMode::Inst as u8,
-            0xAC,
-        ],
-    );
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xAC]);
     check_rw_is_high(&rw);
     usart.blocking_write(&[0x78, 0x06]).unwrap();
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x78, 0x06]);
@@ -430,9 +723,7 @@ pub fn test_ldy_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3:
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart
-        .blocking_write(&[CpuMode::DebugWithinMockMemory as u8])
-        .unwrap();
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x00]);
     check_valid_register_status(usart, TxReg::X, &[0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00000010]);
@@ -453,9 +744,7 @@ pub fn test_ldy_absx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
-    usart
-        .blocking_write(&[CpuMode::DebugWithinMockMemory as u8])
-        .unwrap();
+    usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x8A]);
     check_valid_register_status(usart, TxReg::X, &[0x8A]);
     check_valid_register_status(usart, TxReg::P, &[0b10000000]);
@@ -480,15 +769,25 @@ fn main() -> ! {
     let rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
-    send_reset_signal_if_not_nop(&nop, &mut resb);
-    usart_write(
-        &mut usart,
-        &[
-            CpuMode::DebugWithinMockMemory as u8,
-            OpeMode::Inst as u8,
-            0xa9,
-        ],
-    );
+    test_lda_indx_within_internal_memory(&mut usart, &nop, &rw, &mut resb);
+    test_lda_zp_within_internal_memory(&mut usart, &nop, &rw, &mut resb);
+    test_lda_imm_within_internal_memory(&mut usart, &nop, &rw, &mut resb);
+    test_lda_abs_within_internal_memory(&mut usart, &nop, &rw, &mut resb);
+    test_lda_indy_within_internal_memory(&mut usart, &nop, &rw, &mut resb);
+    test_lda_zpx_within_internal_memory(&mut usart, &nop, &rw, &mut resb);
+    test_lda_absy_within_internal_memory(&mut usart, &nop, &rw, &mut resb);
+    test_lda_absx_within_internal_memory(&mut usart, &nop, &rw, &mut resb);
+    test_ldx_imm_within_internal_memory(&mut usart, &nop, &rw, &mut resb);
+    test_ldx_zp_within_internal_memory(&mut usart, &nop, &rw, &mut resb);
+    test_ldx_abs_within_internal_memory(&mut usart, &nop, &rw, &mut resb);
+    test_ldx_zpy_within_internal_memory(&mut usart, &nop, &rw, &mut resb);
+    test_ldx_absy_within_internal_memory(&mut usart, &nop, &rw, &mut resb);
+    test_ldy_imm_within_internal_memory(&mut usart, &nop, &rw, &mut resb);
+    test_ldy_zp_within_internal_memory(&mut usart, &nop, &rw, &mut resb);
+    test_ldy_abs_within_internal_memory(&mut usart, &nop, &rw, &mut resb);
+    test_ldy_zpx_within_internal_memory(&mut usart, &nop, &rw, &mut resb);
+    test_ldy_absx_within_internal_memory(&mut usart, &nop, &rw, &mut resb);
+
     test_lda_indx_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
     test_lda_zp_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
     test_lda_imm_within_mocking_memory(&mut usart, &nop, &rw, &mut resb);
