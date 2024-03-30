@@ -148,7 +148,8 @@ pub fn test_adc_indy_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x7F]);
     check_valid_register_status(usart, TxReg::A, &[0x7F]);
     check_valid_register_status(usart, TxReg::P, &[0b00000001]);
-
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x00]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x33, 0x00]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x04]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x34, 0x00]);
     check_valid_register_status(usart, TxReg::A, &[0x04]);
