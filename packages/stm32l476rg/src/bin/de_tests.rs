@@ -14,6 +14,221 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
+pub fn test_dey_impl_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0x33]);
+    check_valid_register_status(usart, TxReg::Y, &[0x33]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x88]);
+    check_valid_register_status(usart, TxReg::Y, &[0x32]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    info!("test_dey_impl_within_internal_memory passed!");
+}
+
+pub fn test_dey_impl_with_rising_z_flag_within_internal_memory<
+    T: BasicInstance,
+    P: Pin,
+    P2: Pin,
+>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0x01]);
+    check_valid_register_status(usart, TxReg::Y, &[0x01]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x88]);
+    check_valid_register_status(usart, TxReg::Y, &[0x00]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000010]);
+    info!("test_dey_impl_with_rising_z_flag_within_internal_memory passed!");
+}
+
+pub fn test_dey_impl_with_rising_n_flag_within_internal_memory<
+    T: BasicInstance,
+    P: Pin,
+    P2: Pin,
+>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x88]);
+    check_valid_register_status(usart, TxReg::Y, &[0xFF]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_dey_impl_with_rising_n_flag_within_internal_memory passed!");
+}
+
+pub fn test_dey_impl_with_falling_n_flag_within_internal_memory<
+    T: BasicInstance,
+    P: Pin,
+    P2: Pin,
+>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0x80]);
+    check_valid_register_status(usart, TxReg::Y, &[0x80]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x88]);
+    check_valid_register_status(usart, TxReg::Y, &[0x7F]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    info!("test_dey_impl_with_falling_n_flag_within_internal_memory passed!");
+}
+
+pub fn test_dex_impl_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x33]);
+    check_valid_register_status(usart, TxReg::X, &[0x33]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xCA]);
+    check_valid_register_status(usart, TxReg::X, &[0x32]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    info!("test_dex_impl_within_internal_memory passed!");
+}
+
+pub fn test_dex_impl_with_rising_z_flag_within_internal_memory<
+    T: BasicInstance,
+    P: Pin,
+    P2: Pin,
+>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x01]);
+    check_valid_register_status(usart, TxReg::X, &[0x01]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xCA]);
+    check_valid_register_status(usart, TxReg::X, &[0x00]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000010]);
+    info!("test_dex_impl_with_rising_z_flag_within_internal_memory passed!");
+}
+
+pub fn test_dex_impl_with_rising_n_flag_within_internal_memory<
+    T: BasicInstance,
+    P: Pin,
+    P2: Pin,
+>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xCA]);
+    check_valid_register_status(usart, TxReg::X, &[0xFF]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_dex_impl_with_rising_n_flag_within_internal_memory passed!");
+}
+
+pub fn test_dex_impl_with_falling_n_flag_within_internal_memory<
+    T: BasicInstance,
+    P: Pin,
+    P2: Pin,
+>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x80]);
+    check_valid_register_status(usart, TxReg::X, &[0x80]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xCA]);
+    check_valid_register_status(usart, TxReg::X, &[0x7F]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    info!("test_dex_impl_with_falling_n_flag_within_internal_memory passed!");
+}
+
+pub fn test_dec_zp_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x78, 0x00]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xC6, 0x78]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0x78, 0x00]);
+    check_valid_register_status(usart, TxReg::A, &[0xFF]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_dec_zp_within_internal_memory passed!");
+}
+
+pub fn test_dec_abs_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x80]);
+    check_valid_register_status(usart, TxReg::A, &[0x80]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x78, 0x06]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xCE, 0x78, 0x06]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0x78, 0x06]);
+    check_valid_register_status(usart, TxReg::A, &[0x7F]);
+    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    info!("test_dec_abs_within_internal_memory passed!");
+}
+
+pub fn test_dec_zpx_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x55, 0x06]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x55]);
+    check_valid_register_status(usart, TxReg::X, &[0x55]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xDE, 0x00, 0x06]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0x55, 0x06]);
+    check_valid_register_status(usart, TxReg::A, &[0xFF]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_dec_zpx_within_internal_memory passed!");
+}
+
+pub fn test_dec_absx_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x55, 0x06]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x55]);
+    check_valid_register_status(usart, TxReg::X, &[0x55]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xDE, 0x00, 0x06]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0x55, 0x06]);
+    check_valid_register_status(usart, TxReg::A, &[0xFF]);
+    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    info!("test_dec_absx_within_internal_memory passed!");
+}
+
 pub fn test_dey_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
@@ -217,6 +432,19 @@ fn main() -> ! {
     let _rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
+    test_dey_impl_within_internal_memory(&mut usart, &nop, &mut resb);
+    test_dey_impl_with_rising_z_flag_within_internal_memory(&mut usart, &nop, &mut resb);
+    test_dey_impl_with_rising_n_flag_within_internal_memory(&mut usart, &nop, &mut resb);
+    test_dey_impl_with_falling_n_flag_within_internal_memory(&mut usart, &nop, &mut resb);
+    test_dex_impl_within_internal_memory(&mut usart, &nop, &mut resb);
+    test_dex_impl_with_rising_z_flag_within_internal_memory(&mut usart, &nop, &mut resb);
+    test_dex_impl_with_rising_n_flag_within_internal_memory(&mut usart, &nop, &mut resb);
+    test_dex_impl_with_falling_n_flag_within_internal_memory(&mut usart, &nop, &mut resb);
+    test_dec_zp_within_internal_memory(&mut usart, &nop, &mut resb);
+    test_dec_abs_within_internal_memory(&mut usart, &nop, &mut resb);
+    test_dec_zpx_within_internal_memory(&mut usart, &nop, &mut resb);
+    test_dec_absx_within_internal_memory(&mut usart, &nop, &mut resb);
+
     test_dey_impl_within_mocking_memory(&mut usart, &nop, &mut resb);
     test_dey_impl_with_rising_z_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
     test_dey_impl_with_rising_n_flag_within_mocking_memory(&mut usart, &nop, &mut resb);
