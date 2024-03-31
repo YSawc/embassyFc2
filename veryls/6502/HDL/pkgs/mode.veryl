@@ -15,4 +15,10 @@ package ModePkg {
         Compare,
         Other,
     }
+
+    enum CassetteMode: logic<2> {
+        Nop,
+        None,
+        NesTest,
+    }
 }

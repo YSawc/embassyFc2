@@ -1,11 +1,12 @@
 module Ram (
-    i_clk : input  logic    ,
-    i_rst : input  logic    ,
-    i_en  : input  logic    ,
-    i_we  : input  logic    ,
-    i_addr: input  logic<16>,
-    i_data: input  logic<8> ,
-    o_data: output logic<8> ,
+    i_clk          : input  logic                    ,
+    i_rst          : input  logic                    ,
+    i_en           : input  logic                    ,
+    i_we           : input  logic                    ,
+    i_addr         : input  logic                <16>,
+    i_data         : input  logic                <8> ,
+    i_cassette_mode: input  ModePkg::CassetteMode    ,
+    o_data         : output logic                <8> ,
 ) {
     var i_ip_wram_we  : logic   ;
     var o_ip_wram_data: logic<8>;
@@ -154,9 +155,17 @@ module Ram (
                     } else if i_addr >= 16'h6000 && i_addr <= 16'h7FFF {
                         i_ip_eram_we = 1;
                     } else if i_addr >= 16'h8000 && i_addr <= 16'hBFFF {
-                        i_ip_prg1_rom_we = 1;
+                        if i_cassette_mode == ModePkg::CassetteMode::NesTest {
+                            i_ip_nestest1_rom_we = 1;
+                        } else {
+                            i_ip_prg1_rom_we = 1;
+                        }
                     } else if i_addr >= 16'hCFFF && i_addr <= 16'hFFFF {
-                        i_ip_prg2_rom_we = 1;
+                        if i_cassette_mode == ModePkg::CassetteMode::NesTest {
+                            i_ip_nestest2_rom_we = 1;
+                        } else {
+                            i_ip_prg2_rom_we = 1;
+                        }
                     }
                 } else {
                     if i_addr >= 16'h0000 && i_addr <= 16'h07FF {
@@ -176,9 +185,17 @@ module Ram (
                     } else if i_addr >= 16'h6000 && i_addr <= 16'h7FFF {
                         n_o_data = o_ip_eram_data;
                     } else if i_addr >= 16'h8000 && i_addr <= 16'hBFFF {
-                        n_o_data = o_ip_prg1_rom_data;
+                        if i_cassette_mode == ModePkg::CassetteMode::NesTest {
+                            n_o_data = o_ip_nestest1_rom_data;
+                        } else {
+                            n_o_data = o_ip_prg1_rom_data;
+                        }
                     } else if i_addr >= 16'hCFFF && i_addr <= 16'hFFFF {
-                        n_o_data = o_ip_prg2_rom_data;
+                        if i_cassette_mode == ModePkg::CassetteMode::NesTest {
+                            n_o_data = o_ip_nestest2_rom_data;
+                        } else {
+                            n_o_data = o_ip_prg2_rom_data;
+                        }
                     }
                 }
             }

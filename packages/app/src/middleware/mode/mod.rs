@@ -10,6 +10,14 @@ pub enum CpuMode {
 pub enum OpeMode {
     Inst,
     RegisterTransfer,
+    InstWithNesTest,
+}
+
+#[derive(Clone, Copy, Debug)]
+pub enum CassetteMode {
+    Nop,
+    None,
+    NesTest,
 }
 
 #[derive(Clone, Copy, Debug)]

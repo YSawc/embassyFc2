@@ -2,7 +2,7 @@ module ModeSelector (
     i_clk   : input  logic              ,
     i_rst   : input  logic              ,
     i_en    : input  logic              ,
-    i_data  : input  logic           <8>,
+    i_mode  : input  logic           <8>,
     o_mode  : output ModePkg::CpuMode   ,
     o_finish: output logic              ,
 ) {
@@ -28,8 +28,8 @@ module ModeSelector (
                 }
             }
             Status::Work: {
-                if i_data >= 2 && i_data <= 8'hfe {
-                    o_mode_next = i_data as ModePkg::CpuMode;
+                if i_mode >= 2 && i_mode <= 8'hfe {
+                    o_mode_next = i_mode as ModePkg::CpuMode;
                 } else {
                     o_mode_next = ModePkg::CpuMode::Nop;
                 }

@@ -1,44 +1,112 @@
 module ModeHandler (
-    i_clk   : input  logic           ,
-    i_rst   : input  logic           ,
-    i_en    : input  logic           ,
-    i_rx    : input  logic           ,
-    o_mode  : output ModePkg::CpuMode,
-    o_rts   : output logic           ,
-    o_busy  : output logic           ,
-    o_finish: output logic           ,
+    i_clk          : input  logic                ,
+    i_rst          : input  logic                ,
+    i_en           : input  logic                ,
+    i_rx           : input  logic                ,
+    o_cpu_mode     : output ModePkg::CpuMode     ,
+    o_cassette_mode: output ModePkg::CassetteMode,
+    o_rts          : output logic                ,
+    o_busy         : output logic                ,
+    o_finish       : output logic                ,
 ) {
-    let i_mode_read_en    : logic    = (o_mode == ModePkg::CpuMode::Nop);
-    var o_mode_read_data  : logic<8>;
-    var o_mode_read_busy  : logic   ;
-    var o_mode_read_finish: logic   ;
-    inst mode_read_rx: uarty::Rx (
-        i_clk                       ,
-        i_rst                       ,
-        i_en    : i_mode_read_en    ,
-        i_rx                        ,
-        o_data  : o_mode_read_data  ,
-        o_busy  : o_mode_read_busy  ,
-        o_finish: o_mode_read_finish,
+    var status       : Status   ;
+    var status_next  : Status   ;
+    var o_finish_next: logic    ;
+    enum Status: logic <3> {
+        Ready,
+        ReadCpuMode,
+        CpuModeSelect,
+        ReadCassetteMode,
+        Finish,
+    }
+
+    let i_cpu_mode_read_en    : logic    = status == Status::ReadCpuMode;
+    var o_cpu_mode_read_data  : logic<8>;
+    var o_cpu_mode_read_busy  : logic   ;
+    var o_cpu_mode_read_finish: logic   ;
+    inst cpu_mode_read_rx: uarty::Rx (
+        i_clk                           ,
+        i_rst                           ,
+        i_en    : i_cpu_mode_read_en    ,
+        i_rx                            ,
+        o_data  : o_cpu_mode_read_data  ,
+        o_busy  : o_cpu_mode_read_busy  ,
+        o_finish: o_cpu_mode_read_finish,
     );
 
-    assign o_rts = if i_mode_read_en {
-        ~i_mode_read_en
+    assign o_rts = if i_cpu_mode_read_en {
+        ~i_cpu_mode_read_en
+    } else if i_cassette_mode_read_en {
+        ~i_cassette_mode_read_en
     } else {
         1
     };
 
-    let mode_selector_en      : logic = o_mode_read_data != 0;
+    let mode_selector_en      : logic = status == Status::CpuModeSelect;
     var o_mode_selector_finish: logic;
     inst mode_selector: ModeSelector (
         i_clk                           ,
         i_rst                           ,
         i_en    : mode_selector_en      ,
-        i_data  : o_mode_read_data      ,
-        o_mode                          ,
+        i_mode  : o_cpu_mode_read_data  ,
+        o_mode  : o_cpu_mode            ,
         o_finish: o_mode_selector_finish,
     );
 
-    assign o_busy   = ~o_mode_selector_finish;
-    assign o_finish = o_mode_selector_finish;
+    let i_cassette_mode_read_en    : logic    = status == Status::ReadCassetteMode;
+    var o_cassette_mode_read_data  : logic<8>;
+    var o_cassette_mode_read_busy  : logic   ;
+    var o_cassette_mode_read_finish: logic   ;
+    inst cassette_read_rx: uarty::Rx (
+        i_clk                                ,
+        i_rst                                ,
+        i_en    : i_cassette_mode_read_en    ,
+        i_rx                                 ,
+        o_data  : o_cassette_mode_read_data  ,
+        o_busy  : o_cassette_mode_read_busy  ,
+        o_finish: o_cassette_mode_read_finish,
+    );
+
+    assign o_cassette_mode = o_cassette_mode_read_data as ModePkg::CassetteMode;
+    assign o_busy          = ~(o_cassette_mode != ModePkg::CassetteMode::Nop);
+
+    always_comb {
+        status_next   = status;
+        o_finish_next = o_finish;
+        case status {
+            Status::Ready: {
+                if i_en {
+                    status_next = Status::ReadCpuMode;
+                }
+            }
+            Status::ReadCpuMode: {
+                if o_cpu_mode_read_finish {
+                    status_next = Status::CpuModeSelect;
+                }
+            }
+            Status::CpuModeSelect: {
+                if o_mode_selector_finish {
+                    status_next = Status::ReadCassetteMode;
+                }
+            }
+            Status::ReadCassetteMode: {
+                if o_cassette_mode_read_finish {
+                    status_next = Status::Finish;
+                }
+            }
+            Status::Finish: {}
+        }
+        o_finish_next = status_next == Status::Finish;
+    }
+
+    always_ff (posedge i_clk, async_high i_rst) {
+        if_reset {
+            status   = Status::Ready;
+            o_finish = 0;
+        } else {
+            status   = status_next;
+            o_finish = o_finish_next;
+        }
+    }
+
 }

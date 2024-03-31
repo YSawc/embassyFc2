@@ -2,7 +2,7 @@
 #![no_main]
 
 use defmt::*;
-use embassy_fc2_app::middleware::mode::{CpuMode, OpeMode, TxReg};
+use embassy_fc2_app::middleware::mode::*;
 use embassy_stm32::dma::NoDma;
 use embassy_stm32::gpio::{Input, Level, Output, Pin, Pull, Speed};
 use embassy_stm32::usart::{BasicInstance, Config, Uart};
@@ -21,6 +21,7 @@ pub fn test_rti_impl_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
     usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0xCE]);
     check_valid_register_status(usart, TxReg::A, &[0xCE]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
@@ -80,6 +81,7 @@ pub fn test_rts_impl_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
     usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x4C, 0xFC, 0xC5]);
     check_valid_register_status(usart, TxReg::PC, &[0xFC, 0xc5]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
@@ -117,6 +119,7 @@ pub fn test_rti_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
     usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
+    usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0xCE]);
     check_valid_register_status(usart, TxReg::A, &[0xCE]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
@@ -164,6 +167,7 @@ pub fn test_rts_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
     usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
+    usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x4C, 0xFC, 0xC5]);
     check_valid_register_status(usart, TxReg::PC, &[0xFC, 0xc5]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
