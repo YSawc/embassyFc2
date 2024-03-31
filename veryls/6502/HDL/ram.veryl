@@ -87,6 +87,26 @@ module Ram (
         q      : o_ip_prg2_rom_data,
     );
 
+    var i_ip_nestest1_rom_we  : logic   ;
+    var o_ip_nestest1_rom_data: logic<8>;
+    inst ip_nestest1_rom: $sv::ip_nestest (
+        address: i_addr                ,
+        clock  : i_clk                 ,
+        data   : i_data                ,
+        wren   : i_ip_nestest1_rom_we  ,
+        q      : o_ip_nestest1_rom_data,
+    );
+
+    var i_ip_nestest2_rom_we  : logic   ;
+    var o_ip_nestest2_rom_data: logic<8>;
+    inst ip_nestest2_rom: $sv::ip_nestest (
+        address: i_addr                ,
+        clock  : i_clk                 ,
+        data   : i_data                ,
+        wren   : i_ip_nestest2_rom_we  ,
+        q      : o_ip_nestest2_rom_data,
+    );
+
     var n_o_data: logic<8>;
     always_ff (posedge i_clk, async_high i_rst) {
         if_reset {
@@ -100,6 +120,8 @@ module Ram (
             i_ip_eram_we           = 0;
             i_ip_prg1_rom_we       = 0;
             i_ip_prg2_rom_we       = 0;
+            i_ip_nestest1_rom_we   = 0;
+            i_ip_nestest2_rom_we   = 0;
         } else {
             o_data                 = n_o_data;
             i_ip_wram_we           = 0;
@@ -110,6 +132,8 @@ module Ram (
             i_ip_eram_we           = 0;
             i_ip_prg1_rom_we       = 0;
             i_ip_prg2_rom_we       = 0;
+            i_ip_nestest1_rom_we   = 0;
+            i_ip_nestest2_rom_we   = 0;
 
             if i_en {
                 if i_we {
