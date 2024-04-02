@@ -21,7 +21,7 @@ module Ram (
     var i_ip_wram_mirror_we  : logic   ;
     var o_ip_wram_mirror_data: logic<8>;
     inst ip_wram_mirror: $sv::ip_wram_mirror (
-        address: i_addr               ,
+        address: i_addr - 16'h0800    ,
         clock  : i_clk                ,
         data   : i_data               ,
         wren   : i_ip_wram_mirror_we  ,
@@ -31,7 +31,7 @@ module Ram (
     var i_ip_ppu_reg_mirror_en  : logic   ;
     var o_ip_ppu_reg_mirror_data: logic<8>;
     inst ip_ppu_reg_mirror: $sv::ip_ppu_reg_mirror (
-        address: i_addr                  ,
+        address: i_addr - 16'h2008       ,
         clock  : i_clk                   ,
         data   : i_data                  ,
         wren   : i_ip_ppu_reg_mirror_en  ,
@@ -41,7 +41,7 @@ module Ram (
     var i_ip_func_apu_io_we  : logic   ;
     var o_ip_func_apu_io_data: logic<8>;
     inst ip_func_apu_io: $sv::ip_func_apu_io (
-        address: i_addr               ,
+        address: i_addr - 16'h4018    ,
         clock  : i_clk                ,
         data   : i_data               ,
         wren   : i_we                 ,
@@ -51,27 +51,27 @@ module Ram (
     var i_ip_erom_we  : logic   ;
     var o_ip_erom_data: logic<8>;
     inst ip_erom: $sv::ip_erom (
-        address: i_addr        ,
-        clock  : i_clk         ,
-        data   : i_data        ,
-        wren   : i_ip_erom_we  ,
-        q      : o_ip_erom_data,
+        address: i_addr - 16'h4020,
+        clock  : i_clk            ,
+        data   : i_data           ,
+        wren   : i_ip_erom_we     ,
+        q      : o_ip_erom_data   ,
     );
 
     var i_ip_eram_we  : logic   ;
     var o_ip_eram_data: logic<8>;
     inst ip_eram: $sv::ip_eram (
-        address: i_addr        ,
-        clock  : i_clk         ,
-        data   : i_data        ,
-        wren   : i_ip_eram_we  ,
-        q      : o_ip_eram_data,
+        address: i_addr - 16'h6000,
+        clock  : i_clk            ,
+        data   : i_data           ,
+        wren   : i_ip_eram_we     ,
+        q      : o_ip_eram_data   ,
     );
 
     var i_ip_prg1_rom_we  : logic   ;
     var o_ip_prg1_rom_data: logic<8>;
     inst ip_prg1_rom: $sv::ip_eram (
-        address: i_addr            ,
+        address: i_addr - 16'h8000 ,
         clock  : i_clk             ,
         data   : i_data            ,
         wren   : i_ip_prg1_rom_we  ,
@@ -81,7 +81,7 @@ module Ram (
     var i_ip_prg2_rom_we  : logic   ;
     var o_ip_prg2_rom_data: logic<8>;
     inst ip_prg2_rom: $sv::ip_eram (
-        address: i_addr            ,
+        address: i_addr - 16'hC000 ,
         clock  : i_clk             ,
         data   : i_data            ,
         wren   : i_ip_prg2_rom_we  ,
@@ -91,7 +91,7 @@ module Ram (
     var i_ip_nestest1_rom_we  : logic   ;
     var o_ip_nestest1_rom_data: logic<8>;
     inst ip_nestest1_rom: $sv::ip_nestest (
-        address: i_addr                ,
+        address: i_addr - 16'h8000     ,
         clock  : i_clk                 ,
         data   : i_data                ,
         wren   : i_ip_nestest1_rom_we  ,
@@ -101,7 +101,7 @@ module Ram (
     var i_ip_nestest2_rom_we  : logic   ;
     var o_ip_nestest2_rom_data: logic<8>;
     inst ip_nestest2_rom: $sv::ip_nestest (
-        address: i_addr                ,
+        address: i_addr - 16'hC000     ,
         clock  : i_clk                 ,
         data   : i_data                ,
         wren   : i_ip_nestest2_rom_we  ,
@@ -190,7 +190,7 @@ module Ram (
                         } else {
                             n_o_data = o_ip_prg1_rom_data;
                         }
-                    } else if i_addr >= 16'hCFFF && i_addr <= 16'hFFFF {
+                    } else if i_addr >= 16'hC000 && i_addr <= 16'hFFFF {
                         if i_cassette_mode == ModePkg::CassetteMode::NesTest {
                             n_o_data = o_ip_nestest2_rom_data;
                         } else {

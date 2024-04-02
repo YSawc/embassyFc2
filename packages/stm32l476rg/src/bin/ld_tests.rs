@@ -14,6 +14,23 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
+pub fn test_lda_nestest_head<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    rw: &Input<P2>,
+    resb: &mut Output<P3>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[CassetteMode::NesTest as u8]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0x00, 0xC0]);
+    check_valid_register_status(usart, TxReg::A, &[0x45]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0x01, 0xC0]);
+    check_valid_register_status(usart, TxReg::A, &[0x4E]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0x02, 0xC0]);
+    check_valid_register_status(usart, TxReg::A, &[0x1A]);
+}
+
 pub fn test_lda_indx_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
@@ -805,6 +822,7 @@ fn main() -> ! {
     let rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
+    test_lda_nestest_head(&mut usart, &nop, &rw, &mut resb);
     test_lda_indx_within_internal_memory(&mut usart, &nop, &rw, &mut resb);
     test_lda_zp_within_internal_memory(&mut usart, &nop, &rw, &mut resb);
     test_lda_imm_within_internal_memory(&mut usart, &nop, &rw, &mut resb);
