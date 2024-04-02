@@ -24,11 +24,11 @@ pub fn test_lda_nestest_head<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
     usart_write(usart, &[CassetteMode::NesTest as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0x00, 0xC0]);
-    check_valid_register_status(usart, TxReg::A, &[0x45]);
+    check_valid_register_status(usart, TxReg::A, &[0x4C]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0x01, 0xC0]);
-    check_valid_register_status(usart, TxReg::A, &[0x4E]);
+    check_valid_register_status(usart, TxReg::A, &[0xF5]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0x02, 0xC0]);
-    check_valid_register_status(usart, TxReg::A, &[0x1A]);
+    check_valid_register_status(usart, TxReg::A, &[0xC5]);
 }
 
 pub fn test_lda_indx_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
@@ -823,6 +823,7 @@ fn main() -> ! {
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
     test_lda_nestest_head(&mut usart, &nop, &rw, &mut resb);
+
     test_lda_indx_within_internal_memory(&mut usart, &nop, &rw, &mut resb);
     test_lda_zp_within_internal_memory(&mut usart, &nop, &rw, &mut resb);
     test_lda_imm_within_internal_memory(&mut usart, &nop, &rw, &mut resb);
