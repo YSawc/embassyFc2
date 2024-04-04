@@ -118,7 +118,7 @@ module OpeCompare (
     always_ff (posedge i_clk, async_high i_rst) {
         if_reset {
             compare_data       = 0;
-            if_register_mst.p  = 0;
+            if_register_mst.p  = 36;
             if_memory_mst.en   = 0;
             if_memory_mst.we   = 0;
             if_memory_mst.addr = 0;

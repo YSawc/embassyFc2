@@ -22,9 +22,9 @@ pub fn test_sec_impl_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
     send_reset_signal_if_not_nop(&nop, resb);
     usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
     usart_write(usart, &[CassetteMode::None as u8]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x38]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000001]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100101]);
     info!("test_sec_impl_within_internal_memory passed!");
 }
 
@@ -36,9 +36,9 @@ pub fn test_sed_impl_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
     send_reset_signal_if_not_nop(&nop, resb);
     usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
     usart_write(usart, &[CassetteMode::None as u8]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xF8]);
-    check_valid_register_status(usart, TxReg::P, &[0b00001000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00101100]);
     info!("test_sed_impl_within_internal_memory passed!");
 }
 
@@ -50,9 +50,9 @@ pub fn test_sei_impl_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
     send_reset_signal_if_not_nop(&nop, resb);
     usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
     usart_write(usart, &[CassetteMode::None as u8]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x78]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000100]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     info!("test_sei_impl_within_internal_memory passed!");
 }
 
@@ -64,9 +64,9 @@ pub fn test_sec_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     send_reset_signal_if_not_nop(&nop, resb);
     usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[CassetteMode::None as u8]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x38]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000001]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100101]);
     info!("test_sec_impl_within_mocking_memory passed!");
 }
 
@@ -78,9 +78,9 @@ pub fn test_sed_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     send_reset_signal_if_not_nop(&nop, resb);
     usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[CassetteMode::None as u8]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xF8]);
-    check_valid_register_status(usart, TxReg::P, &[0b00001000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00101100]);
     info!("test_sed_impl_within_mocking_memory passed!");
 }
 
@@ -92,9 +92,9 @@ pub fn test_sei_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     send_reset_signal_if_not_nop(&nop, resb);
     usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[CassetteMode::None as u8]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x78]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000100]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     info!("test_sei_impl_within_mocking_memory passed!");
 }
 

@@ -143,7 +143,7 @@ module OpeOther (
             if_register_mst.x  = 0;
             if_register_mst.y  = 0;
             if_register_mst.s  = 0;
-            if_register_mst.p  = 0;
+            if_register_mst.p  = 36;
             if_register_mst.pc = 0;
         } else {
             status             = status_next;

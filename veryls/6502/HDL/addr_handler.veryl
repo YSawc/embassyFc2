@@ -240,7 +240,7 @@ module AddrHandler (
 
     always_ff (posedge i_clk, async_high i_rst) {
         if_reset {
-            if_register_mst.p  = 0;
+            if_register_mst.p  = 36;
             if_register_mst.pc = 0;
             status             = Status::Ready;
             o_target_low_addr  = 0;

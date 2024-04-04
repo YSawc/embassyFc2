@@ -25,11 +25,11 @@ pub fn test_nop_impl_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[OpeMode::Inst as u8, 0x4C, 0xF5, 0xC5]);
     check_valid_register_status(usart, TxReg::PC, &[0xF5, 0xC5]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xEA]);
     check_valid_register_status(usart, TxReg::PC, &[0xF6, 0xC5]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     info!("test_brk_impl_without_b_flag_within_internal_memory passed!");
 }
 
@@ -44,11 +44,11 @@ pub fn test_nop_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[OpeMode::Inst as u8, 0x4C, 0xF5, 0xC5]);
     check_valid_register_status(usart, TxReg::PC, &[0xF5, 0xC5]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xEA]);
     check_valid_register_status(usart, TxReg::PC, &[0xF6, 0xC5]);
     check_valid_register_status(usart, TxReg::S, &[0xFF]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     info!("test_brk_impl_without_b_flag_within_mocking_memory passed!");
 }
 

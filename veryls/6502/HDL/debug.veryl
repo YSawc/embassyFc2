@@ -849,7 +849,7 @@ module Debug (
             if_register_mst.x        = 0;
             if_register_mst.y        = 0;
             if_register_mst.s        = 8'hFF;
-            if_register_mst.p        = 0;
+            if_register_mst.p        = 36;
             if_register_mst.pc       = 0;
             if_memory_mst.en         = 0;
             if_memory_mst.we         = 0;

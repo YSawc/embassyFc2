@@ -24,10 +24,10 @@ pub fn test_dey_impl_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0x33]);
     check_valid_register_status(usart, TxReg::Y, &[0x33]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x88]);
     check_valid_register_status(usart, TxReg::Y, &[0x32]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     info!("test_dey_impl_within_internal_memory passed!");
 }
 
@@ -47,7 +47,7 @@ pub fn test_dey_impl_with_rising_z_flag_within_internal_memory<
     check_valid_register_status(usart, TxReg::Y, &[0x01]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x88]);
     check_valid_register_status(usart, TxReg::Y, &[0x00]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000010]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100110]);
     info!("test_dey_impl_with_rising_z_flag_within_internal_memory passed!");
 }
 
@@ -65,7 +65,7 @@ pub fn test_dey_impl_with_rising_n_flag_within_internal_memory<
     usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x88]);
     check_valid_register_status(usart, TxReg::Y, &[0xFF]);
-    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     info!("test_dey_impl_with_rising_n_flag_within_internal_memory passed!");
 }
 
@@ -83,10 +83,10 @@ pub fn test_dey_impl_with_falling_n_flag_within_internal_memory<
     usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0x80]);
     check_valid_register_status(usart, TxReg::Y, &[0x80]);
-    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x88]);
     check_valid_register_status(usart, TxReg::Y, &[0x7F]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     info!("test_dey_impl_with_falling_n_flag_within_internal_memory passed!");
 }
 
@@ -100,10 +100,10 @@ pub fn test_dex_impl_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x33]);
     check_valid_register_status(usart, TxReg::X, &[0x33]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xCA]);
     check_valid_register_status(usart, TxReg::X, &[0x32]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     info!("test_dex_impl_within_internal_memory passed!");
 }
 
@@ -123,7 +123,7 @@ pub fn test_dex_impl_with_rising_z_flag_within_internal_memory<
     check_valid_register_status(usart, TxReg::X, &[0x01]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xCA]);
     check_valid_register_status(usart, TxReg::X, &[0x00]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000010]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100110]);
     info!("test_dex_impl_with_rising_z_flag_within_internal_memory passed!");
 }
 
@@ -141,7 +141,7 @@ pub fn test_dex_impl_with_rising_n_flag_within_internal_memory<
     usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xCA]);
     check_valid_register_status(usart, TxReg::X, &[0xFF]);
-    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     info!("test_dex_impl_with_rising_n_flag_within_internal_memory passed!");
 }
 
@@ -159,10 +159,10 @@ pub fn test_dex_impl_with_falling_n_flag_within_internal_memory<
     usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x80]);
     check_valid_register_status(usart, TxReg::X, &[0x80]);
-    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xCA]);
     check_valid_register_status(usart, TxReg::X, &[0x7F]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     info!("test_dex_impl_with_falling_n_flag_within_internal_memory passed!");
 }
 
@@ -176,10 +176,10 @@ pub fn test_dec_zp_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x78, 0x00]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xC6, 0x78]);
-    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0x78, 0x00]);
     check_valid_register_status(usart, TxReg::A, &[0xFF]);
-    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     info!("test_dec_zp_within_internal_memory passed!");
 }
 
@@ -193,13 +193,13 @@ pub fn test_dec_abs_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x80]);
     check_valid_register_status(usart, TxReg::A, &[0x80]);
-    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x78, 0x06]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xCE, 0x78, 0x06]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0x78, 0x06]);
     check_valid_register_status(usart, TxReg::A, &[0x7F]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     info!("test_dec_abs_within_internal_memory passed!");
 }
 
@@ -215,10 +215,10 @@ pub fn test_dec_zpx_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x55]);
     check_valid_register_status(usart, TxReg::X, &[0x55]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xDE, 0x00, 0x06]);
-    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0x55, 0x06]);
     check_valid_register_status(usart, TxReg::A, &[0xFF]);
-    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     info!("test_dec_zpx_within_internal_memory passed!");
 }
 
@@ -234,10 +234,10 @@ pub fn test_dec_absx_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x55]);
     check_valid_register_status(usart, TxReg::X, &[0x55]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xDE, 0x00, 0x06]);
-    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0x55, 0x06]);
     check_valid_register_status(usart, TxReg::A, &[0xFF]);
-    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     info!("test_dec_absx_within_internal_memory passed!");
 }
 
@@ -251,10 +251,10 @@ pub fn test_dey_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0x33]);
     check_valid_register_status(usart, TxReg::Y, &[0x33]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x88]);
     check_valid_register_status(usart, TxReg::Y, &[0x32]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     info!("test_dey_impl_within_mocking_memory passed!");
 }
 
@@ -270,7 +270,7 @@ pub fn test_dey_impl_with_rising_z_flag_within_mocking_memory<T: BasicInstance, 
     check_valid_register_status(usart, TxReg::Y, &[0x01]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x88]);
     check_valid_register_status(usart, TxReg::Y, &[0x00]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000010]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100110]);
     info!("test_dey_impl_with_rising_z_flag_within_mocking_memory passed!");
 }
 
@@ -284,7 +284,7 @@ pub fn test_dey_impl_with_rising_n_flag_within_mocking_memory<T: BasicInstance, 
     usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x88]);
     check_valid_register_status(usart, TxReg::Y, &[0xFF]);
-    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     info!("test_dey_impl_with_rising_n_flag_within_mocking_memory passed!");
 }
 
@@ -302,10 +302,10 @@ pub fn test_dey_impl_with_falling_n_flag_within_mocking_memory<
     usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0x80]);
     check_valid_register_status(usart, TxReg::Y, &[0x80]);
-    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x88]);
     check_valid_register_status(usart, TxReg::Y, &[0x7F]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     info!("test_dey_impl_with_falling_n_flag_within_mocking_memory passed!");
 }
 
@@ -319,10 +319,10 @@ pub fn test_dex_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x33]);
     check_valid_register_status(usart, TxReg::X, &[0x33]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xCA]);
     check_valid_register_status(usart, TxReg::X, &[0x32]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     info!("test_dex_impl_within_mocking_memory passed!");
 }
 
@@ -338,7 +338,7 @@ pub fn test_dex_impl_with_rising_z_flag_within_mocking_memory<T: BasicInstance, 
     check_valid_register_status(usart, TxReg::X, &[0x01]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xCA]);
     check_valid_register_status(usart, TxReg::X, &[0x00]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000010]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100110]);
     info!("test_dex_impl_with_rising_z_flag_within_mocking_memory passed!");
 }
 
@@ -352,7 +352,7 @@ pub fn test_dex_impl_with_rising_n_flag_within_mocking_memory<T: BasicInstance, 
     usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xCA]);
     check_valid_register_status(usart, TxReg::X, &[0xFF]);
-    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     info!("test_dex_impl_with_rising_n_flag_within_mocking_memory passed!");
 }
 
@@ -370,10 +370,10 @@ pub fn test_dex_impl_with_falling_n_flag_within_mocking_memory<
     usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x80]);
     check_valid_register_status(usart, TxReg::X, &[0x80]);
-    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xCA]);
     check_valid_register_status(usart, TxReg::X, &[0x7F]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     info!("test_dex_impl_with_falling_n_flag_within_mocking_memory passed!");
 }
 
@@ -389,7 +389,7 @@ pub fn test_dec_zp_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x78, 0x00]);
     usart.blocking_write(&[0x00]).unwrap();
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0x78, 0x00, 0xFF]);
-    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     info!("test_dec_zp_within_mocking_memory passed!");
 }
 
@@ -405,7 +405,7 @@ pub fn test_dec_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x78, 0x06]);
     usart.blocking_write(&[0x80]).unwrap();
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0x78, 0x06, 0x7F]);
-    check_valid_register_status(usart, TxReg::P, &[0b00000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     info!("test_dec_abs_within_mocking_memory passed!");
 }
 
@@ -423,7 +423,7 @@ pub fn test_dec_zpx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x55, 0x06]);
     usart.blocking_write(&[0x00]).unwrap();
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0x55, 0x06, 0xFF]);
-    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     info!("test_dec_zpx_within_mocking_memory passed!");
 }
 
@@ -441,7 +441,7 @@ pub fn test_dec_absx_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x55, 0x06]);
     usart.blocking_write(&[0x00]).unwrap();
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0x55, 0x06, 0xFF]);
-    check_valid_register_status(usart, TxReg::P, &[0b10000000]);
+    check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     info!("test_dec_absx_within_mocking_memory passed!");
 }
 

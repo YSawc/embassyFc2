@@ -118,7 +118,7 @@ module main (
             if_register.x  = 0;
             if_register.y  = 0;
             if_register.s  = 0;
-            if_register.p  = 0;
+            if_register.p  = 36;
             if_register.pc = 0;
         } else {
             if_register.a  = if_debug_register.a;
