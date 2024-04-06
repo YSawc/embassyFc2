@@ -9,8 +9,8 @@ pub enum CpuMode {
 #[derive(Clone, Copy, Debug)]
 pub enum OpeMode {
     Inst,
+    Sequence,
     RegisterTransfer,
-    InstWithNesTest,
 }
 
 #[derive(Clone, Copy, Debug)]

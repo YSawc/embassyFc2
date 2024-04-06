@@ -32,10 +32,12 @@ module Debug (
     enum Status: logic <5> {
         Ready,
         OpeRead,
+        SequenceCountRead,
         TxRegisterDetect,
         RegisterLowTransfer,
         RegisterHighTransfer,
         InstRead,
+        PrgReadMemory,
         RWHandler,
         AddrHandler,
         OpeReady,
@@ -305,6 +307,7 @@ module Debug (
     assign operators[8'hfe] = {OperatorsPkg::OpeKind::Inc, OperatorsPkg::AddrMode::AbsX}; // 0xfe
     enum OpeMode: logic<2> {
         Inst,
+        Sequence,
         RegisterTransfer,
     }
     var o_raw_operator_mode: logic<8>;
@@ -320,11 +323,26 @@ module Debug (
         o_busy  : o_ope_read_busy    ,
         o_finish: o_ope_mode_finish  ,
     );
-    let casted_ope_mode          : OpeMode    = o_raw_operator_mode as OpeMode;
-    let i_tx_reg_detect_rx_en    : logic      = status == Status::TxRegisterDetect;
-    var o_tx_reg_detect_rx_data  : logic  <8>;
-    var o_tx_reg_detect_rx_busy  : logic     ;
-    var o_tx_reg_detect_rx_finish: logic     ;
+    let casted_ope_mode: OpeMode = o_raw_operator_mode as OpeMode;
+
+    let i_sequence_count_rx_en    : logic    = status == Status::SequenceCountRead;
+    var o_sequence_count_rx_data  : logic<8>;
+    var o_sequence_count_rx_busy  : logic   ;
+    var o_sequence_count_rx_finish: logic   ;
+    inst sequence_count_rx: uarty::Rx (
+        i_clk                               ,
+        i_rst                               ,
+        i_rx                                ,
+        i_en    : i_sequence_count_rx_en    ,
+        o_data  : o_sequence_count_rx_data  ,
+        o_busy  : o_sequence_count_rx_busy  ,
+        o_finish: o_sequence_count_rx_finish,
+    );
+
+    let i_tx_reg_detect_rx_en    : logic    = status == Status::TxRegisterDetect;
+    var o_tx_reg_detect_rx_data  : logic<8>;
+    var o_tx_reg_detect_rx_busy  : logic   ;
+    var o_tx_reg_detect_rx_finish: logic   ;
     inst tx_reg_detect_rx: uarty::Rx (
         i_clk                              ,
         i_rst                              ,
@@ -334,6 +352,9 @@ module Debug (
         o_busy  : o_tx_reg_detect_rx_busy  ,
         o_finish: o_tx_reg_detect_rx_finish,
     );
+    var current_sequence_count_next: logic<8>;
+    var current_sequence_count     : logic<8>;
+
     enum TxReg: logic<3> {
         A,
         X,
@@ -406,8 +427,38 @@ module Debug (
         o_busy  : o_inst_read_busy  ,
         o_finish: o_inst_read_finish,
     );
-    let i_inst_casted_ope_kind : OperatorsPkg::OpeKind  = operators[o_raw_inst_mode].ope_kind;
-    let i_inst_casted_addr_mode: OperatorsPkg::AddrMode = operators[o_raw_inst_mode].addr_mode;
+
+    let i_prg_read_memory_en              : logic    = status == Status::PrgReadMemory;
+    var o_prg_read_memory_data            : logic<8>;
+    var o_prg_read_memory_tx              : logic   ;
+    var o_prg_read_memory_rts             : logic   ;
+    var o_prg_read_memory_busy            : logic   ;
+    var o_prg_read_memory_finish          : logic   ;
+    let i_prg_read_memory_target_low_addr : logic<8> = (if_register_mst.pc & 16'hFF);
+    let i_prg_read_memory_target_high_addr: logic<8> = (if_register_mst.pc & 16'hFF00) >> 8;
+    inst if_prg_read_memory_memory         : MemoryIf;
+    inst prg_read_memory: ReadMemory (
+        i_clk                                                     ,
+        i_rst                                                     ,
+        i_en                  : i_prg_read_memory_en              ,
+        i_we                                                      ,
+        i_rx                                                      ,
+        i_debug_mock_memory_en                                    ,
+        i_target_low_addr     : i_prg_read_memory_target_low_addr ,
+        i_target_high_addr    : i_prg_read_memory_target_high_addr,
+        if_memory_mst         : if_prg_read_memory_memory         ,
+        if_memory_slv                                             ,
+        o_data                : o_prg_read_memory_data            ,
+        o_tx                  : o_prg_read_memory_tx              ,
+        o_rts                 : o_prg_read_memory_rts             ,
+        o_busy                : o_prg_read_memory_busy            ,
+        o_finish              : o_prg_read_memory_finish          ,
+    );
+
+    var tmp_inst_mode_next     : logic                 <8>;
+    var tmp_inst_mode          : logic                 <8>;
+    let i_inst_casted_ope_kind : OperatorsPkg::OpeKind     = operators[tmp_inst_mode].ope_kind;
+    let i_inst_casted_addr_mode: OperatorsPkg::AddrMode    = operators[tmp_inst_mode].addr_mode;
 
     let i_rw_handler_en    : logic = status == Status::RWHandler;
     var o_rw_handler_rw    : logic;
@@ -423,33 +474,35 @@ module Debug (
         o_finish  : o_rw_handler_finish   ,
     );
 
-    let i_addr_handler_en    : logic = status == Status::AddrHandler;
-    var o_addr_handler_rts   : logic;
-    var o_addr_handler_busy  : logic;
-    var o_addr_handler_finish: logic;
-    inst addr_handler_register: RegisterIf;
-    inst addr_handler_memory  : MemoryIf;
-    var o_target_low_addr    : logic<8>;
-    var o_target_high_addr   : logic<8>;
-    var o_addr_handler_tx    : logic   ;
+    let i_addr_handler_en         : logic = status == Status::AddrHandler;
+    let i_addr_handler_sequence_en: logic = casted_ope_mode == OpeMode::Sequence;
+    var o_addr_handler_rts        : logic;
+    var o_addr_handler_busy       : logic;
+    var o_addr_handler_finish     : logic;
+    inst addr_handler_register     : RegisterIf;
+    inst addr_handler_memory       : MemoryIf;
+    var o_target_low_addr         : logic<8>;
+    var o_target_high_addr        : logic<8>;
+    var o_addr_handler_tx         : logic   ;
     inst addr_handler: AddrHandler (
-        i_clk                                          ,
-        i_rst                                          ,
-        i_en                  : i_addr_handler_en      ,
-        i_we                                           ,
-        i_rx                                           ,
-        i_debug_mock_memory_en                         ,
-        i_addr_mode           : i_inst_casted_addr_mode,
-        if_register_mst       : addr_handler_register  ,
-        if_register_slv                                ,
-        if_memory_mst         : addr_handler_memory    ,
-        if_memory_slv                                  ,
-        o_target_low_addr                              ,
-        o_target_high_addr                             ,
-        o_tx                  : o_addr_handler_tx      ,
-        o_rts                 : o_addr_handler_rts     ,
-        o_busy                : o_addr_handler_busy    ,
-        o_finish              : o_addr_handler_finish  ,
+        i_clk                                             ,
+        i_rst                                             ,
+        i_en                  : i_addr_handler_en         ,
+        i_we                                              ,
+        i_rx                                              ,
+        i_debug_mock_memory_en                            ,
+        i_addr_mode           : i_inst_casted_addr_mode   ,
+        i_sequence_en         : i_addr_handler_sequence_en,
+        if_register_mst       : addr_handler_register     ,
+        if_register_slv                                   ,
+        if_memory_mst         : addr_handler_memory       ,
+        if_memory_slv                                     ,
+        o_target_low_addr                                 ,
+        o_target_high_addr                                ,
+        o_tx                  : o_addr_handler_tx         ,
+        o_rts                 : o_addr_handler_rts        ,
+        o_busy                : o_addr_handler_busy       ,
+        o_finish              : o_addr_handler_finish     ,
     );
 
     let i_ope_splitter_en    : logic            = status == Status::OpeReady;
@@ -622,7 +675,7 @@ module Debug (
     assign o_finish_next                 = o_ope_other_finish;
     var register_transfer_finish_next: logic;
     var register_transfer_finish     : logic;
-    assign o_busy_next                   = if casted_ope_mode == OpeMode::Inst {
+    assign o_busy_next                   = if casted_ope_mode == OpeMode::Inst || casted_ope_mode == OpeMode::Sequence {
         if status == Status::OpeReadAndStoreToMemory {
             ~o_ope_read_and_store_to_memory_finish
         } else if status == Status::OpeReadAndStoreToRegister {
@@ -648,6 +701,10 @@ module Debug (
         ~i_ope_read_en
     } else if i_inst_read_en {
         ~i_inst_read_en
+    } else if i_sequence_count_rx_en {
+        ~i_sequence_count_rx_en
+    } else if i_prg_read_memory_en {
+        o_prg_read_memory_rts
     } else if i_tx_reg_detect_rx_en {
         ~i_tx_reg_detect_rx_en
     } else if i_addr_handler_en {
@@ -682,21 +739,36 @@ module Debug (
         if_memory_mst_data_next       = if_memory_mst.data;
         status_next                   = status;
         register_transfer_finish_next = register_transfer_finish;
+        current_sequence_count_next   = current_sequence_count;
+        tmp_inst_mode_next            = tmp_inst_mode;
         case status {
             Status::Ready: {
                 o_tx_next                     = 1;
                 register_transfer_finish_next = 0;
                 if i_en {
-                    status_next = Status::OpeRead;
+                    if current_sequence_count >: 0 {
+                        current_sequence_count_next -= 1;
+                        status_next                 =  Status::PrgReadMemory;
+                    } else {
+                        status_next = Status::OpeRead;
+                    }
                 }
             }
             Status::OpeRead: {
                 if o_ope_mode_finish {
                     if casted_ope_mode == OpeMode::Inst {
                         status_next = Status::InstRead;
+                    } else if casted_ope_mode == OpeMode::Sequence {
+                        status_next = Status::SequenceCountRead;
                     } else if casted_ope_mode == OpeMode::RegisterTransfer {
                         status_next = Status::TxRegisterDetect;
                     }
+                }
+            }
+            Status::SequenceCountRead: {
+                if o_sequence_count_rx_finish {
+                    current_sequence_count_next = o_sequence_count_rx_data;
+                    status_next                 = Status::Ready;
                 }
             }
             Status::TxRegisterDetect: {
@@ -724,7 +796,19 @@ module Debug (
             }
             Status::InstRead: {
                 if o_inst_read_finish {
-                    status_next = Status::RWHandler;
+                    tmp_inst_mode_next = o_raw_inst_mode;
+                    status_next        = Status::RWHandler;
+                }
+            }
+            Status::PrgReadMemory: {
+                o_tx_next               = o_prg_read_memory_tx;
+                if_memory_mst_en_next   = if_prg_read_memory_memory.en;
+                if_memory_mst_we_next   = if_prg_read_memory_memory.we;
+                if_memory_mst_addr_next = if_prg_read_memory_memory.addr;
+                if_memory_mst_data_next = if_prg_read_memory_memory.data;
+                if o_prg_read_memory_finish {
+                    tmp_inst_mode_next = o_prg_read_memory_data;
+                    status_next        = Status::RWHandler;
                 }
             }
             Status::RWHandler: {
@@ -858,7 +942,9 @@ module Debug (
             o_busy                   = 0;
             o_rts                    = 1;
             status                   = Status::Ready;
+            current_sequence_count   = 0;
             register_transfer_finish = 0;
+            tmp_inst_mode            = 0;
             o_finish                 = 0;
         } else {
             o_tx                     = o_tx_next;
@@ -876,6 +962,8 @@ module Debug (
             o_rts                    = o_rts_next;
             register_transfer_finish = register_transfer_finish_next;
             status                   = status_next;
+            current_sequence_count   = current_sequence_count_next;
+            tmp_inst_mode            = tmp_inst_mode_next;
             o_finish                 = o_finish_next;
         }
     }

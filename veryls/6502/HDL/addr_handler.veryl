@@ -6,6 +6,7 @@ module AddrHandler (
     i_rx                  : input   logic                    ,
     i_debug_mock_memory_en: input   logic                    ,
     i_addr_mode           : input   OperatorsPkg::AddrMode   ,
+    i_sequence_en         : input   logic                    ,
     if_register_mst       : modport RegisterIf::Master       ,
     if_register_slv       : modport RegisterIf::Slave        ,
     if_memory_mst         : modport MemoryIf::Master         ,
@@ -33,32 +34,50 @@ module AddrHandler (
     var o_tx_next              : logic   ;
     var o_rts_next             : logic   ;
 
-    let i_target_low_addr_read_en    : logic    = status == Status::ReadTargetLowAddr;
-    var o_target_low_addr_data       : logic<8>;
-    var o_target_low_addr_read_busy  : logic   ;
-    var o_target_low_addr_read_finish: logic   ;
-    inst i_target_low_addr_read_rx: uarty::Rx (
-        i_clk                                  ,
-        i_rst                                  ,
-        i_en    : i_target_low_addr_read_en    ,
-        i_rx                                   ,
-        o_data  : o_target_low_addr_data       ,
-        o_busy  : o_target_low_addr_read_busy  ,
-        o_finish: o_target_low_addr_read_finish,
-    );
-
-    let i_target_high_addr_read_en    : logic    = status == Status::ReadTargetHighAddr;
-    var o_target_high_addr_read_data  : logic<8>;
-    var o_target_high_addr_read_busy  : logic   ;
-    var o_target_high_addr_read_finish: logic   ;
-    inst i_target_high_addr_read_rx: uarty::Rx (
+    let i_read_low_addr_en     : logic     = status == Status::ReadTargetLowAddr;
+    let i_read_low_addr_addr   : logic<16> = if_register_slv.pc + 1;
+    var o_read_low_addr_data   : logic<8> ;
+    var o_read_low_addr_busy   : logic    ;
+    var o_read_low_addr_rts    : logic    ;
+    var o_read_low_addr_finish : logic    ;
+    inst if_read_low_addr_memory: MemoryIf;
+    inst read_low_addr: ReadAddr (
         i_clk                                   ,
         i_rst                                   ,
-        i_en    : i_target_high_addr_read_en    ,
+        i_en           : i_read_low_addr_en     ,
         i_rx                                    ,
-        o_data  : o_target_high_addr_read_data  ,
-        o_busy  : o_target_high_addr_read_busy  ,
-        o_finish: o_target_high_addr_read_finish,
+        i_sequence_en                           ,
+        i_sequence_addr: i_read_low_addr_addr   ,
+        if_register_slv                         ,
+        if_memory_mst  : if_read_low_addr_memory,
+        if_memory_slv                           ,
+        o_data         : o_read_low_addr_data   ,
+        o_busy         : o_read_low_addr_busy   ,
+        o_rts          : o_read_low_addr_rts    ,
+        o_finish       : o_read_low_addr_finish ,
+    );
+
+    let i_read_high_addr_en     : logic     = status == Status::ReadTargetHighAddr;
+    let i_read_high_addr_addr   : logic<16> = if_register_slv.pc + 2;
+    var o_read_high_addr_data   : logic<8> ;
+    var o_read_high_addr_busy   : logic    ;
+    var o_read_high_addr_rts    : logic    ;
+    var o_read_high_addr_finish : logic    ;
+    inst if_read_high_addr_memory: MemoryIf;
+    inst read_high_addr: ReadAddr (
+        i_clk                                    ,
+        i_rst                                    ,
+        i_en           : i_read_high_addr_en     ,
+        i_rx                                     ,
+        i_sequence_en                            ,
+        i_sequence_addr: i_read_high_addr_addr   ,
+        if_register_slv                          ,
+        if_memory_mst  : if_read_high_addr_memory,
+        if_memory_slv                            ,
+        o_data         : o_read_high_addr_data   ,
+        o_busy         : o_read_high_addr_busy   ,
+        o_rts          : o_read_high_addr_rts    ,
+        o_finish       : o_read_high_addr_finish ,
     );
 
     let i_read_low_memory_en     : logic    = status == Status::ReadLowMemory;
@@ -148,23 +167,27 @@ module AddrHandler (
                 }
             }
             Status::ReadTargetLowAddr: {
-                o_tx_next  = 1;
-                o_rts_next = ~i_target_low_addr_read_en;
-                if o_target_low_addr_read_finish {
+                o_rts_next              = o_read_low_addr_rts;
+                o_tx_next               = 1;
+                if_memory_mst_en_next   = if_read_low_addr_memory.en;
+                if_memory_mst_we_next   = if_read_low_addr_memory.we;
+                if_memory_mst_addr_next = if_read_low_addr_memory.addr;
+                if_memory_mst_data_next = if_read_low_addr_memory.data;
+                if o_read_low_addr_finish {
                     if i_addr_mode == OperatorsPkg::AddrMode::ZpX {
-                        o_target_low_addr_next = utilPkg::wrapping_add(o_target_low_addr_data, if_register_slv.x);
+                        o_target_low_addr_next = utilPkg::wrapping_add(o_read_low_addr_data, if_register_slv.x);
                     } else if i_addr_mode == OperatorsPkg::AddrMode::ZpY {
-                        o_target_low_addr_next = utilPkg::wrapping_add(o_target_low_addr_data, if_register_slv.y);
+                        o_target_low_addr_next = utilPkg::wrapping_add(o_read_low_addr_data, if_register_slv.y);
                     } else if i_addr_mode == OperatorsPkg::AddrMode::IndX {
-                        o_target_low_addr_next  = utilPkg::wrapping_add(o_target_low_addr_data, if_register_slv.x);
-                        o_target_high_addr_next = utilPkg::wrapping_add(o_target_low_addr_data, if_register_slv.x + 1);
+                        o_target_low_addr_next  = utilPkg::wrapping_add(o_read_low_addr_data, if_register_slv.x);
+                        o_target_high_addr_next = utilPkg::wrapping_add(o_read_low_addr_data, if_register_slv.x + 1);
                     } else if i_addr_mode == OperatorsPkg::AddrMode::IndY {
-                        o_target_low_addr_next  = o_target_low_addr_data;
-                        o_target_high_addr_next = utilPkg::wrapping_add(o_target_low_addr_data, 1);
+                        o_target_low_addr_next  = o_read_low_addr_data;
+                        o_target_high_addr_next = utilPkg::wrapping_add(o_read_low_addr_data, 1);
                     } else if i_addr_mode == OperatorsPkg::AddrMode::Rel {
-                        RegisterPkg::rel(o_pc_next, o_target_high_addr_next, o_target_low_addr_next, o_target_low_addr_data);
+                        RegisterPkg::rel(o_pc_next, o_target_high_addr_next, o_target_low_addr_next, o_read_low_addr_data);
                     } else {
-                        o_target_low_addr_next = o_target_low_addr_data;
+                        o_target_low_addr_next = o_read_low_addr_data;
                     }
 
                     if i_addr_mode == OperatorsPkg::AddrMode::Imm || i_addr_mode == OperatorsPkg::AddrMode::Zp || i_addr_mode == OperatorsPkg::AddrMode::ZpX || i_addr_mode == OperatorsPkg::AddrMode::ZpY || i_addr_mode == OperatorsPkg::AddrMode::Rel {
@@ -177,10 +200,14 @@ module AddrHandler (
                 }
             }
             Status::ReadTargetHighAddr: {
-                o_tx_next  = 1;
-                o_rts_next = ~i_target_high_addr_read_en;
-                if o_target_high_addr_read_finish {
-                    o_target_high_addr_next = o_target_high_addr_read_data;
+                o_tx_next               = 1;
+                o_rts_next              = o_read_high_addr_rts;
+                if_memory_mst_en_next   = if_read_high_addr_memory.en;
+                if_memory_mst_we_next   = if_read_high_addr_memory.we;
+                if_memory_mst_addr_next = if_read_high_addr_memory.addr;
+                if_memory_mst_data_next = if_read_high_addr_memory.data;
+                if o_read_high_addr_finish {
+                    o_target_high_addr_next = o_read_high_addr_data;
                     if i_addr_mode == OperatorsPkg::AddrMode::Ind {
                         status_next = Status::ReadLowMemory;
                     } else {
