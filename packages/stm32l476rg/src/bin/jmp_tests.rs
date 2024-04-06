@@ -24,15 +24,15 @@ pub fn test_jsr_abs_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x4C, 0xF5, 0xC5]);
     check_valid_register_status(usart, TxReg::PC, &[0xF5, 0xc5]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x20, 0x2D, 0xC7]);
     check_valid_register_status(usart, TxReg::PC, &[0x2D, 0xC7]);
-    check_valid_register_status(usart, TxReg::S, &[0xFD]);
+    check_valid_register_status(usart, TxReg::S, &[0xFB]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
-    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0xFF, 0x01]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0xFD, 0x01]);
     check_valid_register_status(usart, TxReg::A, &[0xC5]);
     check_valid_register_status(usart, TxReg::P, &[0b10100100]);
-    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0xFE, 0x01]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0xFC, 0x01]);
     check_valid_register_status(usart, TxReg::A, &[0xF8]);
     check_valid_register_status(usart, TxReg::P, &[0b10100100]);
 
@@ -93,12 +93,12 @@ pub fn test_jsr_abs_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x4C, 0xF5, 0xC5]);
     check_valid_register_status(usart, TxReg::PC, &[0xF5, 0xc5]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
-    usart_write(usart, &[OpeMode::Inst as u8, 0x20, 0x2D, 0xC7]);
-    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFF, 0x01, 0xC5]);
-    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFE, 0x01, 0xF8]);
-    check_valid_register_status(usart, TxReg::PC, &[0x2D, 0xC7]);
     check_valid_register_status(usart, TxReg::S, &[0xFD]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x20, 0x2D, 0xC7]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFD, 0x01, 0xC5]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFC, 0x01, 0xF8]);
+    check_valid_register_status(usart, TxReg::PC, &[0x2D, 0xC7]);
+    check_valid_register_status(usart, TxReg::S, &[0xFB]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     info!("test_jsr_abs_within_mocking_memory passed!");
 }

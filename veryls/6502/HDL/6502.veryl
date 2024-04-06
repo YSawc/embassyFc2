@@ -117,7 +117,7 @@ module main (
             if_register.a  = 0;
             if_register.x  = 0;
             if_register.y  = 0;
-            if_register.s  = 0;
+            if_register.s  = 8'hFD;
             if_register.p  = 36;
             if_register.pc = 0;
         } else {

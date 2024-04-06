@@ -142,7 +142,7 @@ pub fn test_txs_impl_with_no_flag_within_internal_memory<T: BasicInstance, P: Pi
     usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x39]);
     check_valid_register_status(usart, TxReg::X, &[0x39]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x9A]);
     check_valid_register_status(usart, TxReg::X, &[0x39]);
@@ -160,7 +160,7 @@ pub fn test_txs_impl_in_condition_z_within_internal_memory<T: BasicInstance, P: 
     usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
     usart_write(usart, &[CassetteMode::None as u8]);
     check_valid_register_status(usart, TxReg::X, &[0x00]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x9A]);
     check_valid_register_status(usart, TxReg::X, &[0x00]);
@@ -179,11 +179,11 @@ pub fn test_txs_impl_in_condition_n_within_internal_memory<T: BasicInstance, P: 
     usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x80]);
     check_valid_register_status(usart, TxReg::X, &[0x80]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
     check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0x01]);
     check_valid_register_status(usart, TxReg::Y, &[0x01]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x9A]);
     check_valid_register_status(usart, TxReg::X, &[0x80]);
@@ -320,7 +320,7 @@ pub fn test_tsx_impl_with_no_flag_within_internal_memory<T: BasicInstance, P: Pi
     usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x01]);
     check_valid_register_status(usart, TxReg::X, &[0x01]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x9A]);
     check_valid_register_status(usart, TxReg::X, &[0x01]);
@@ -366,12 +366,12 @@ pub fn test_tsx_impl_with_n_within_internal_memory<T: BasicInstance, P: Pin, P2:
     send_reset_signal_if_not_nop(&nop, resb);
     usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
     usart_write(usart, &[CassetteMode::None as u8]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
     check_valid_register_status(usart, TxReg::X, &[0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xBA]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
-    check_valid_register_status(usart, TxReg::X, &[0xFF]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
+    check_valid_register_status(usart, TxReg::X, &[0xFD]);
     check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     info!("test_tsx_impl_with_n_within_internal_memory passed!");
 }
@@ -504,7 +504,7 @@ pub fn test_txs_impl_with_no_flag_within_mocking_memory<T: BasicInstance, P: Pin
     usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x39]);
     check_valid_register_status(usart, TxReg::X, &[0x39]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x9A]);
     check_valid_register_status(usart, TxReg::X, &[0x39]);
@@ -522,7 +522,7 @@ pub fn test_txs_impl_in_condition_z_within_mocking_memory<T: BasicInstance, P: P
     usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[CassetteMode::None as u8]);
     check_valid_register_status(usart, TxReg::X, &[0x00]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x9A]);
     check_valid_register_status(usart, TxReg::X, &[0x00]);
@@ -541,11 +541,11 @@ pub fn test_txs_impl_in_condition_n_within_mocking_memory<T: BasicInstance, P: P
     usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x80]);
     check_valid_register_status(usart, TxReg::X, &[0x80]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
     check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0x01]);
     check_valid_register_status(usart, TxReg::Y, &[0x01]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x9A]);
     check_valid_register_status(usart, TxReg::X, &[0x80]);
@@ -682,7 +682,7 @@ pub fn test_tsx_impl_with_no_flag_within_mocking_memory<T: BasicInstance, P: Pin
     usart_write(usart, &[CassetteMode::None as u8]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x01]);
     check_valid_register_status(usart, TxReg::X, &[0x01]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x9A]);
     check_valid_register_status(usart, TxReg::X, &[0x01]);
@@ -728,12 +728,12 @@ pub fn test_tsx_impl_with_n_within_mocking_memory<T: BasicInstance, P: Pin, P2: 
     send_reset_signal_if_not_nop(&nop, resb);
     usart_write(usart, &[CpuMode::DebugWithinMockMemory as u8]);
     usart_write(usart, &[CassetteMode::None as u8]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
     check_valid_register_status(usart, TxReg::X, &[0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xBA]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
-    check_valid_register_status(usart, TxReg::X, &[0xFF]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
+    check_valid_register_status(usart, TxReg::X, &[0xFD]);
     check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     info!("test_tsx_impl_with_n_within_mocking_memory passed!");
 }

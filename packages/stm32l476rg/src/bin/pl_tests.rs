@@ -30,16 +30,16 @@ pub fn test_plp_impl_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::A, &[0x82]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xCD, 0x78, 0x06]);
     check_valid_register_status(usart, TxReg::P, &[0b00100111]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x08]);
-    check_valid_register_status(usart, TxReg::S, &[0xFE]);
-    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0xFE, 0x01]);
+    check_valid_register_status(usart, TxReg::S, &[0xFC]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0xFC, 0x01]);
     check_valid_register_status(usart, TxReg::A, &[0b00100111]);
     check_valid_register_status(usart, TxReg::P, &[0b00100101]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x28]);
     check_valid_register_status(usart, TxReg::P, &[0b00100111]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
-    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0xFE, 0x01]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0xFC, 0x01]);
     check_valid_register_status(usart, TxReg::A, &[0b00100111]);
     check_valid_register_status(usart, TxReg::P, &[0b00100101]);
     info!("test_plp_impl_within_internal_memory passed!");
@@ -61,10 +61,10 @@ pub fn test_pla_impl_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::A, &[0x82]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xCD, 0x78, 0x06]);
     check_valid_register_status(usart, TxReg::P, &[0b00100111]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x48]);
-    check_valid_register_status(usart, TxReg::S, &[0xFE]);
-    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0xFE, 0x01]);
+    check_valid_register_status(usart, TxReg::S, &[0xFC]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0xFC, 0x01]);
     check_valid_register_status(usart, TxReg::A, &[0x82]);
     check_valid_register_status(usart, TxReg::P, &[0b10100101]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x40]);
@@ -72,8 +72,8 @@ pub fn test_pla_impl_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[OpeMode::Inst as u8, 0x68]);
     check_valid_register_status(usart, TxReg::A, &[0x82]);
     check_valid_register_status(usart, TxReg::P, &[0b10100101]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
-    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0xFE, 0x01]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0xFC, 0x01]);
     check_valid_register_status(usart, TxReg::A, &[0x82]);
     check_valid_register_status(usart, TxReg::P, &[0b10100101]);
     info!("test_pla_impl_within_internal_memory passed!");
@@ -93,15 +93,15 @@ pub fn test_plp_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x78, 0x06]);
     usart.blocking_write(&[0x82]).unwrap();
     check_valid_register_status(usart, TxReg::P, &[0b00100111]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x08]);
-    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFE, 0x01, 0b00100111]);
-    check_valid_register_status(usart, TxReg::S, &[0xFE]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFC, 0x01, 0b00100111]);
+    check_valid_register_status(usart, TxReg::S, &[0xFC]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x28]);
-    usart_read_with_check(usart, &mut [0x0u8; 2], &[0xFE, 0x01]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0xFC, 0x01]);
     usart.blocking_write(&[0b00100111]).unwrap();
     check_valid_register_status(usart, TxReg::P, &[0b00100111]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
     info!("test_plp_impl_within_mocking_memory passed!");
 }
 
@@ -119,18 +119,18 @@ pub fn test_pla_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0x78, 0x06]);
     usart.blocking_write(&[0x82]).unwrap();
     check_valid_register_status(usart, TxReg::P, &[0b00100111]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x48]);
-    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFE, 0x01, 0x82]);
-    check_valid_register_status(usart, TxReg::S, &[0xFE]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFC, 0x01, 0x82]);
+    check_valid_register_status(usart, TxReg::S, &[0xFC]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x40]);
     check_valid_register_status(usart, TxReg::A, &[0x40]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x68]);
-    usart_read_with_check(usart, &mut [0x0u8; 2], &[0xFE, 0x01]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0xFC, 0x01]);
     usart.blocking_write(&[0x82]).unwrap();
     check_valid_register_status(usart, TxReg::A, &[0x82]);
     check_valid_register_status(usart, TxReg::P, &[0b10100101]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
     info!("test_pla_impl_within_mocking_memory passed!");
 }
 

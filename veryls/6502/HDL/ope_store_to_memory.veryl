@@ -157,7 +157,7 @@ module OpeStoreToMemory (
             o_finish             = 0;
             tmp_target_low_addr  = 0;
             tmp_target_high_addr = 0;
-            if_register_mst.s    = 0;
+            if_register_mst.s    = 8'hFD;
             if_register_mst.p    = 36;
             if_register_mst.pc   = 0;
             i_send_data          = 0;

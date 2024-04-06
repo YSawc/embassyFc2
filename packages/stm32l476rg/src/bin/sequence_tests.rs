@@ -22,14 +22,15 @@ pub fn test_inst_sequence_should_execute_first_ope<T: BasicInstance, P: Pin, P2:
     send_reset_signal_if_not_nop(&nop, resb);
     usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
     usart_write(usart, &[CassetteMode::NesTest as u8]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x4C, 0x00, 0xC0]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     check_valid_register_status(usart, TxReg::PC, &[0x00, 0xC0]);
     usart_write(usart, &[OpeMode::Sequence as u8, 0x01]);
     // second status of nestest.log
     check_valid_register_status(usart, TxReg::PC, &[0xF5, 0xC5]);
-    check_valid_register_status(usart, TxReg::S, &[0xFF]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     info!("test_inst_sequence passed!");
 }
