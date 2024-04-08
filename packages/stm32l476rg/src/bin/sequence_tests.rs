@@ -40,7 +40,7 @@ pub fn test_inst_sequence_should_execute_first_ope<T: BasicInstance, P: Pin, P2:
     info!("test_inst_sequence_should_execute_first_ope passed!");
 }
 
-pub fn test_inst_sequence_first_bit<T: BasicInstance, P: Pin, P2: Pin>(
+pub fn test_inst_sequence<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
     resb: &mut Output<P2>,
@@ -51,14 +51,14 @@ pub fn test_inst_sequence_first_bit<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::S, &[0xFD]);
     jmp_c000(usart);
 
-    // step to 42:c78D
-    usart_write(usart, &[OpeMode::Sequence as u8, 0x29]);
-    check_valid_register_status(usart, TxReg::A, &[0xFF]);
+    // step to 51:C7E0
+    usart_write(usart, &[OpeMode::Sequence as u8, 0x32]);
+    check_valid_register_status(usart, TxReg::A, &[0x00]);
     check_valid_register_status(usart, TxReg::X, &[0x00]);
     check_valid_register_status(usart, TxReg::Y, &[0x00]);
-    check_valid_register_status(usart, TxReg::P, &[0b11100100]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100110]);
     check_valid_register_status(usart, TxReg::S, &[0xFB]);
-    check_valid_register_status(usart, TxReg::PC, &[0x8D, 0xC7]);
+    check_valid_register_status(usart, TxReg::PC, &[0xA6, 0xC7]);
 
     info!("test_inst_sequence_first_bit passed!");
 }
@@ -75,7 +75,7 @@ fn main() -> ! {
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
     test_inst_sequence_should_execute_first_ope(&mut usart, &nop, &mut resb);
-    test_inst_sequence_first_bit(&mut usart, &nop, &mut resb);
+    test_inst_sequence(&mut usart, &nop, &mut resb);
 
     info!("all tests passed!");
     loop {}

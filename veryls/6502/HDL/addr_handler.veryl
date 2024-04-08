@@ -174,10 +174,15 @@ module AddrHandler (
                 if_memory_mst_addr_next = if_read_low_addr_memory.addr;
                 if_memory_mst_data_next = if_read_low_addr_memory.data;
                 if o_read_low_addr_finish {
-                    if i_addr_mode == OperatorsPkg::AddrMode::ZpX {
-                        o_target_low_addr_next = utilPkg::wrapping_add(o_read_low_addr_data, if_register_slv.x);
+                    if i_addr_mode == OperatorsPkg::AddrMode::Zp || i_addr_mode == OperatorsPkg::AddrMode::Imm {
+                        o_target_low_addr_next  = o_read_low_addr_data;
+                        o_target_high_addr_next = 0;
+                    } else if i_addr_mode == OperatorsPkg::AddrMode::ZpX {
+                        o_target_low_addr_next  = utilPkg::wrapping_add(o_read_low_addr_data, if_register_slv.x);
+                        o_target_high_addr_next = 0;
                     } else if i_addr_mode == OperatorsPkg::AddrMode::ZpY {
-                        o_target_low_addr_next = utilPkg::wrapping_add(o_read_low_addr_data, if_register_slv.y);
+                        o_target_low_addr_next  = utilPkg::wrapping_add(o_read_low_addr_data, if_register_slv.y);
+                        o_target_high_addr_next = 0;
                     } else if i_addr_mode == OperatorsPkg::AddrMode::IndX {
                         o_target_low_addr_next  = utilPkg::wrapping_add(o_read_low_addr_data, if_register_slv.x);
                         o_target_high_addr_next = utilPkg::wrapping_add(o_read_low_addr_data, if_register_slv.x + 1);

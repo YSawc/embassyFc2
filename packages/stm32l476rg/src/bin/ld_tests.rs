@@ -166,7 +166,7 @@ pub fn test_lda_zpx_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x0C]);
     check_valid_register_status(usart, TxReg::A, &[0x0C]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
-    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x65, 0x06]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x65, 0x00]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2]);
     check_rw_is_high(&rw);
     usart.blocking_write(&[0x05]).unwrap();
