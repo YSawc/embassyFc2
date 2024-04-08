@@ -134,8 +134,9 @@ module OpeStoreToMemory (
                             write_count_next += 1;
                             status_next      =  Status::Ready;
                         } else {
-                            pc_next     = utilPkg::combine_byte_to_short(i_target_high_addr, i_target_low_addr);
-                            status_next = Status::Finish;
+                            write_count_next = 0;
+                            pc_next          = utilPkg::combine_byte_to_short(i_target_high_addr, i_target_low_addr);
+                            status_next      = Status::Finish;
                         }
                     } else {
                         status_next = Status::Finish;

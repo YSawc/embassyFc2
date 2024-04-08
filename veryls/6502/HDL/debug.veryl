@@ -505,18 +505,21 @@ module Debug (
         o_finish              : o_addr_handler_finish     ,
     );
 
-    let i_ope_splitter_en    : logic            = status == Status::OpeReady;
-    var o_ope_splitter_busy  : logic           ;
-    var o_ope_splitter_finish: logic           ;
-    var o_ope_mode           : ModePkg::OpeMode;
+    let i_ope_splitter_en       : logic            = status == Status::OpeReady;
+    var o_ope_splitter_busy     : logic           ;
+    var o_ope_splitter_finish   : logic           ;
+    var o_ope_mode              : ModePkg::OpeMode;
+    inst if_ope_splitter_register: RegisterIf;
     inst ope_splitter: OpeSplitter (
-        i_clk                             ,
-        i_rst                             ,
-        i_en      : i_ope_splitter_en     ,
-        i_ope_kind: i_inst_casted_ope_kind,
-        o_ope_mode                        ,
-        o_busy    : o_ope_splitter_busy   ,
-        o_finish  : o_ope_splitter_finish ,
+        i_clk                                    ,
+        i_rst                                    ,
+        i_en           : i_ope_splitter_en       ,
+        i_ope_kind     : i_inst_casted_ope_kind  ,
+        if_register_mst: if_ope_splitter_register,
+        if_register_slv                          ,
+        o_ope_mode                               ,
+        o_busy         : o_ope_splitter_busy     ,
+        o_finish       : o_ope_splitter_finish   ,
     );
 
     let i_ope_read_and_store_to_memory_en       : logic = status == Status::OpeReadAndStoreToMemory;
@@ -830,6 +833,7 @@ module Debug (
             }
             Status::OpeReady: {
                 if o_ope_splitter_finish {
+                    o_pc_next = if_ope_splitter_register.pc;
                     if o_ope_mode == ModePkg::OpeMode::ReadAndStoreToMemory {
                         status_next = Status::OpeReadAndStoreToMemory;
                     } else if o_ope_mode == ModePkg::OpeMode::ReadAndStoreToRegister {

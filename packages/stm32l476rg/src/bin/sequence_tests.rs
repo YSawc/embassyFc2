@@ -14,6 +14,13 @@ bind_interrupts!(struct Irqs {
     USART1 => usart::InterruptHandler<peripherals::USART1>;
 });
 
+pub fn jmp_c000<T: BasicInstance>(usart: &mut Uart<T>) {
+    usart_write(usart, &[OpeMode::Inst as u8, 0x4C, 0x00, 0xC0]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
+    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
+    check_valid_register_status(usart, TxReg::PC, &[0x00, 0xC0]);
+}
+
 pub fn test_inst_sequence_should_execute_first_ope<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
@@ -23,16 +30,37 @@ pub fn test_inst_sequence_should_execute_first_ope<T: BasicInstance, P: Pin, P2:
     usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
     usart_write(usart, &[CassetteMode::NesTest as u8]);
     check_valid_register_status(usart, TxReg::S, &[0xFD]);
-    usart_write(usart, &[OpeMode::Inst as u8, 0x4C, 0x00, 0xC0]);
-    check_valid_register_status(usart, TxReg::S, &[0xFD]);
-    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
-    check_valid_register_status(usart, TxReg::PC, &[0x00, 0xC0]);
+    jmp_c000(usart);
     usart_write(usart, &[OpeMode::Sequence as u8, 0x01]);
     // second status of nestest.log
     check_valid_register_status(usart, TxReg::PC, &[0xF5, 0xC5]);
     check_valid_register_status(usart, TxReg::S, &[0xFD]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
-    info!("test_inst_sequence passed!");
+
+    info!("test_inst_sequence_should_execute_first_ope passed!");
+}
+
+pub fn test_inst_sequence_first_bit<T: BasicInstance, P: Pin, P2: Pin>(
+    usart: &mut Uart<T>,
+    nop: &Input<P>,
+    resb: &mut Output<P2>,
+) {
+    send_reset_signal_if_not_nop(&nop, resb);
+    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
+    usart_write(usart, &[CassetteMode::NesTest as u8]);
+    check_valid_register_status(usart, TxReg::S, &[0xFD]);
+    jmp_c000(usart);
+
+    // step to 42:c78D
+    usart_write(usart, &[OpeMode::Sequence as u8, 0x29]);
+    check_valid_register_status(usart, TxReg::A, &[0xFF]);
+    check_valid_register_status(usart, TxReg::X, &[0x00]);
+    check_valid_register_status(usart, TxReg::Y, &[0x00]);
+    check_valid_register_status(usart, TxReg::P, &[0b11100100]);
+    check_valid_register_status(usart, TxReg::S, &[0xFB]);
+    check_valid_register_status(usart, TxReg::PC, &[0x8D, 0xC7]);
+
+    info!("test_inst_sequence_first_bit passed!");
 }
 
 #[cortex_m_rt::entry]
@@ -47,6 +75,7 @@ fn main() -> ! {
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
     test_inst_sequence_should_execute_first_ope(&mut usart, &nop, &mut resb);
+    test_inst_sequence_first_bit(&mut usart, &nop, &mut resb);
 
     info!("all tests passed!");
     loop {}

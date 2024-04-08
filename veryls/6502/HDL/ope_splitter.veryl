@@ -1,31 +1,36 @@
 module OpeSplitter (
-    i_clk     : input  logic                ,
-    i_rst     : input  logic                ,
-    i_en      : input  logic                ,
-    i_ope_kind: input  OperatorsPkg::OpeKind,
-    o_ope_mode: output ModePkg::OpeMode     ,
-    o_busy    : output logic                ,
-    o_finish  : output logic                ,
+    i_clk          : input   logic                ,
+    i_rst          : input   logic                ,
+    i_en           : input   logic                ,
+    i_ope_kind     : input   OperatorsPkg::OpeKind,
+    if_register_mst: modport RegisterIf::Master   ,
+    if_register_slv: modport RegisterIf::Slave    ,
+    o_ope_mode     : output  ModePkg::OpeMode     ,
+    o_busy         : output  logic                ,
+    o_finish       : output  logic                ,
 ) {
     enum Status: logic<2> {
         Idle,
         Work,
         Finish,
     }
-    var status         : Status          ;
-    var status_next    : Status          ;
-    var o_ope_mode_next: ModePkg::OpeMode;
-    var o_busy_next    : logic           ;
-    var o_finish_next  : logic           ;
+    var status         : Status              ;
+    var status_next    : Status              ;
+    var o_ope_mode_next: ModePkg::OpeMode    ;
+    var o_busy_next    : logic               ;
+    var o_finish_next  : logic               ;
+    var o_pc_next      : logic           <16>;
     always_comb {
         status_next     = status;
         o_finish_next   = o_finish;
         o_busy_next     = o_busy;
         o_ope_mode_next = o_ope_mode;
+        o_pc_next       = if_register_mst.pc;
         case status {
             Status::Idle: {
                 if i_en {
                     o_busy_next = 1;
+                    o_pc_next   = if_register_slv.pc;
                     status_next = Status::Work;
                 }
             }
@@ -42,9 +47,10 @@ module OpeSplitter (
                     o_ope_mode_next = ModePkg::OpeMode::ReadAndStoreToAccOrMemory;
                 } else if i_ope_kind == OperatorsPkg::OpeKind::Jsr || i_ope_kind == OperatorsPkg::OpeKind::Sta || i_ope_kind == OperatorsPkg::OpeKind::Stx || i_ope_kind == OperatorsPkg::OpeKind::Sty || i_ope_kind == OperatorsPkg::OpeKind::Pha || i_ope_kind == OperatorsPkg::OpeKind::Php {
                     o_ope_mode_next = ModePkg::OpeMode::StoreToMemory;
-                } else if i_ope_kind == OperatorsPkg::OpeKind::Nop {
-                    o_finish_next = status_next == Status::Finish;
                 } else {
+                    if i_ope_kind == OperatorsPkg::OpeKind::Nop {
+                        o_pc_next += 1;
+                    }
                     o_ope_mode_next = ModePkg::OpeMode::Other;
                 }
             }
@@ -57,15 +63,17 @@ module OpeSplitter (
 
     always_ff (posedge i_clk, async_high i_rst) {
         if_reset {
-            status     = Status::Idle;
-            o_finish   = 0;
-            o_busy     = 0;
-            o_ope_mode = ModePkg::OpeMode::Nop;
+            status             = Status::Idle;
+            if_register_mst.pc = 0;
+            o_finish           = 0;
+            o_busy             = 0;
+            o_ope_mode         = ModePkg::OpeMode::Nop;
         } else {
-            status     = status_next;
-            o_finish   = o_finish_next;
-            o_busy     = o_busy_next;
-            o_ope_mode = o_ope_mode_next;
+            status             = status_next;
+            if_register_mst.pc = o_pc_next;
+            o_finish           = o_finish_next;
+            o_busy             = o_busy_next;
+            o_ope_mode         = o_ope_mode_next;
         }
     }
 }

@@ -25,7 +25,7 @@ pub fn check_valid_register_status<T: BasicInstance>(
                 info!("valid register status.");
             } else {
                 info!(
-                    "test failed. expect value is {:?}, but return value is {:?}",
+                    "test failed. expect value is {:X}, but return value is {:X}",
                     expect_data, read_buf
                 );
                 loop {}
@@ -38,7 +38,7 @@ pub fn check_valid_register_status<T: BasicInstance>(
                 info!("valid register status.");
             } else {
                 info!(
-                    "test failed. expect value is {:?}, but return value is {:?}",
+                    "test failed. expect value is {:X}, but return value is {:X}",
                     expect_data, read_buf
                 );
                 loop {}
@@ -50,7 +50,7 @@ pub fn check_valid_register_status<T: BasicInstance>(
 pub fn usart_write<T: BasicInstance>(usart: &mut Uart<T>, send_data: &[u8]) {
     for n in send_data {
         usart.blocking_write(&[*n]).unwrap();
-        info!("usart write data({})", n);
+        info!("usart write data({:X})", n);
     }
 }
 
@@ -64,7 +64,7 @@ pub fn usart_read_with_check<T: BasicInstance>(
         info!("6502 receive expece data.");
     } else {
         info!(
-            "test failed. expect value is {:?}, but return value is {:?}",
+            "test failed. expect value is {:X}, but return value is {:X}",
             expect_data, read_buf
         );
         loop {}

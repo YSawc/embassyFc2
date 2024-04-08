@@ -138,7 +138,7 @@ module OpeReadAndStoreToMemory (
                         o_pc_next = if_register_slv.pc;
                     }
                     if i_ope_kind == OperatorsPkg::OpeKind::Brk {
-                        if (o_p_next & 8'b00000100) == 0 {
+                        if (o_p_next & 8'b00000100) != 0 {
                             tmp_target_low_addr_next  = o_s_next;
                             tmp_target_high_addr_next = 1;
                             o_s_next                  = utilPkg::wrapping_sub(o_s_next, 1);
