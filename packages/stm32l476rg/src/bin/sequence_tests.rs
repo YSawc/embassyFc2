@@ -51,14 +51,14 @@ pub fn test_inst_sequence<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::S, &[0xFD]);
     jmp_c000(usart);
 
-    // step to 51:C7E0
-    usart_write(usart, &[OpeMode::Sequence as u8, 0x32]);
-    check_valid_register_status(usart, TxReg::A, &[0x00]);
+    // step to 67:C600
+    usart_write(usart, &[OpeMode::Sequence as u8, 0x42]);
+    check_valid_register_status(usart, TxReg::A, &[0xFF]);
     check_valid_register_status(usart, TxReg::X, &[0x00]);
     check_valid_register_status(usart, TxReg::Y, &[0x00]);
-    check_valid_register_status(usart, TxReg::P, &[0b00100110]);
+    check_valid_register_status(usart, TxReg::P, &[0b11100100]);
     check_valid_register_status(usart, TxReg::S, &[0xFB]);
-    check_valid_register_status(usart, TxReg::PC, &[0xA6, 0xC7]);
+    check_valid_register_status(usart, TxReg::PC, &[0xE2, 0xC7]);
 
     info!("test_inst_sequence_first_bit passed!");
 }

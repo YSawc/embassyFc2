@@ -93,9 +93,9 @@ module OpeStoreToMemory (
                         tmp_target_high_addr_next = 1;
                         s_next                    = utilPkg::wrapping_sub(s_next, 1);
                         if write_count == 0 {
-                            i_send_data_next = (if_register_slv.pc & 16'hFF00) >> 8;
+                            i_send_data_next = ((pc_next - 1) & 16'hFF00) >> 8;
                         } else {
-                            i_send_data_next = if_register_slv.pc & 16'h00FF;
+                            i_send_data_next = (pc_next - 1) & 16'h00FF;
                         }
                     } else if i_ope_kind == OperatorsPkg::OpeKind::Pha || i_ope_kind == OperatorsPkg::OpeKind::Php {
                         s_next                    = RegisterPkg::sub_without_flag(p_next, s_next, 1);

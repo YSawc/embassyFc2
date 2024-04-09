@@ -93,7 +93,7 @@ pub fn test_rts_impl_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::A, &[0xC5]);
     check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0xFC, 0x01]);
-    check_valid_register_status(usart, TxReg::A, &[0xFC]);
+    check_valid_register_status(usart, TxReg::A, &[0xFE]);
     check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0xFF]);
     check_valid_register_status(usart, TxReg::A, &[0xFF]);
@@ -173,7 +173,7 @@ pub fn test_rts_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::S, &[0xFD]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x20, 0x2D, 0xC7]);
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFD, 0x01, 0xC5]);
-    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFC, 0x01, 0xFC]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFC, 0x01, 0xFE]);
     check_valid_register_status(usart, TxReg::PC, &[0x2D, 0xC7]);
     check_valid_register_status(usart, TxReg::S, &[0xFB]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
