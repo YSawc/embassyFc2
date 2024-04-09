@@ -201,7 +201,7 @@ package RegisterPkg {
         input_3: input logic<8> ,
     ) {
         input_1                        = (pc & 16'hFF00) >> 8;
-        input_2                        = pc & 16'h000FF;
+        input_2                        = pc & 16'h00FF;
         add_three_without_adding_carry(input_1, input_2, 1);
         let byte_buf                      : logic<16> = (input_1 << 8) + input_2 + input_3;
         if (input_3 >= 8'h80) {

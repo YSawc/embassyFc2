@@ -906,6 +906,7 @@ module Debug (
             Status::OpeCompare: {
                 o_tx_next               = o_ope_compare_tx;
                 o_p_next                = if_ope_compare_register.p;
+                o_pc_next               = if_ope_compare_register.pc;
                 if_memory_mst_en_next   = if_ope_compare_memory.en;
                 if_memory_mst_we_next   = if_ope_compare_memory.we;
                 if_memory_mst_addr_next = if_ope_compare_memory.addr;

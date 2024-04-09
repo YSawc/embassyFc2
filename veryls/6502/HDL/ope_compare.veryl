@@ -24,13 +24,14 @@ module OpeCompare (
         Compare,
         Finish,
     }
-    var status_next      : Status   ;
-    var status           : Status   ;
-    var o_p_next         : logic <8>;
-    var o_busy_next      : logic    ;
-    var o_finish_next    : logic    ;
-    var compare_data     : logic <8>;
-    var compare_data_next: logic <8>;
+    var status_next      : Status    ;
+    var status           : Status    ;
+    var o_p_next         : logic <8> ;
+    var o_pc_next        : logic <16>;
+    var o_busy_next      : logic     ;
+    var o_finish_next    : logic     ;
+    var compare_data     : logic <8> ;
+    var compare_data_next: logic <8> ;
 
     let i_read_memory_en     : logic    = status == Status::ReadMemory;
     var o_read_memory_data   : logic<8>;
@@ -69,6 +70,7 @@ module OpeCompare (
     var if_memory_mst_data_next: logic<8> ;
     always_comb {
         o_p_next                = if_register_mst.p;
+        o_pc_next               = if_register_mst.pc;
         status_next             = status;
         o_finish_next           = o_finish;
         compare_data_next       = compare_data;
@@ -78,7 +80,8 @@ module OpeCompare (
         if_memory_mst_data_next = if_memory_mst.data;
         case status {
             Status::Ready: {
-                o_p_next = if_register_slv.p;
+                o_p_next  = if_register_slv.p;
+                o_pc_next = if_register_slv.pc;
                 if i_en {
                     if i_addr_mode == OperatorsPkg::AddrMode::Imm {
                         compare_data_next = i_target_low_addr;
@@ -119,6 +122,7 @@ module OpeCompare (
         if_reset {
             compare_data       = 0;
             if_register_mst.p  = 36;
+            if_register_mst.pc = 0;
             if_memory_mst.en   = 0;
             if_memory_mst.we   = 0;
             if_memory_mst.addr = 0;
@@ -129,6 +133,7 @@ module OpeCompare (
         } else {
             compare_data       = compare_data_next;
             if_register_mst.p  = o_p_next;
+            if_register_mst.pc = o_pc_next;
             if_memory_mst.en   = if_memory_mst_en_next;
             if_memory_mst.we   = if_memory_mst_we_next;
             if_memory_mst.addr = if_memory_mst_addr_next;
