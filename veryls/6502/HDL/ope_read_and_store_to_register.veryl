@@ -215,7 +215,8 @@ module OpeReadAndStoreToRegister (
                     o_y_next            = register_data;
                     RegisterPkg::set_nz(o_p_next, o_y_next);
                 } else if i_ope_kind == OperatorsPkg::OpeKind::Plp {
-                    o_p_next = register_data;
+                    o_p_next =  register_data;
+                    o_p_next &= 8'b11101111;
                 }
             }
             Status::Finish: {
