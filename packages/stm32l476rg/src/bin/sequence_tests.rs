@@ -50,15 +50,17 @@ pub fn test_inst_sequence<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[CassetteMode::NesTest as u8]);
     check_valid_register_status(usart, TxReg::S, &[0xFD]);
     jmp_c000(usart);
+    usart_write(usart, &[OpeMode::Sequence as u8, 200]);
+    usart_write(usart, &[OpeMode::Sequence as u8, 200]);
 
-    // step to 237:c949
-    usart_write(usart, &[OpeMode::Sequence as u8, 236]);
-    check_valid_register_status(usart, TxReg::A, &[0x6B]);
+    // step to 468
+    usart_write(usart, &[OpeMode::Sequence as u8, 67]);
+    check_valid_register_status(usart, TxReg::A, &[0x80]);
     check_valid_register_status(usart, TxReg::X, &[0x00]);
     check_valid_register_status(usart, TxReg::Y, &[0x00]);
-    check_valid_register_status(usart, TxReg::P, &[0b00001111]);
+    check_valid_register_status(usart, TxReg::P, &[0x46]);
     check_valid_register_status(usart, TxReg::S, &[0xFB]);
-    check_valid_register_status(usart, TxReg::PC, &[0x49, 0xC9]);
+    check_valid_register_status(usart, TxReg::PC, &[0x7D, 0xCB]);
 
     info!("test_inst_sequence passed!");
 }

@@ -41,7 +41,7 @@ async fn main() {
     let root = Path::new("../");
     env::set_current_dir(root).unwrap();
 
-    let timelimit = Duration::from_secs(13);
+    let timelimit = Duration::from_secs(20);
     for testcase in testcases {
         timeout(timelimit, exe_testcase(testcase.to_string()))
             .await

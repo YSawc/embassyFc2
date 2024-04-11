@@ -105,7 +105,7 @@ pub fn test_adc_imm_plus_carry_within_internal_memory<T: BasicInstance, P: Pin, 
     check_valid_register_status(usart, TxReg::P, &[0b00100101]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x69, 0x7F]);
     check_valid_register_status(usart, TxReg::A, &[0xFF]);
-    check_valid_register_status(usart, TxReg::P, &[0b10100100]);
+    check_valid_register_status(usart, TxReg::P, &[0b11100100]);
     info!("test_adc_imm_plus_carry_within_internal_memory passed!");
 }
 
@@ -345,7 +345,7 @@ pub fn test_adc_imm_plus_carry_within_mocking_memory<T: BasicInstance, P: Pin, P
     check_valid_register_status(usart, TxReg::P, &[0b00100101]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x69, 0x7F]);
     check_valid_register_status(usart, TxReg::A, &[0xFF]);
-    check_valid_register_status(usart, TxReg::P, &[0b10100100]);
+    check_valid_register_status(usart, TxReg::P, &[0b11100100]);
     info!("test_adc_imm_plus_carry_within_mocking_memory passed!");
 }
 

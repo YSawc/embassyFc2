@@ -57,10 +57,11 @@ package RegisterPkg {
         input_l  : input logic<8>,
         input_r  : input logic<8>,
     ) -> logic<8> {
-        let old_carry: logic = (current_p & 8'b00000001) != 0;
-        let is_carry : logic = (input_l + input_r + old_carry) >= 16'h100;
+        let old_carry: logic    = (current_p & 8'b00000001) != 0;
+        let is_carry : logic    = (input_l + input_r + old_carry) >= 16'h100;
+        let result   : logic<8> = base_add_with_vnz(1, 1, 1, current_p, input_l, input_r);
         set_c    (current_p, is_carry);
-        return base_add_with_vnz(1, 1, current_p, input_l, input_r + old_carry);
+        return result;
     }
 
     function add_with_vnz (
@@ -68,7 +69,7 @@ package RegisterPkg {
         input_l  : input logic<8>,
         input_r  : input logic<8>,
     ) -> logic<8> {
-        return base_add_with_vnz(1, 1, current_p, input_l, input_r);
+        return base_add_with_vnz(1, 1, 0, current_p, input_l, input_r);
     }
 
     function add_with_nz (
@@ -76,7 +77,7 @@ package RegisterPkg {
         input_l  : input logic<8>,
         input_r  : input logic<8>,
     ) -> logic<8> {
-        return base_add_with_vnz(0, 1, current_p, input_l, input_r);
+        return base_add_with_vnz(0, 1, 0, current_p, input_l, input_r);
     }
 
     function add_without_flag (
@@ -84,29 +85,34 @@ package RegisterPkg {
         input_l  : input logic<8>,
         input_r  : input logic<8>,
     ) -> logic<8> {
-        return base_add_with_vnz(0, 0, current_p, input_l, input_r);
+        return base_add_with_vnz(0, 0, 0, current_p, input_l, input_r);
     }
 
     function base_add_with_vnz (
         handle_overflow: input logic   ,
         handle_nz      : input logic   ,
+        adding_carry   : input logic   ,
         current_p      : ref   logic<8>,
         input_l        : input logic<8>,
         input_r        : input logic<8>,
     ) -> logic<8> {
         let is_l_data_plus: logic     = (input_l & 8'b10000000) == 0;
         let is_r_data_plus: logic     = (input_r & 8'b10000000) == 0;
-        let byte_buf      : logic<16> = input_l + input_r;
-        let is_carry      : logic     = byte_buf >= 16'h100;
-        let output_data   : logic<8>  = if is_carry {
-            input_l + input_r - 16'h100
+        let old_carry     : logic     = (current_p & 8'b00000001) != 0;
+        let byte_buf      : logic<16> = if adding_carry {
+            input_l + input_r + old_carry
         } else {
             input_l + input_r
         };
+        let is_carry   : logic    = byte_buf >= 16'h100;
+        let output_data: logic<8> = if is_carry {
+            byte_buf - 16'h100
+        } else {
+            byte_buf
+        };
         let is_data_plus: logic = (output_data & 8'b10000000) == 0;
-        var is_overflow : logic;
         if handle_overflow {
-            is_overflow = (is_data_plus != is_l_data_plus) && (is_data_plus != is_r_data_plus);
+            let is_overflow: logic = (is_data_plus != is_l_data_plus) && (is_data_plus != is_r_data_plus);
             set_v      (current_p, is_overflow);
         }
         if handle_nz {
