@@ -53,11 +53,11 @@ module OpeOther (
                 status_next = Status::Finish;
                 o_busy_next = 0;
                 if i_ope_kind == OperatorsPkg::OpeKind::Inx {
-                    x_next = RegisterPkg::add_with_vnz(p_next, x_next, 1);
+                    x_next = RegisterPkg::add_with_nz(p_next, x_next, 1);
                 } else if i_ope_kind == OperatorsPkg::OpeKind::Dex {
                     x_next = RegisterPkg::sub_with_nz(p_next, x_next, 1);
                 } else if i_ope_kind == OperatorsPkg::OpeKind::Iny {
-                    y_next = RegisterPkg::add_with_vnz(p_next, y_next, 1);
+                    y_next = RegisterPkg::add_with_nz(p_next, y_next, 1);
                 } else if i_ope_kind == OperatorsPkg::OpeKind::Dey {
                     y_next = RegisterPkg::sub_with_nz(p_next, y_next, 1);
                 } else if i_ope_kind == OperatorsPkg::OpeKind::Clc {

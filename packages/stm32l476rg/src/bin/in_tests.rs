@@ -209,7 +209,7 @@ pub fn test_inx_impl_with_zero_within_internal_memory<
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xE8]);
     check_valid_register_status(usart, TxReg::X, &[0x80]);
-    check_valid_register_status(usart, TxReg::P, &[0b11100100]);
+    check_valid_register_status(usart, TxReg::P, &[0b10100100]);
 }
 
 pub fn test_iny_impl_without_flag_within_internal_memory<
@@ -422,7 +422,7 @@ pub fn test_inx_impl_with_zero_within_mocking_memory<T: BasicInstance, P: Pin, P
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xE8]);
     check_valid_register_status(usart, TxReg::X, &[0x80]);
-    check_valid_register_status(usart, TxReg::P, &[0b11100100]);
+    check_valid_register_status(usart, TxReg::P, &[0b10100100]);
 }
 
 pub fn test_iny_impl_without_flag_within_mocking_memory<
