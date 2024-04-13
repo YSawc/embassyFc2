@@ -24,3 +24,11 @@ analysis:
 execute_tests:
 	cd packages/test-executor && \
 	cargo run
+
+execute_sequence-: $(addprefix execute_sequence-, $(LINE))
+
+execute_sequence-%:
+	cd packages/dump_sequence && \
+	cargo run ${@:execute_sequence-%=%} && \
+	cd ../stm32l476rg && \
+	cargo run --bin generated_sequence_test

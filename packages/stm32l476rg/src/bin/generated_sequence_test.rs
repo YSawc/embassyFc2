@@ -21,25 +21,6 @@ pub fn jmp_c000<T: BasicInstance>(usart: &mut Uart<T>) {
     check_valid_register_status(usart, TxReg::PC, &[0x00, 0xC0]);
 }
 
-pub fn test_inst_sequence_should_execute_first_ope<T: BasicInstance, P: Pin, P2: Pin>(
-    usart: &mut Uart<T>,
-    nop: &Input<P>,
-    resb: &mut Output<P2>,
-) {
-    send_reset_signal_if_not_nop(&nop, resb);
-    usart_write(usart, &[CpuMode::DebugWithinInternalMemory as u8]);
-    usart_write(usart, &[CassetteMode::NesTest as u8]);
-    check_valid_register_status(usart, TxReg::S, &[0xFD]);
-    jmp_c000(usart);
-    usart_write(usart, &[OpeMode::Sequence as u8, 0x01]);
-    // second status of nestest.log
-    check_valid_register_status(usart, TxReg::PC, &[0xF5, 0xC5]);
-    check_valid_register_status(usart, TxReg::S, &[0xFD]);
-    check_valid_register_status(usart, TxReg::P, &[0b00100100]);
-
-    info!("test_inst_sequence_should_execute_first_ope passed!");
-}
-
 pub fn test_inst_sequence<T: BasicInstance, P: Pin, P2: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
@@ -58,14 +39,14 @@ pub fn test_inst_sequence<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[OpeMode::Sequence as u8, 200]);
     usart_write(usart, &[OpeMode::Sequence as u8, 200]);
 
-    // step to 1450
-    usart_write(usart, &[OpeMode::Sequence as u8, 49]);
-    check_valid_register_status(usart, TxReg::A, &[0x7F]);
+    // step to 1463
+    usart_write(usart, &[OpeMode::Sequence as u8, 62]);
+    check_valid_register_status(usart, TxReg::A, &[0x02]);
     check_valid_register_status(usart, TxReg::X, &[0x00]);
-    check_valid_register_status(usart, TxReg::Y, &[0x6F]);
-    check_valid_register_status(usart, TxReg::P, &[0x47]);
+    check_valid_register_status(usart, TxReg::Y, &[0x70]);
+    check_valid_register_status(usart, TxReg::P, &[0x45]);
     check_valid_register_status(usart, TxReg::S, &[0xF9]);
-    check_valid_register_status(usart, TxReg::PC, &[0x7A, 0xF9]);
+    check_valid_register_status(usart, TxReg::PC, &[0x88, 0xF9]);
 
     info!("test_inst_sequence passed!");
 }
@@ -81,7 +62,6 @@ fn main() -> ! {
     let _rw = Input::new(p.PA0, Pull::None);
     let nop = Input::new(p.PA1, Pull::None);
     let mut resb = Output::new(p.PA4, Level::Low, Speed::Medium);
-    test_inst_sequence_should_execute_first_ope(&mut usart, &nop, &mut resb);
     test_inst_sequence(&mut usart, &nop, &mut resb);
 
     info!("all tests passed!");
