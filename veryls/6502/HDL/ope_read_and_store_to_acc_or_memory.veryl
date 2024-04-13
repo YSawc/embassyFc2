@@ -26,14 +26,15 @@ module OpeReadAndStoreToAccOrMemory (
         WriteMemory,
         Finish,
     }
-    var status_next  : Status   ;
-    var status       : Status   ;
-    var is_carry_next: logic    ;
-    var is_carry     : logic    ;
-    var a_next       : logic <8>;
-    var p_next       : logic <8>;
-    var o_busy_next  : logic    ;
-    var o_finish_next: logic    ;
+    var status_next  : Status    ;
+    var status       : Status    ;
+    var is_carry_next: logic     ;
+    var is_carry     : logic     ;
+    var a_next       : logic <8> ;
+    var p_next       : logic <8> ;
+    var pc_next      : logic <16>;
+    var o_busy_next  : logic     ;
+    var o_finish_next: logic     ;
 
     let i_read_memory_en     : logic    = status == Status::ReadMemory;
     var o_read_memory_data   : logic<8>;
@@ -90,6 +91,7 @@ module OpeReadAndStoreToAccOrMemory (
     always_comb {
         a_next                  = if_register_mst.a;
         p_next                  = if_register_mst.p;
+        pc_next                 = if_register_mst.pc;
         status_next             = status;
         o_finish_next           = o_finish;
         i_assign_data_next      = i_assign_data;
@@ -101,8 +103,9 @@ module OpeReadAndStoreToAccOrMemory (
         case status {
             Status::Ready: {
                 if i_en {
-                    a_next = if_register_slv.a;
-                    p_next = if_register_slv.p;
+                    a_next  = if_register_slv.a;
+                    p_next  = if_register_slv.p;
+                    pc_next = if_register_slv.pc;
                     if i_addr_mode == OperatorsPkg::AddrMode::Acc {
                         i_assign_data_next = a_next;
                         status_next        = Status::PreWrite;
@@ -165,6 +168,7 @@ module OpeReadAndStoreToAccOrMemory (
         if_reset {
             if_register_mst.a  = 0;
             if_register_mst.p  = 36;
+            if_register_mst.pc = 0;
             status             = Status::Ready;
             i_assign_data      = 0;
             is_carry           = 0;
@@ -177,6 +181,7 @@ module OpeReadAndStoreToAccOrMemory (
         } else {
             if_register_mst.a  = a_next;
             if_register_mst.p  = p_next;
+            if_register_mst.pc = pc_next;
             status             = status_next;
             i_assign_data      = i_assign_data_next;
             is_carry           = is_carry_next;
