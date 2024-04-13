@@ -137,9 +137,9 @@ module OpeReadAndStoreToRegister (
                             status_next        = Status::WriteRegister;
                         } else {
                             if i_ope_kind == OperatorsPkg::OpeKind::Plp || i_ope_kind == OperatorsPkg::OpeKind::Pla {
+                                o_s_next                  = RegisterPkg::add_without_flag(o_p_next, o_s_next, 1);
                                 tmp_target_low_addr_next  = o_s_next;
                                 tmp_target_high_addr_next = 1;
-                                o_s_next                  = RegisterPkg::add_without_flag(o_p_next, o_s_next, 1);
                             } else {
                                 tmp_target_low_addr_next  = i_target_low_addr;
                                 tmp_target_high_addr_next = i_target_high_addr;

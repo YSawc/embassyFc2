@@ -55,14 +55,14 @@ pub fn test_inst_sequence<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[OpeMode::Sequence as u8, 200]);
     usart_write(usart, &[OpeMode::Sequence as u8, 200]);
 
-    // step to 859
-    usart_write(usart, &[OpeMode::Sequence as u8, 58]);
-    check_valid_register_status(usart, TxReg::A, &[0x33]);
-    check_valid_register_status(usart, TxReg::X, &[0x7E]);
-    check_valid_register_status(usart, TxReg::Y, &[0x01]);
-    check_valid_register_status(usart, TxReg::P, &[0x07]);
+    // step to 957
+    usart_write(usart, &[OpeMode::Sequence as u8, 156]);
+    check_valid_register_status(usart, TxReg::A, &[0x55]);
+    check_valid_register_status(usart, TxReg::X, &[0x99]);
+    check_valid_register_status(usart, TxReg::Y, &[0x88]);
+    check_valid_register_status(usart, TxReg::P, &[0x87]);
     check_valid_register_status(usart, TxReg::S, &[0x80]);
-    check_valid_register_status(usart, TxReg::PC, &[0x17, 0xCE]);
+    check_valid_register_status(usart, TxReg::PC, &[0xD6, 0xCE]);
 
     info!("test_inst_sequence passed!");
 }
