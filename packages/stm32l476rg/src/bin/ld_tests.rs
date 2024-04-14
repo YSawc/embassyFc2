@@ -265,7 +265,7 @@ pub fn test_ldx_zp_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3:
 pub fn test_ldx_abs_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
-    rw: &Input<P2>,
+    _rw: &Input<P2>,
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
@@ -275,9 +275,7 @@ pub fn test_ldx_abs_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3
     check_valid_register_status(usart, TxReg::A, &[0xFB]);
     check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0xFF, 0x07]);
-    usart_write(usart, &[OpeMode::Inst as u8, 0xAE]);
-    check_rw_is_high(&rw);
-    usart.blocking_write(&[0xFF, 0x07]).unwrap();
+    usart_write(usart, &[OpeMode::Inst as u8, 0xAE, 0xFF, 0x07]);
     check_valid_register_status(usart, TxReg::X, &[0xFB]);
     check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     info!("test_ldx_abs_within_internal_memory passed!");
@@ -309,7 +307,7 @@ pub fn test_ldx_zpy_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3
 pub fn test_ldx_absy_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
-    rw: &Input<P2>,
+    _rw: &Input<P2>,
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
@@ -323,9 +321,7 @@ pub fn test_ldx_absy_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P
     usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0x78]);
     check_valid_register_status(usart, TxReg::Y, &[0x78]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
-    usart_write(usart, &[OpeMode::Inst as u8, 0xBE]);
-    check_rw_is_high(&rw);
-    usart.blocking_write(&[0x00, 0x06]).unwrap();
+    usart_write(usart, &[OpeMode::Inst as u8, 0xBE, 0x00, 0x06]);
     check_valid_register_status(usart, TxReg::X, &[0x33]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     info!("test_ldx_absy_within_internal_memory passed!");
@@ -372,7 +368,7 @@ pub fn test_ldy_zp_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3:
 pub fn test_ldy_abs_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
-    rw: &Input<P2>,
+    _rw: &Input<P2>,
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
@@ -382,9 +378,7 @@ pub fn test_ldy_abs_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3
     check_valid_register_status(usart, TxReg::A, &[0x55]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x78, 0x06]);
-    usart_write(usart, &[OpeMode::Inst as u8, 0xAC]);
-    check_rw_is_high(&rw);
-    usart.blocking_write(&[0x78, 0x06]).unwrap();
+    usart_write(usart, &[OpeMode::Inst as u8, 0xAC, 0x78, 0x06]);
     check_valid_register_status(usart, TxReg::Y, &[0x55]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     info!("test_ldy_abs_within_internal_memory passed!");
@@ -419,7 +413,7 @@ pub fn test_ldy_zpx_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3
 pub fn test_ldy_absx_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3: Pin>(
     usart: &mut Uart<T>,
     nop: &Input<P>,
-    rw: &Input<P2>,
+    _rw: &Input<P2>,
     resb: &mut Output<P3>,
 ) {
     send_reset_signal_if_not_nop(&nop, resb);
@@ -429,9 +423,7 @@ pub fn test_ldy_absx_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P
     usart_write(usart, &[OpeMode::Inst as u8, 0xA2, 0x8A]);
     check_valid_register_status(usart, TxReg::X, &[0x8A]);
     check_valid_register_status(usart, TxReg::P, &[0b10100100]);
-    usart_write(usart, &[OpeMode::Inst as u8, 0xBC]);
-    check_rw_is_high(&rw);
-    usart.blocking_write(&[0xFF, 0x05]).unwrap();
+    usart_write(usart, &[OpeMode::Inst as u8, 0xBC, 0xFF, 0x05]);
     check_valid_register_status(usart, TxReg::Y, &[0x00]);
     check_valid_register_status(usart, TxReg::P, &[0b00100110]);
     info!("test_ldy_absx_within_internal_memory passed!");

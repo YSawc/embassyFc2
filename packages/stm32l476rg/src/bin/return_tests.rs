@@ -30,7 +30,7 @@ pub fn test_rti_impl_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::A, &[0xCE]);
     check_valid_register_status(usart, TxReg::S, &[0xFC]);
     check_valid_register_status(usart, TxReg::P, &[0b10100100]);
-    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0xFC, 0x01]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0xFD, 0x01]);
     check_valid_register_status(usart, TxReg::A, &[0xCE]);
     check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0xAD]);
@@ -41,7 +41,7 @@ pub fn test_rti_impl_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::A, &[0xAD]);
     check_valid_register_status(usart, TxReg::S, &[0xFB]);
     check_valid_register_status(usart, TxReg::P, &[0b10100100]);
-    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0xFB, 0x01]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0xFC, 0x01]);
     check_valid_register_status(usart, TxReg::A, &[0xAD]);
     check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x65]);
@@ -52,13 +52,13 @@ pub fn test_rti_impl_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::A, &[0x65]);
     check_valid_register_status(usart, TxReg::S, &[0xFA]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
-    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0xFA, 0x01]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0xFB, 0x01]);
     check_valid_register_status(usart, TxReg::A, &[0x65]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x65]);
     check_valid_register_status(usart, TxReg::A, &[0x65]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
-    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0xFB, 0x01]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0xFC, 0x01]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0xAD]);
     check_valid_register_status(usart, TxReg::A, &[0xAD]);
     check_valid_register_status(usart, TxReg::P, &[0b10100100]);
@@ -125,7 +125,7 @@ pub fn test_rti_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::S, &[0xFD]);
     check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x48]);
-    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFC, 0x01, 0xCE]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFD, 0x01, 0xCE]);
     check_valid_register_status(usart, TxReg::A, &[0xCE]);
     check_valid_register_status(usart, TxReg::S, &[0xFC]);
     check_valid_register_status(usart, TxReg::P, &[0b10100100]);
@@ -134,7 +134,7 @@ pub fn test_rti_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::S, &[0xFC]);
     check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x48]);
-    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFB, 0x01, 0xAD]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFC, 0x01, 0xAD]);
     check_valid_register_status(usart, TxReg::A, &[0xAD]);
     check_valid_register_status(usart, TxReg::S, &[0xFB]);
     check_valid_register_status(usart, TxReg::P, &[0b10100100]);
@@ -143,7 +143,7 @@ pub fn test_rti_impl_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin>(
     check_valid_register_status(usart, TxReg::S, &[0xFB]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x48]);
-    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFA, 0x01, 0x24]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFB, 0x01, 0x24]);
     check_valid_register_status(usart, TxReg::A, &[0x24]);
     check_valid_register_status(usart, TxReg::S, &[0xFA]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);

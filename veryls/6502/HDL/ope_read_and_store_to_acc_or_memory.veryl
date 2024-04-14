@@ -61,12 +61,12 @@ module OpeReadAndStoreToAccOrMemory (
         o_finish              : o_read_memory_finish ,
     );
 
-    var i_assign_data     : logic<8>;
-    var i_assign_data_next: logic<8>;
-    let i_write_memory_en     : logic = i_we && status == Status::WriteMemory;
-    var o_write_memory_tx     : logic;
-    var o_write_memory_busy   : logic;
-    var o_write_memory_finish : logic;
+    var i_assign_data         : logic<8>;
+    var i_assign_data_next    : logic<8>;
+    let i_write_memory_en     : logic    = status == Status::WriteMemory;
+    var o_write_memory_tx     : logic   ;
+    var o_write_memory_busy   : logic   ;
+    var o_write_memory_finish : logic   ;
     inst if_write_memory_memory: MemoryIf;
     inst write_memory: WriteMemory (
         i_clk                                         ,
@@ -75,8 +75,8 @@ module OpeReadAndStoreToAccOrMemory (
         i_we                                          ,
         i_rx                                          ,
         i_debug_mock_memory_en                        ,
-        i_target_low_addr     : i_target_low_addr     ,
-        i_target_high_addr    : 0                     ,
+        i_target_low_addr                             ,
+        i_target_high_addr                            ,
         i_send_data           : i_assign_data         ,
         if_memory_mst         : if_write_memory_memory,
         if_memory_slv                                 ,
