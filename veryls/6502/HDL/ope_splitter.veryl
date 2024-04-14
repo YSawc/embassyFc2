@@ -19,17 +19,32 @@ module OpeSplitter (
     var o_ope_mode_next: ModePkg::OpeMode    ;
     var o_busy_next    : logic               ;
     var o_finish_next  : logic               ;
+    var o_a_next       : logic           <8> ;
+    var o_x_next       : logic           <8> ;
+    var o_y_next       : logic           <8> ;
+    var o_s_next       : logic           <8> ;
+    var o_p_next       : logic           <8> ;
     var o_pc_next      : logic           <16>;
     always_comb {
         status_next     = status;
         o_finish_next   = o_finish;
         o_busy_next     = o_busy;
         o_ope_mode_next = o_ope_mode;
+        o_a_next        = if_register_mst.a;
+        o_x_next        = if_register_mst.x;
+        o_y_next        = if_register_mst.y;
+        o_s_next        = if_register_mst.s;
+        o_p_next        = if_register_mst.p;
         o_pc_next       = if_register_mst.pc;
         case status {
             Status::Idle: {
                 if i_en {
                     o_busy_next = 1;
+                    o_a_next    = if_register_slv.a;
+                    o_x_next    = if_register_slv.x;
+                    o_y_next    = if_register_slv.y;
+                    o_s_next    = if_register_slv.s;
+                    o_p_next    = if_register_slv.p;
                     o_pc_next   = if_register_slv.pc;
                     status_next = Status::Work;
                 }
@@ -64,16 +79,26 @@ module OpeSplitter (
     always_ff (posedge i_clk, async_high i_rst) {
         if_reset {
             status             = Status::Idle;
+            if_register_mst.a  = 0;
+            if_register_mst.x  = 0;
+            if_register_mst.y  = 0;
+            if_register_mst.s  = 0;
+            if_register_mst.p  = 0;
             if_register_mst.pc = 0;
             o_finish           = 0;
             o_busy             = 0;
             o_ope_mode         = ModePkg::OpeMode::Nop;
         } else {
             status             = status_next;
+            if_register_mst.a  = o_a_next;
+            if_register_mst.x  = o_x_next;
+            if_register_mst.y  = o_y_next;
+            if_register_mst.s  = o_s_next;
+            if_register_mst.p  = o_p_next;
             if_register_mst.pc = o_pc_next;
-            o_finish           = o_finish_next;
-            o_busy             = o_busy_next;
-            o_ope_mode         = o_ope_mode_next;
+            o_finish   = o_finish_next;
+            o_busy     = o_busy_next;
+            o_ope_mode = o_ope_mode_next;
         }
     }
 }

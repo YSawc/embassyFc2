@@ -833,6 +833,11 @@ module Debug (
             }
             Status::OpeReady: {
                 if o_ope_splitter_finish {
+                    o_a_next  = if_ope_splitter_register.a;
+                    o_x_next  = if_ope_splitter_register.x;
+                    o_y_next  = if_ope_splitter_register.y;
+                    o_s_next  = if_ope_splitter_register.s;
+                    o_p_next  = if_ope_splitter_register.p;
                     o_pc_next = if_ope_splitter_register.pc;
                     if o_ope_mode == ModePkg::OpeMode::ReadAndStoreToMemory {
                         status_next = Status::OpeReadAndStoreToMemory;
