@@ -47,15 +47,20 @@ pub fn test_inst_sequence<T: BasicInstance, P: Pin, P2: Pin>(
     usart_write(usart, &[OpeMode::Sequence as u8, 200]);
     usart_write(usart, &[OpeMode::Sequence as u8, 200]);
     usart_write(usart, &[OpeMode::Sequence as u8, 200]);
+    usart_write(usart, &[OpeMode::Sequence as u8, 200]);
+    usart_write(usart, &[OpeMode::Sequence as u8, 200]);
+    usart_write(usart, &[OpeMode::Sequence as u8, 200]);
+    usart_write(usart, &[OpeMode::Sequence as u8, 200]);
+    usart_write(usart, &[OpeMode::Sequence as u8, 200]);
 
-    // step to 3328
-    usart_write(usart, &[OpeMode::Sequence as u8, 127]);
-    check_valid_register_status(usart, TxReg::A, &[0xDB]);
-    check_valid_register_status(usart, TxReg::X, &[0x07]);
-    check_valid_register_status(usart, TxReg::Y, &[0x00]);
-    check_valid_register_status(usart, TxReg::P, &[0xC5]);
+    // step to 4318
+    usart_write(usart, &[OpeMode::Sequence as u8, 117]);
+    check_valid_register_status(usart, TxReg::A, &[0x69]);
+    check_valid_register_status(usart, TxReg::X, &[0x69]);
+    check_valid_register_status(usart, TxReg::Y, &[0xFF]);
+    check_valid_register_status(usart, TxReg::P, &[0x05]);
     check_valid_register_status(usart, TxReg::S, &[0xFB]);
-    check_valid_register_status(usart, TxReg::PC, &[0x7B, 0xDB]);
+    check_valid_register_status(usart, TxReg::PC, &[0x16, 0xDF]);
 
     info!("test_inst_sequence passed!");
 }

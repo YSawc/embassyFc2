@@ -80,6 +80,11 @@ module AddrHandler (
         o_finish       : o_read_high_addr_finish ,
     );
 
+    var i_target_low_addr      : logic<8>;
+    var i_target_low_addr_next : logic<8>;
+    var i_target_high_addr     : logic<8>;
+    var i_target_high_addr_next: logic<8>;
+
     let i_read_low_memory_en     : logic    = status == Status::ReadLowMemory;
     var o_read_low_memory_data   : logic<8>;
     var o_read_low_memory_tx     : logic   ;
@@ -94,8 +99,8 @@ module AddrHandler (
         i_we                                             ,
         i_rx                                             ,
         i_debug_mock_memory_en                           ,
-        i_target_low_addr     : o_target_low_addr        ,
-        i_target_high_addr    : 0                        ,
+        i_target_low_addr                                ,
+        i_target_high_addr                               ,
         if_memory_mst         : if_read_low_memory_memory,
         if_memory_slv                                    ,
         o_data                : o_read_low_memory_data   ,
@@ -119,8 +124,8 @@ module AddrHandler (
         i_we                                              ,
         i_rx                                              ,
         i_debug_mock_memory_en                            ,
-        i_target_low_addr     : o_target_high_addr        ,
-        i_target_high_addr    : 0                         ,
+        i_target_low_addr                                 ,
+        i_target_high_addr                                ,
         if_memory_mst         : if_read_high_memory_memory,
         if_memory_slv                                     ,
         o_data                : o_read_high_memory_data   ,
@@ -154,6 +159,8 @@ module AddrHandler (
         if_memory_mst_we_next   = if_memory_mst.we;
         if_memory_mst_addr_next = if_memory_mst.addr;
         if_memory_mst_data_next = if_memory_mst.data;
+        i_target_low_addr_next  = i_target_low_addr;
+        i_target_high_addr_next = i_target_high_addr;
         case status {
             Status::Ready: {
                 o_p_next = if_register_slv.p;
@@ -198,7 +205,9 @@ module AddrHandler (
                     if i_addr_mode == OperatorsPkg::AddrMode::Imm || i_addr_mode == OperatorsPkg::AddrMode::Zp || i_addr_mode == OperatorsPkg::AddrMode::ZpX || i_addr_mode == OperatorsPkg::AddrMode::ZpY || i_addr_mode == OperatorsPkg::AddrMode::Rel {
                         status_next = Status::AdjustRegister;
                     } else if i_addr_mode == OperatorsPkg::AddrMode::IndX || i_addr_mode == OperatorsPkg::AddrMode::IndY {
-                        status_next = Status::ReadLowMemory;
+                        i_target_low_addr_next  = o_target_low_addr_next;
+                        i_target_high_addr_next = 0;
+                        status_next             = Status::ReadLowMemory;
                     } else {
                         status_next = Status::ReadTargetHighAddr;
                     }
@@ -214,7 +223,9 @@ module AddrHandler (
                 if o_read_high_addr_finish {
                     o_target_high_addr_next = o_read_high_addr_data;
                     if i_addr_mode == OperatorsPkg::AddrMode::Ind {
-                        status_next = Status::ReadLowMemory;
+                        i_target_low_addr_next  = o_target_low_addr;
+                        i_target_high_addr_next = o_read_high_addr_data;
+                        status_next             = Status::ReadLowMemory;
                     } else {
                         status_next = Status::AdjustRegister;
                     }
@@ -230,6 +241,13 @@ module AddrHandler (
                 if o_read_low_memory_finish {
                     o_target_low_addr_next = o_read_low_memory_data;
                     if i_addr_mode == OperatorsPkg::AddrMode::Ind || i_addr_mode == OperatorsPkg::AddrMode::IndX || i_addr_mode == OperatorsPkg::AddrMode::IndY {
+                        if i_addr_mode == OperatorsPkg::AddrMode::Ind {
+                            i_target_low_addr_next  = o_target_low_addr + 1;
+                            i_target_high_addr_next = o_target_high_addr;
+                        } else {
+                            i_target_low_addr_next  = o_target_high_addr;
+                            i_target_high_addr_next = 0;
+                        }
                         status_next = Status::ReadHighMemory;
                     } else {
                         status_next = Status::AdjustRegister;
@@ -285,6 +303,8 @@ module AddrHandler (
             if_memory_mst.we   = 0;
             if_memory_mst.addr = 0;
             if_memory_mst.data = 0;
+            i_target_low_addr  = 0;
+            i_target_high_addr = 0;
         } else {
             if_register_mst.p  = o_p_next;
             if_register_mst.pc = o_pc_next;
@@ -299,6 +319,8 @@ module AddrHandler (
             if_memory_mst.we   = if_memory_mst_we_next;
             if_memory_mst.addr = if_memory_mst_addr_next;
             if_memory_mst.data = if_memory_mst_data_next;
+            i_target_low_addr  = i_target_low_addr_next;
+            i_target_high_addr = i_target_high_addr_next;
         }
     }
 }
