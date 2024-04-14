@@ -147,6 +147,5 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let target_line_number = args[1].parse::<u32>().unwrap();
     let reg_s = RegisterStr::create_register_str(target_line_number);
-    println!("{:?}", reg_s);
     reg_s.gen_test_sequence_file(target_line_number);
 }

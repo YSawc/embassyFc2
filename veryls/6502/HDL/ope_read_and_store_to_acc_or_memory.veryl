@@ -60,26 +60,35 @@ module OpeReadAndStoreToAccOrMemory (
         o_busy                : o_read_memory_busy   ,
         o_finish              : o_read_memory_finish ,
     );
+
     var i_assign_data     : logic<8>;
     var i_assign_data_next: logic<8>;
-    let i_memory_tx_en    : logic    = i_en && status == Status::WriteMemory;
-    var i_memory_tx_tx    : logic   ;
-    var o_memory_tx_busy  : logic   ;
-    var o_memory_tx_finish: logic   ;
-    inst memory_tx: uarty::Tx (
-        i_clk                       ,
-        i_rst                       ,
-        i_en    : i_memory_tx_en    ,
-        i_data  : i_assign_data     ,
-        o_tx    : i_memory_tx_tx    ,
-        o_busy  : o_memory_tx_busy  ,
-        o_finish: o_memory_tx_finish,
+    let i_write_memory_en     : logic = i_we && status == Status::WriteMemory;
+    var o_write_memory_tx     : logic;
+    var o_write_memory_busy   : logic;
+    var o_write_memory_finish : logic;
+    inst if_write_memory_memory: MemoryIf;
+    inst write_memory: WriteMemory (
+        i_clk                                         ,
+        i_rst                                         ,
+        i_en                  : i_write_memory_en     ,
+        i_we                                          ,
+        i_rx                                          ,
+        i_debug_mock_memory_en                        ,
+        i_target_low_addr     : i_target_low_addr     ,
+        i_target_high_addr    : 0                     ,
+        i_send_data           : i_assign_data         ,
+        if_memory_mst         : if_write_memory_memory,
+        if_memory_slv                                 ,
+        o_tx                  : o_write_memory_tx     ,
+        o_busy                : o_write_memory_busy   ,
+        o_finish              : o_write_memory_finish ,
     );
 
     assign o_tx = if status == Status::ReadMemory {
         o_read_memory_tx
     } else if status == Status::WriteMemory {
-        i_memory_tx_tx
+        o_write_memory_tx
     } else {
         1
     };
@@ -151,7 +160,11 @@ module OpeReadAndStoreToAccOrMemory (
                 status_next         = Status::Finish;
             }
             Status::WriteMemory: {
-                if o_memory_tx_finish {
+                if_memory_mst_en_next   = if_write_memory_memory.en;
+                if_memory_mst_we_next   = if_write_memory_memory.we;
+                if_memory_mst_addr_next = if_write_memory_memory.addr;
+                if_memory_mst_data_next = if_write_memory_memory.data;
+                if o_write_memory_finish {
                     RegisterPkg::set_c (p_next, is_carry);
                     RegisterPkg::set_nz(p_next, i_assign_data);
                     status_next         = Status::Finish;
