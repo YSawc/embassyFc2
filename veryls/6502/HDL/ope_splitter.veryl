@@ -96,9 +96,9 @@ module OpeSplitter (
             if_register_mst.s  = o_s_next;
             if_register_mst.p  = o_p_next;
             if_register_mst.pc = o_pc_next;
-            o_finish   = o_finish_next;
-            o_busy     = o_busy_next;
-            o_ope_mode = o_ope_mode_next;
+            o_finish           = o_finish_next;
+            o_busy             = o_busy_next;
+            o_ope_mode         = o_ope_mode_next;
         }
     }
 }
