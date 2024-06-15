@@ -8,6 +8,7 @@ use std::{
 use tokio::time::timeout;
 
 async fn exe_testcase(testcase: String) {
+    println!("{} started.", testcase);
     let mut test_process = Command::new("cargo")
         .arg("run")
         .arg("--bin")

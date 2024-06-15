@@ -21,6 +21,12 @@ analysis:
 	cd veryls/6502 && \
 	quartus_map --read_settings_files=on --write_settings_files=off 6502 -c 6502 --analysis_and_elaboration
 
+execute_test-: $(addprefix execute_test-, $(LINE))
+
+execute_test-%:
+	cd packages/stm32l476rg && \
+	cargo run --bin ${@:execute_test-%=%}
+
 execute_tests:
 	cd packages/test-executor && \
 	cargo run
