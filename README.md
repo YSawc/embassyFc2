@@ -67,10 +67,10 @@ cmp_tests passed.
 |A0|GPIO4|RW(LOW=write, HIGH=read)|
 |A1|GPIO5|Nop(Low if cpumode in fpga is not nop)|
 |PA4|GPIO6|Resb|
-|PA2|GPIO0|RX|
+|PA10|GPIO0|RX|
 |PA9|GPIO1|TX|
-|PA12|GPIO2|CTS|
-|PA11|GPIO3|RTS|
+|PA12|GPIO2|RTS|
+|PA11|GPIO3|CTS|
 
 #### requirements
 - usbblaster rules
