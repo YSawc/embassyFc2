@@ -1,16 +1,16 @@
-#### embassy fc2
+# embassy fc2
 famicom simulator written with rust and [veryl](https://github.com/dalance/veryl).
 This repository includes embed software and hardware projects.
 Currently software is used to send signals for cpu test.
 
-#### examples
+# examples
 
 Before run below samples, there are some step needs.
 1. program FPGA with veryls/6502 HDL files.
 2. connect stm32l476rg and FPGA with usart.(default pin function is below.)
 3. run software
 
-##### single test runner
+## single test runner
 ```
 cd packages/stm32l476rg
 cargo run --bin jmp_tests
@@ -33,7 +33,7 @@ INFO  test passed!
 └─ jmp_abs_test::__cortex_m_rt_main @ src/bin/jmp_abs_test.rs:5
 ```
 
-##### multiple test runner
+## multiple test runner
 To check tests at once, run test-executor.
 ```
 > cd packages/test-executor
@@ -60,7 +60,19 @@ cmp_tests passed.
 
 ```
 
-#### default pin function.
+## execute nestest until specified line
+
+nestest includes automation executing system within program counter to 0c000h.
+
+This system can call `execute_sequence-[line]` in make command. This command executes nestest until specified line of `dump_logs/nestest.log` with checking valid cpu register value comparing of nestest.log .
+
+Nestest file prepared with mif(Memory initialization file).
+
+```
+make execute_sequence-[UntilLine]
+```
+
+# default pin function.
 
 |stm32|FPGA|description|
 |-|-|-|
@@ -72,7 +84,7 @@ cmp_tests passed.
 |PA12|GPIO2|RTS|
 |PA11|GPIO3|CTS|
 
-#### requirements
+# requirements
 - usbblaster rules
 ```
 cat /etc/udev/rules.d/51-usbblaster.rules
