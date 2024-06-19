@@ -64,6 +64,12 @@ module OpeCompare (
         1
     };
 
+    assign o_rts = if i_read_memory_en {
+        o_read_memory_rts
+    } else {
+        1
+    };
+
     var if_memory_mst_en_next  : logic    ;
     var if_memory_mst_we_next  : logic    ;
     var if_memory_mst_addr_next: logic<16>;

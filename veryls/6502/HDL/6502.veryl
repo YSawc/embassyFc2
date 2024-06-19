@@ -99,7 +99,7 @@ module main (
         1
     };
     assign gpio_0_2 = if i_mode_handler_en {
-        ~o_mode_handler_busy
+        o_mode_handler_rts
     } else if o_debug_busy {
         o_debug_rts
     } else {

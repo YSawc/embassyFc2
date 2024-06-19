@@ -233,7 +233,7 @@ module OpeReadAndStoreToMemory (
             i_send_data          = 0;
             o_busy               = 0;
             o_finish             = 0;
-            o_rts                = 0;
+            o_rts                = 1;
             tmp_target_low_addr  = 0;
             tmp_target_high_addr = 0;
             write_count          = 0;

@@ -163,7 +163,8 @@ module AddrHandler (
         i_target_high_addr_next = i_target_high_addr;
         case status {
             Status::Ready: {
-                o_p_next = if_register_slv.p;
+                o_rts_next = 1;
+                o_p_next   = if_register_slv.p;
                 if i_en {
                     o_pc_next = if_register_slv.pc + 1;
                     if i_addr_mode == OperatorsPkg::AddrMode::Impl || i_addr_mode == OperatorsPkg::AddrMode::Acc {
@@ -267,6 +268,7 @@ module AddrHandler (
                 }
             }
             Status::AdjustRegister: {
+                o_rts_next  = 1;
                 status_next = Status::Finish;
 
                 if i_addr_mode == OperatorsPkg::AddrMode::Imm || i_addr_mode == OperatorsPkg::AddrMode::Zp || i_addr_mode == OperatorsPkg::AddrMode::ZpX || i_addr_mode == OperatorsPkg::AddrMode::ZpY || i_addr_mode == OperatorsPkg::AddrMode::Rel || i_addr_mode == OperatorsPkg::AddrMode::IndX || i_addr_mode == OperatorsPkg::AddrMode::IndY {
@@ -282,6 +284,7 @@ module AddrHandler (
                 }
             }
             Status::Finish: {
+                o_rts_next  = 1;
                 status_next = Status::Ready;
             }
         }
