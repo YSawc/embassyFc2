@@ -76,8 +76,8 @@ make execute_sequence-[UntilLine]
 
 |stm32|FPGA|description|
 |-|-|-|
-|A0|GPIO4|RW(LOW=write, HIGH=read)|
-|A1|GPIO5|Nop(Low if cpumode in fpga is not nop)|
+|PA0|GPIO4|RW(LOW=write, HIGH=read)|
+|PA1|GPIO5|Nop(Low if cpumode in fpga is not nop)|
 |PA4|GPIO6|Resb|
 |PA10|GPIO0|RX|
 |PA9|GPIO1|TX|

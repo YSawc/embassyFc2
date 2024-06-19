@@ -1,4 +1,4 @@
-.PHONY: build programmer analysis execute_tests
+.PHONY: build programmer analysis execute_test execute_tests
 
 build:
 	veryl fmt
