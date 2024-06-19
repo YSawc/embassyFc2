@@ -68,13 +68,13 @@ pub fn test_jmp_ind_within_internal_memory<T: BasicInstance, P: Pin, P2: Pin, P3
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0x7E]);
     check_valid_register_status(usart, TxReg::A, &[0x7E]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
-    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x00, 0x00]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x00, 0x02]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA9, 0xDB]);
     check_valid_register_status(usart, TxReg::A, &[0xDB]);
     check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xA0, 0x01]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
-    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x02, 0x00]);
+    usart_write(usart, &[OpeMode::Inst as u8, 0x8D, 0x01, 0x02]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x6c]);
     check_rw_is_high(&rw);
     usart_write(usart, &[0x00, 0x02]);
@@ -132,9 +132,9 @@ pub fn test_jmp_ind_within_mocking_memory<T: BasicInstance, P: Pin, P2: Pin, P3:
     usart_write(usart, &[OpeMode::Inst as u8, 0x6c]);
     check_rw_is_high(&rw);
     usart_write(usart, &[0x00, 0x02]);
-    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x00, 0x00]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x00, 0x02]);
     usart.blocking_write(&[0x7e]).unwrap();
-    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x02, 0x00]);
+    usart_read_with_check(usart, &mut [0x0u8; 2], &[0x01, 0x02]);
     usart.blocking_write(&[0xdb]).unwrap();
     check_valid_register_status(usart, TxReg::PC, &[0x7e, 0xdb]);
     check_valid_register_status(usart, TxReg::P, &[0b00100100]);
