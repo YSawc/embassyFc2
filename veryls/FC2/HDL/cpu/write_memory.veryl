@@ -58,7 +58,7 @@ module WriteMemory (
         o_finish: o_high_tx_finish,
     );
 
-    let i_memory_tx_en    : logic    = status == Status::MemoryTx;
+    let i_memory_tx_en    : logic    = i_we && status == Status::MemoryTx;
     var o_memory_tx_tx    : logic<8>;
     var o_memory_tx_busy  : logic   ;
     var o_memory_tx_finish: logic   ;

@@ -1,5 +1,5 @@
 [project]
-name = "cpu_6502"
+name = "fc2"
 version = "0.1.0"
 
 [format]
@@ -9,4 +9,4 @@ indent_width = 4
 "https://github.com/YSawc/uarty" = "0.2.1"
 
 [build]
-target = {type = "directory", path = "veryls/6502/HDL/sv"}
+target = {type = "directory", path = "HDL/sv"}

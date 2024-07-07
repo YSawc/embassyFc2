@@ -1,0 +1,59 @@
+module main (
+    clk     : input  logic   ,
+    rst     : input  logic   ,
+    key     : input  logic<3>,
+    gpio_0_1: input  logic   , // RX
+    gpio_0_3: input  logic   , // CTS
+    gpio_0_6: input  logic   , // RESB
+    gpio_0_0: output logic   , // TX
+    gpio_0_2: output logic   , // RTS
+    gpio_0_4: output logic   , // RW
+    gpio_0_5: output logic   , // Nop(Low if cpumode is not nop)
+) {
+    let i_clk     : logic    = clk;
+    let i_rst     : logic    = rst;
+    let _i_key    : logic<3> = key;
+    let i_gpio_0_1: logic    = gpio_0_1;
+    let i_rx      : logic    = i_gpio_0_1;
+    let i_gpio_0_3: logic    = gpio_0_3;
+    let i_gpio_0_6: logic    = gpio_0_6;
+
+    let i_cts : logic = i_gpio_0_3;
+    let i_resb: logic = i_gpio_0_6;
+    let reset : logic = i_rst || i_resb;
+
+    inst if_memory: MemoryIf;
+
+    var o_cpu_6502_tx : logic;
+    var o_cpu_6502_rts: logic;
+    var o_cpu_6502_rw : logic;
+    var o_cpu_6502_nop: logic;
+    inst cpu_6502: Cpu6502 (
+        i_clk                 ,
+        i_rst : reset         ,
+        i_rx                  ,
+        i_cts                 ,
+        i_resb                ,
+        o_tx  : o_cpu_6502_tx ,
+        o_rts : o_cpu_6502_rts,
+        o_rw  : o_cpu_6502_rw ,
+        o_nop : o_cpu_6502_nop,
+    );
+
+    var status: Status   ;
+    enum Status: logic <3> {
+        Ready,
+        ReadTargetLowAddr,
+        ReadTargetHighAddr,
+        ReadLowMemory,
+        ReadHighMemory,
+        ReadWordMemory,
+        AdjustRegister,
+        Finish,
+    }
+
+    assign gpio_0_0 = o_cpu_6502_tx;
+    assign gpio_0_2 = o_cpu_6502_rts;
+    assign gpio_0_4 = o_cpu_6502_rw;
+    assign gpio_0_5 = o_cpu_6502_nop;
+}
