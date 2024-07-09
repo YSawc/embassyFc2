@@ -24,20 +24,35 @@ module main (
 
     inst if_memory: MemoryIf;
 
-    var o_cpu_6502_tx : logic;
-    var o_cpu_6502_rts: logic;
-    var o_cpu_6502_rw : logic;
-    var o_cpu_6502_nop: logic;
+    var o_cpu_6502_tx    : logic   ;
+    var o_cpu_6502_rts   : logic   ;
+    var o_cpu_6502_rw    : logic   ;
+    var o_cpu_6502_nop   : logic   ;
+    var o_cpu_6502_cycles: logic<8>;
     inst cpu_6502: Cpu6502 (
-        i_clk                 ,
-        i_rst : reset         ,
-        i_rx                  ,
-        i_cts                 ,
-        i_resb                ,
-        o_tx  : o_cpu_6502_tx ,
-        o_rts : o_cpu_6502_rts,
-        o_rw  : o_cpu_6502_rw ,
-        o_nop : o_cpu_6502_nop,
+        i_clk                      ,
+        i_rst   : reset            ,
+        i_rx                       ,
+        i_cts                      ,
+        i_resb                     ,
+        o_tx    : o_cpu_6502_tx    ,
+        o_rts   : o_cpu_6502_rts   ,
+        o_rw    : o_cpu_6502_rw    ,
+        o_nop   : o_cpu_6502_nop   ,
+        o_cycles: o_cpu_6502_cycles,
+    );
+
+    var o_ppu_tx : logic;
+    var o_ppu_rts: logic;
+    var o_ppu_rw : logic;
+    var o_ppu_nop: logic;
+    inst ppu: Ppu (
+        i_clk                          ,
+        i_rst       : reset            ,
+        i_rx                           ,
+        i_cts                          ,
+        i_resb                         ,
+        i_cpu_cycles: o_cpu_6502_cycles,
     );
 
     var status: Status   ;

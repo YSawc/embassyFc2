@@ -6,7 +6,7 @@ Currently software is used to send signals for cpu test.
 # examples
 
 Before run below samples, there are some step needs.
-1. program FPGA with veryls/6502 HDL files.
+1. program FPGA with veryls/FC2 HDL files.
 2. connect stm32l476rg and FPGA with usart.(default pin function is below.)
 3. run software
 

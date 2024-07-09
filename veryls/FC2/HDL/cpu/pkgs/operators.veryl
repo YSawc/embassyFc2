@@ -113,7 +113,8 @@ package OperatorsPkg {
     }
 
     struct Operator {
-        ope_kind : OpeKind ,
-        addr_mode: AddrMode,
+        ope_kind : OpeKind    ,
+        addr_mode: AddrMode   ,
+        cycles   : logic   <8>,
     }
 }

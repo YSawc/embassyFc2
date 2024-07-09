@@ -1,0 +1,23 @@
+module Ppu (
+    i_clk       : input logic   ,
+    i_rst       : input logic   ,
+    i_rx        : input logic   ,
+    i_cts       : input logic   ,
+    i_resb      : input logic   ,
+    i_cpu_cycles: input logic<8>,
+) {
+    var cycles     : logic<16>;
+    var cycles_next: logic<16>;
+
+    always_comb {
+        cycles_next += i_cpu_cycles;
+    }
+
+    always_ff (posedge i_clk, async_high i_rst) {
+        if_reset {
+            cycles = 0;
+        } else {
+            cycles = cycles_next;
+        }
+    }
+}

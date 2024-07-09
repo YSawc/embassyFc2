@@ -1,13 +1,14 @@
 module Cpu6502 (
-    i_clk : input  logic,
-    i_rst : input  logic,
-    i_rx  : input  logic, // RX
-    i_cts : input  logic, // CTS
-    i_resb: input  logic, // RESB
-    o_tx  : output logic, // TX
-    o_rts : output logic, // RTS
-    o_rw  : output logic, // RW
-    o_nop : output logic, // Nop(Low if cpumode is not nop)
+    i_clk   : input  logic   ,
+    i_rst   : input  logic   ,
+    i_rx    : input  logic   , // RX
+    i_cts   : input  logic   , // CTS
+    i_resb  : input  logic   , // RESB
+    o_tx    : output logic   , // TX
+    o_rts   : output logic   , // RTS
+    o_rw    : output logic   , // RW
+    o_nop   : output logic   , // Nop(Low if cpumode is not nop)
+    o_cycles: output logic<8>,
 ) {
     inst if_register   : RegisterIf;
     inst if_memory     : MemoryIf;
@@ -46,7 +47,8 @@ module Cpu6502 (
     var o_debug_finish        : logic;
     inst if_debug_register     : RegisterIf;
     inst if_debug_memory       : MemoryIf;
-    var o_debug_rts           : logic;
+    var o_debug_rts           : logic   ;
+    var o_debug_cycles        : logic<8>;
     inst debug: Debug (
         i_clk                                    ,
         i_rst                                    ,
@@ -62,6 +64,7 @@ module Cpu6502 (
         o_busy                : o_debug_busy     ,
         o_rts                 : o_debug_rts      ,
         o_rw                  : o_debug_rw       ,
+        o_cycles              : o_debug_cycles   ,
         o_finish              : o_debug_finish   ,
     );
 
@@ -99,7 +102,9 @@ module Cpu6502 (
         1
     };
 
-    assign o_nop = cpu_mode == ModePkg::CpuMode::Nop;
+    assign o_nop    = cpu_mode == ModePkg::CpuMode::Nop;
+    assign o_cycles = o_debug_cycles;
+
     always_ff (posedge i_clk, async_high i_rst) {
         if_reset {
             if_register.a  = 0;
