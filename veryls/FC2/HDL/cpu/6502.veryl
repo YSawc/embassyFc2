@@ -1,14 +1,15 @@
 module Cpu6502 (
-    i_clk   : input  logic   ,
-    i_rst   : input  logic   ,
-    i_rx    : input  logic   , // RX
-    i_cts   : input  logic   , // CTS
-    i_resb  : input  logic   , // RESB
-    o_tx    : output logic   , // TX
-    o_rts   : output logic   , // RTS
-    o_rw    : output logic   , // RW
-    o_nop   : output logic   , // Nop(Low if cpumode is not nop)
-    o_cycles: output logic<8>,
+    i_clk    : input  logic   ,
+    i_mst_clk: input  logic   ,
+    i_rst    : input  logic   ,
+    i_rx     : input  logic   , // RX
+    i_cts    : input  logic   , // CTS
+    i_resb   : input  logic   , // RESB
+    o_tx     : output logic   , // TX
+    o_rts    : output logic   , // RTS
+    o_rw     : output logic   , // RW
+    o_nop    : output logic   , // Nop(Low if cpumode is not nop)
+    o_cycles : output logic<8>,
 ) {
     inst if_register   : RegisterIf;
     inst if_memory     : MemoryIf;
@@ -23,6 +24,7 @@ module Cpu6502 (
     var o_mode_handler_finish: logic                ;
     inst mode_handler: ModeHandler (
         i_clk                                 ,
+        i_mst_clk                             ,
         i_rst                                 ,
         i_en           : i_mode_handler_en    ,
         i_rx                                  ,
@@ -51,6 +53,7 @@ module Cpu6502 (
     var o_debug_cycles        : logic<8>;
     inst debug: Debug (
         i_clk                                    ,
+        i_mst_clk                                ,
         i_rst                                    ,
         i_en                  : i_debug_en       ,
         i_rx                                     ,
@@ -70,7 +73,7 @@ module Cpu6502 (
 
     var o_ram_data: logic<8>;
     inst ram: Ram (
-        i_clk                                ,
+        i_clk          : i_mst_clk           ,
         i_rst                                ,
         i_en           : if_debug_memory.en  ,
         i_we           : if_debug_memory.we  ,

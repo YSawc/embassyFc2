@@ -1,5 +1,6 @@
 module OpeStoreToMemory (
     i_clk                 : input   logic                   ,
+    i_mst_clk             : input   logic                   ,
     i_rst                 : input   logic                   ,
     i_en                  : input   logic                   ,
     i_we                  : input   logic                   ,
@@ -45,6 +46,7 @@ module OpeStoreToMemory (
     inst if_write_memory_memory: MemoryIf;
     inst write_memory: WriteMemory (
         i_clk                                         ,
+        i_mst_clk                                     ,
         i_rst                                         ,
         i_en                  : i_write_memory_en     ,
         i_we                                          ,
@@ -63,6 +65,8 @@ module OpeStoreToMemory (
     var if_memory_mst_we_next  : logic    ;
     var if_memory_mst_addr_next: logic<16>;
     var if_memory_mst_data_next: logic<8> ;
+    var latched_io_finish      : logic    ;
+    var latched_io_finish_next : logic    ;
     always_comb {
         o_tx_next                 = o_tx;
         status_next               = status;
@@ -78,6 +82,7 @@ module OpeStoreToMemory (
         if_memory_mst_we_next     = if_memory_mst.we;
         if_memory_mst_addr_next   = if_memory_mst.addr;
         if_memory_mst_data_next   = if_memory_mst.data;
+        latched_io_finish_next    = latched_io_finish;
         case status {
             Status::Ready: {
                 if i_en {
@@ -128,19 +133,24 @@ module OpeStoreToMemory (
                 if_memory_mst_we_next   = if_write_memory_memory.we;
                 if_memory_mst_addr_next = if_write_memory_memory.addr;
                 if_memory_mst_data_next = if_write_memory_memory.data;
-                if o_write_memory_finish {
-                    if i_ope_kind == OperatorsPkg::OpeKind::Jsr {
-                        if write_count == 0 {
-                            write_count_next += 1;
-                            status_next      =  Status::Ready;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next = 0;
+                        if i_ope_kind == OperatorsPkg::OpeKind::Jsr {
+                            if write_count == 0 {
+                                write_count_next += 1;
+                                status_next      =  Status::Ready;
+                            } else {
+                                write_count_next = 0;
+                                pc_next          = utilPkg::combine_byte_to_short(i_target_high_addr, i_target_low_addr);
+                                status_next      = Status::Finish;
+                            }
                         } else {
-                            write_count_next = 0;
-                            pc_next          = utilPkg::combine_byte_to_short(i_target_high_addr, i_target_low_addr);
-                            status_next      = Status::Finish;
+                            status_next = Status::Finish;
                         }
-                    } else {
-                        status_next = Status::Finish;
                     }
+                } else {
+                    latched_io_finish_next |= o_write_memory_finish;
                 }
             }
             Status::Finish: {
@@ -150,7 +160,7 @@ module OpeStoreToMemory (
         o_finish_next = status_next == Status::Finish;
     }
 
-    always_ff (posedge i_clk, async_high i_rst) {
+    always_ff (posedge i_mst_clk, async_high i_rst) {
         if_reset {
             o_tx                 = 0;
             o_busy               = 0;
@@ -167,11 +177,10 @@ module OpeStoreToMemory (
             if_memory_mst.we     = 0;
             if_memory_mst.addr   = 0;
             if_memory_mst.data   = 0;
+            latched_io_finish    = 0;
         } else {
             o_tx                 = o_tx_next;
             o_busy               = o_busy_next;
-            status               = status_next;
-            o_finish             = o_finish_next;
             tmp_target_low_addr  = tmp_target_low_addr_next;
             tmp_target_high_addr = tmp_target_high_addr_next;
             if_register_mst.s    = s_next;
@@ -183,6 +192,12 @@ module OpeStoreToMemory (
             if_memory_mst.we     = if_memory_mst_we_next;
             if_memory_mst.addr   = if_memory_mst_addr_next;
             if_memory_mst.data   = if_memory_mst_data_next;
+            latched_io_finish    = latched_io_finish_next;
+            o_finish             = 0;
+            if (i_clk) {
+                status   = status_next;
+                o_finish = o_finish_next;
+            }
         }
     }
 }

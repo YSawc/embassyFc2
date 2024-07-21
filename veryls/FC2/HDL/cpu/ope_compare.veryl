@@ -1,5 +1,6 @@
 module OpeCompare (
     i_clk                 : input   logic                    ,
+    i_mst_clk             : input   logic                    ,
     i_rst                 : input   logic                    ,
     i_en                  : input   logic                    ,
     i_we                  : input   logic                    ,
@@ -42,6 +43,7 @@ module OpeCompare (
     inst if_read_memory_memory: MemoryIf;
     inst read_memory: ReadMemory (
         i_clk                                        ,
+        i_mst_clk                                    ,
         i_rst                                        ,
         i_en                  : i_read_memory_en     ,
         i_we                                         ,
@@ -74,6 +76,8 @@ module OpeCompare (
     var if_memory_mst_we_next  : logic    ;
     var if_memory_mst_addr_next: logic<16>;
     var if_memory_mst_data_next: logic<8> ;
+    var latched_io_finish      : logic    ;
+    var latched_io_finish_next : logic    ;
     always_comb {
         o_p_next                = if_register_mst.p;
         o_pc_next               = if_register_mst.pc;
@@ -84,6 +88,7 @@ module OpeCompare (
         if_memory_mst_we_next   = if_memory_mst.we;
         if_memory_mst_addr_next = if_memory_mst.addr;
         if_memory_mst_data_next = if_memory_mst.data;
+        latched_io_finish_next  = latched_io_finish;
         case status {
             Status::Ready: {
                 o_p_next  = if_register_slv.p;
@@ -102,20 +107,27 @@ module OpeCompare (
                 if_memory_mst_we_next   = if_read_memory_memory.we;
                 if_memory_mst_addr_next = if_read_memory_memory.addr;
                 if_memory_mst_data_next = if_read_memory_memory.data;
-                if o_read_memory_finish {
-                    compare_data_next = o_read_memory_data;
-                    status_next       = Status::Compare;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next = 0;
+                        compare_data_next      = o_read_memory_data;
+                        status_next            = Status::Compare;
+                    }
+                } else {
+                    latched_io_finish_next |= o_read_memory_finish;
                 }
             }
             Status::Compare: {
-                if i_ope_kind == OperatorsPkg::OpeKind::Cmp {
-                    RegisterPkg::compare_with_nzc(o_p_next, if_register_slv.a, compare_data);
-                } else if i_ope_kind == OperatorsPkg::OpeKind::Cpx {
-                    RegisterPkg::compare_with_nzc(o_p_next, if_register_slv.x, compare_data);
-                } else if i_ope_kind == OperatorsPkg::OpeKind::Cpy {
-                    RegisterPkg::compare_with_nzc(o_p_next, if_register_slv.y, compare_data);
+                if i_clk {
+                    if i_ope_kind == OperatorsPkg::OpeKind::Cmp {
+                        RegisterPkg::compare_with_nzc(o_p_next, if_register_slv.a, compare_data);
+                    } else if i_ope_kind == OperatorsPkg::OpeKind::Cpx {
+                        RegisterPkg::compare_with_nzc(o_p_next, if_register_slv.x, compare_data);
+                    } else if i_ope_kind == OperatorsPkg::OpeKind::Cpy {
+                        RegisterPkg::compare_with_nzc(o_p_next, if_register_slv.y, compare_data);
+                    }
+                    status_next = Status::Finish;
                 }
-                status_next = Status::Finish;
             }
             Status::Finish: {
                 status_next = Status::Ready;
@@ -124,7 +136,7 @@ module OpeCompare (
         o_finish_next = status_next == Status::Finish;
     }
 
-    always_ff (posedge i_clk, async_high i_rst) {
+    always_ff (posedge i_mst_clk, async_high i_rst) {
         if_reset {
             compare_data       = 0;
             if_register_mst.p  = 36;
@@ -136,6 +148,7 @@ module OpeCompare (
             status             = Status::Ready;
             o_busy             = 0;
             o_finish           = 0;
+            latched_io_finish  = 0;
         } else {
             compare_data       = compare_data_next;
             if_register_mst.p  = o_p_next;
@@ -144,9 +157,13 @@ module OpeCompare (
             if_memory_mst.we   = if_memory_mst_we_next;
             if_memory_mst.addr = if_memory_mst_addr_next;
             if_memory_mst.data = if_memory_mst_data_next;
-            status             = status_next;
             o_busy             = o_busy_next;
-            o_finish           = o_finish_next;
+            latched_io_finish  = latched_io_finish_next;
+            o_finish           = 0;
+            if (i_clk) {
+                status   = status_next;
+                o_finish = o_finish_next;
+            }
         }
     }
 }

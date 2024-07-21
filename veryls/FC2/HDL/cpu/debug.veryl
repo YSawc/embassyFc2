@@ -1,5 +1,6 @@
 module Debug (
     i_clk                 : input   logic                ,
+    i_mst_clk             : input   logic                ,
     i_rst                 : input   logic                ,
     i_rx                  : input   logic                ,
     i_en                  : input   logic                ,
@@ -318,7 +319,7 @@ module Debug (
     let i_ope_read_en      : logic    = status == Status::OpeRead;
     var o_ope_mode_finish  : logic   ;
     inst o_ope_mode_rx: uarty::Rx (
-        i_clk                        ,
+        i_clk   : i_mst_clk          ,
         i_rst                        ,
         i_rx                         ,
         i_en    : i_ope_read_en      ,
@@ -333,7 +334,7 @@ module Debug (
     var o_sequence_count_rx_busy  : logic   ;
     var o_sequence_count_rx_finish: logic   ;
     inst sequence_count_rx: uarty::Rx (
-        i_clk                               ,
+        i_clk   : i_mst_clk                 ,
         i_rst                               ,
         i_rx                                ,
         i_en    : i_sequence_count_rx_en    ,
@@ -347,7 +348,7 @@ module Debug (
     var o_tx_reg_detect_rx_busy  : logic   ;
     var o_tx_reg_detect_rx_finish: logic   ;
     inst tx_reg_detect_rx: uarty::Rx (
-        i_clk                              ,
+        i_clk   : i_mst_clk                ,
         i_rst                              ,
         i_rx                               ,
         i_en    : i_tx_reg_detect_rx_en    ,
@@ -389,7 +390,7 @@ module Debug (
     var o_register_row_tx_busy  : logic;
     var o_register_row_tx_finish: logic;
     inst register_row_tx: uarty::Tx (
-        i_clk                             ,
+        i_clk   : i_mst_clk               ,
         i_rst                             ,
         i_en    : register_row_tx_en      ,
         i_data  : i_register_row_tx_data  ,
@@ -408,7 +409,7 @@ module Debug (
     var o_register_high_tx_busy  : logic;
     var o_register_high_tx_finish: logic;
     inst register_high_tx: uarty::Tx (
-        i_clk                              ,
+        i_clk   : i_mst_clk                ,
         i_rst                              ,
         i_en    : i_register_high_tx_en    ,
         i_data  : i_register_high_tx_data  ,
@@ -422,7 +423,7 @@ module Debug (
     let i_inst_read_en    : logic    = status == Status::InstRead;
     var o_inst_read_finish: logic   ;
     inst inst_mode_rx: uarty::Rx (
-        i_clk                       ,
+        i_clk   : i_mst_clk         ,
         i_rst                       ,
         i_rx                        ,
         i_en    : i_inst_read_en    ,
@@ -442,6 +443,7 @@ module Debug (
     inst if_prg_read_memory_memory         : MemoryIf;
     inst prg_read_memory: ReadMemory (
         i_clk                                                     ,
+        i_mst_clk                                                 ,
         i_rst                                                     ,
         i_en                  : i_prg_read_memory_en              ,
         i_we                                                      ,
@@ -490,6 +492,7 @@ module Debug (
     var o_addr_handler_tx         : logic   ;
     inst addr_handler: AddrHandler (
         i_clk                                             ,
+        i_mst_clk                                         ,
         i_rst                                             ,
         i_en                  : i_addr_handler_en         ,
         i_we                                              ,
@@ -535,6 +538,7 @@ module Debug (
     var o_ope_read_and_store_to_memory_finish   : logic;
     inst ope_read_and_store_to_memory: OpeReadAndStoreToMemory (
         i_clk                                                           ,
+        i_mst_clk                                                       ,
         i_rst                                                           ,
         i_en                  : i_ope_read_and_store_to_memory_en       ,
         i_we                                                            ,
@@ -562,6 +566,7 @@ module Debug (
     var o_ope_read_and_store_to_register_finish   : logic;
     inst ope_read_and_store_to_register: OpeReadAndStoreToRegister (
         i_clk                                                             ,
+        i_mst_clk                                                         ,
         i_rst                                                             ,
         i_en                  : i_ope_read_and_store_to_register_en       ,
         i_we                                                              ,
@@ -590,6 +595,7 @@ module Debug (
     inst if_ope_read_and_store_to_acc_or_memory_memory  : MemoryIf;
     inst ope_read_and_store_to_acc_or_memory: OpeReadAndStoreToAccOrMemory (
         i_clk                                                                  ,
+        i_mst_clk                                                              ,
         i_rst                                                                  ,
         i_en                  : i_ope_read_and_store_to_acc_or_memory_en       ,
         i_we                                                                   ,
@@ -617,6 +623,7 @@ module Debug (
     var o_ope_store_to_memory_finish   : logic   ;
     inst ope_store_to_memory: OpeStoreToMemory (
         i_clk                                                  ,
+        i_mst_clk                                              ,
         i_rst                                                  ,
         i_en                  : i_ope_store_to_memory_en       ,
         i_we                                                   ,
@@ -643,6 +650,7 @@ module Debug (
     var o_ope_compare_finish   : logic;
     inst ope_compare: OpeCompare (
         i_clk                                          ,
+        i_mst_clk                                      ,
         i_rst                                          ,
         i_en                  : i_ope_compare_en       ,
         i_we                                           ,
@@ -732,6 +740,9 @@ module Debug (
     var if_memory_mst_we_next  : logic    ;
     var if_memory_mst_addr_next: logic<16>;
     var if_memory_mst_data_next: logic<8> ;
+
+    var latched_io_finish     : logic;
+    var latched_io_finish_next: logic;
     always_comb {
         o_tx_next                     = o_tx;
         o_a_next                      = if_register_mst.a;
@@ -749,6 +760,7 @@ module Debug (
         current_sequence_count_next   = current_sequence_count;
         tmp_inst_mode_next            = tmp_inst_mode;
         o_cycles_next                 = o_cycles;
+        latched_io_finish_next        = latched_io_finish;
         case status {
             Status::Ready: {
                 o_tx_next                     = 1;
@@ -763,49 +775,79 @@ module Debug (
                 }
             }
             Status::OpeRead: {
-                if o_ope_mode_finish {
-                    if casted_ope_mode == OpeMode::Inst {
-                        status_next = Status::InstRead;
-                    } else if casted_ope_mode == OpeMode::Sequence {
-                        status_next = Status::SequenceCountRead;
-                    } else if casted_ope_mode == OpeMode::RegisterTransfer {
-                        status_next = Status::TxRegisterDetect;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next = 0;
+                        if casted_ope_mode == OpeMode::Inst {
+                            status_next = Status::InstRead;
+                        } else if casted_ope_mode == OpeMode::Sequence {
+                            status_next = Status::SequenceCountRead;
+                        } else if casted_ope_mode == OpeMode::RegisterTransfer {
+                            status_next = Status::TxRegisterDetect;
+                        }
                     }
+                } else {
+                    latched_io_finish_next |= o_ope_mode_finish;
                 }
             }
             Status::SequenceCountRead: {
-                if o_sequence_count_rx_finish {
-                    current_sequence_count_next = o_sequence_count_rx_data;
-                    status_next                 = Status::Ready;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next      = 0;
+                        current_sequence_count_next = o_sequence_count_rx_data;
+                        status_next                 = Status::Ready;
+                    }
+                } else {
+                    latched_io_finish_next |= o_sequence_count_rx_finish;
                 }
             }
             Status::TxRegisterDetect: {
-                if o_tx_reg_detect_rx_finish {
-                    status_next = Status::RegisterLowTransfer;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next = 0;
+                        status_next            = Status::RegisterLowTransfer;
+                    }
+                } else {
+                    latched_io_finish_next |= o_tx_reg_detect_rx_finish;
                 }
             }
             Status::RegisterLowTransfer: {
                 o_tx_next = o_register_row_tx_tx;
-                if o_register_row_tx_finish {
-                    if tmp_high_tx_en {
-                        status_next = Status::RegisterHighTransfer;
-                    } else {
-                        register_transfer_finish_next = 1;
-                        status_next                   = Status::Ready;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next = 0;
+                        if tmp_high_tx_en {
+                            status_next = Status::RegisterHighTransfer;
+                        } else {
+                            register_transfer_finish_next = 1;
+                            status_next                   = Status::Ready;
+                        }
                     }
+                } else {
+                    latched_io_finish_next |= o_register_row_tx_finish;
                 }
             }
             Status::RegisterHighTransfer: {
-                o_tx_next = o_register_high_tx_tx;
-                if o_register_high_tx_finish {
-                    register_transfer_finish_next = 1;
-                    status_next                   = Status::Ready;
+                if i_clk {
+                    o_tx_next = o_register_high_tx_tx;
+                    if latched_io_finish {
+                        latched_io_finish_next        = 0;
+                        register_transfer_finish_next = 1;
+                        status_next                   = Status::Ready;
+                    }
+                } else {
+                    latched_io_finish_next |= o_register_high_tx_finish;
                 }
             }
             Status::InstRead: {
-                if o_inst_read_finish {
-                    tmp_inst_mode_next = o_raw_inst_mode;
-                    status_next        = Status::RWHandler;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next = 0;
+                        tmp_inst_mode_next     = o_raw_inst_mode;
+                        status_next            = Status::RWHandler;
+                    }
+                } else {
+                    latched_io_finish_next |= o_inst_read_finish;
                 }
             }
             Status::PrgReadMemory: {
@@ -814,14 +856,24 @@ module Debug (
                 if_memory_mst_we_next   = if_prg_read_memory_memory.we;
                 if_memory_mst_addr_next = if_prg_read_memory_memory.addr;
                 if_memory_mst_data_next = if_prg_read_memory_memory.data;
-                if o_prg_read_memory_finish {
-                    tmp_inst_mode_next = o_prg_read_memory_data;
-                    status_next        = Status::RWHandler;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next = 0;
+                        tmp_inst_mode_next     = o_prg_read_memory_data;
+                        status_next            = Status::RWHandler;
+                    }
+                } else {
+                    latched_io_finish_next |= o_prg_read_memory_finish;
                 }
             }
             Status::RWHandler: {
-                if o_rw_handler_finish {
-                    status_next = Status::AddrHandler;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next = 0;
+                        status_next            = Status::AddrHandler;
+                    }
+                } else {
+                    latched_io_finish_next |= o_rw_handler_finish;
                 }
             }
             Status::AddrHandler: {
@@ -830,33 +882,43 @@ module Debug (
                 if_memory_mst_we_next   = addr_handler_memory.we;
                 if_memory_mst_addr_next = addr_handler_memory.addr;
                 if_memory_mst_data_next = addr_handler_memory.data;
-                if o_addr_handler_finish {
-                    o_p_next    = addr_handler_register.p;
-                    o_pc_next   = addr_handler_register.pc;
-                    status_next = Status::OpeReady;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next = 0;
+                        o_p_next               = addr_handler_register.p;
+                        o_pc_next              = addr_handler_register.pc;
+                        status_next            = Status::OpeReady;
+                    }
+                } else {
+                    latched_io_finish_next |= o_addr_handler_finish;
                 }
             }
             Status::OpeReady: {
-                if o_ope_splitter_finish {
-                    o_a_next  = if_ope_splitter_register.a;
-                    o_x_next  = if_ope_splitter_register.x;
-                    o_y_next  = if_ope_splitter_register.y;
-                    o_s_next  = if_ope_splitter_register.s;
-                    o_p_next  = if_ope_splitter_register.p;
-                    o_pc_next = if_ope_splitter_register.pc;
-                    if o_ope_mode == ModePkg::OpeMode::ReadAndStoreToMemory {
-                        status_next = Status::OpeReadAndStoreToMemory;
-                    } else if o_ope_mode == ModePkg::OpeMode::ReadAndStoreToRegister {
-                        status_next = Status::OpeReadAndStoreToRegister;
-                    } else if o_ope_mode == ModePkg::OpeMode::ReadAndStoreToAccOrMemory {
-                        status_next = Status::OpeReadAndStoreToAccOrMemory;
-                    } else if o_ope_mode == ModePkg::OpeMode::StoreToMemory {
-                        status_next = Status::OpeStoreToMemory;
-                    } else if o_ope_mode == ModePkg::OpeMode::Compare {
-                        status_next = Status::OpeCompare;
-                    } else {
-                        status_next = Status::OpeOther;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next = 0;
+                        o_a_next               = if_ope_splitter_register.a;
+                        o_x_next               = if_ope_splitter_register.x;
+                        o_y_next               = if_ope_splitter_register.y;
+                        o_s_next               = if_ope_splitter_register.s;
+                        o_p_next               = if_ope_splitter_register.p;
+                        o_pc_next              = if_ope_splitter_register.pc;
+                        if o_ope_mode == ModePkg::OpeMode::ReadAndStoreToMemory {
+                            status_next = Status::OpeReadAndStoreToMemory;
+                        } else if o_ope_mode == ModePkg::OpeMode::ReadAndStoreToRegister {
+                            status_next = Status::OpeReadAndStoreToRegister;
+                        } else if o_ope_mode == ModePkg::OpeMode::ReadAndStoreToAccOrMemory {
+                            status_next = Status::OpeReadAndStoreToAccOrMemory;
+                        } else if o_ope_mode == ModePkg::OpeMode::StoreToMemory {
+                            status_next = Status::OpeStoreToMemory;
+                        } else if o_ope_mode == ModePkg::OpeMode::Compare {
+                            status_next = Status::OpeCompare;
+                        } else {
+                            status_next = Status::OpeOther;
+                        }
                     }
+                } else {
+                    latched_io_finish_next |= o_ope_splitter_finish;
                 }
             }
             Status::OpeReadAndStoreToMemory: {
@@ -865,11 +927,16 @@ module Debug (
                 if_memory_mst_we_next   = if_ope_read_and_store_to_memory_memory.we;
                 if_memory_mst_addr_next = if_ope_read_and_store_to_memory_memory.addr;
                 if_memory_mst_data_next = if_ope_read_and_store_to_memory_memory.data;
-                if o_ope_read_and_store_to_memory_finish {
-                    o_s_next    = if_ope_read_and_store_to_memory_register.s;
-                    o_p_next    = if_ope_read_and_store_to_memory_register.p;
-                    o_pc_next   = if_ope_read_and_store_to_memory_register.pc;
-                    status_next = Status::Ready;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next = 0;
+                        o_s_next               = if_ope_read_and_store_to_memory_register.s;
+                        o_p_next               = if_ope_read_and_store_to_memory_register.p;
+                        o_pc_next              = if_ope_read_and_store_to_memory_register.pc;
+                        status_next            = Status::Ready;
+                    }
+                } else {
+                    latched_io_finish_next |= o_ope_read_and_store_to_memory_finish;
                 }
             }
             Status::OpeReadAndStoreToRegister: {
@@ -878,14 +945,19 @@ module Debug (
                 if_memory_mst_we_next   = if_ope_read_and_store_to_register_memory.we;
                 if_memory_mst_addr_next = if_ope_read_and_store_to_register_memory.addr;
                 if_memory_mst_data_next = if_ope_read_and_store_to_register_memory.data;
-                if o_ope_read_and_store_to_register_finish {
-                    o_a_next    = if_ope_read_and_store_to_register_register.a;
-                    o_x_next    = if_ope_read_and_store_to_register_register.x;
-                    o_y_next    = if_ope_read_and_store_to_register_register.y;
-                    o_s_next    = if_ope_read_and_store_to_register_register.s;
-                    o_p_next    = if_ope_read_and_store_to_register_register.p;
-                    o_pc_next   = if_ope_read_and_store_to_register_register.pc;
-                    status_next = Status::Ready;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next = 0;
+                        o_a_next               = if_ope_read_and_store_to_register_register.a;
+                        o_x_next               = if_ope_read_and_store_to_register_register.x;
+                        o_y_next               = if_ope_read_and_store_to_register_register.y;
+                        o_s_next               = if_ope_read_and_store_to_register_register.s;
+                        o_p_next               = if_ope_read_and_store_to_register_register.p;
+                        o_pc_next              = if_ope_read_and_store_to_register_register.pc;
+                        status_next            = Status::Ready;
+                    }
+                } else {
+                    latched_io_finish_next |= o_ope_read_and_store_to_register_finish;
                 }
             }
             Status::OpeReadAndStoreToAccOrMemory: {
@@ -894,11 +966,16 @@ module Debug (
                 if_memory_mst_we_next   = if_ope_read_and_store_to_acc_or_memory_memory.we;
                 if_memory_mst_addr_next = if_ope_read_and_store_to_acc_or_memory_memory.addr;
                 if_memory_mst_data_next = if_ope_read_and_store_to_acc_or_memory_memory.data;
-                if o_ope_read_and_store_to_acc_or_memory_finish {
-                    o_a_next    = if_ope_read_and_store_to_acc_or_memory_register.a;
-                    o_p_next    = if_ope_read_and_store_to_acc_or_memory_register.p;
-                    o_pc_next   = if_ope_read_and_store_to_acc_or_memory_register.pc;
-                    status_next = Status::Ready;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next = 0;
+                        o_a_next               = if_ope_read_and_store_to_acc_or_memory_register.a;
+                        o_p_next               = if_ope_read_and_store_to_acc_or_memory_register.p;
+                        o_pc_next              = if_ope_read_and_store_to_acc_or_memory_register.pc;
+                        status_next            = Status::Ready;
+                    }
+                } else {
+                    latched_io_finish_next |= o_ope_read_and_store_to_acc_or_memory_finish;
                 }
             }
             Status::OpeStoreToMemory: {
@@ -907,11 +984,16 @@ module Debug (
                 if_memory_mst_we_next   = if_ope_store_to_memory_memory.we;
                 if_memory_mst_addr_next = if_ope_store_to_memory_memory.addr;
                 if_memory_mst_data_next = if_ope_store_to_memory_memory.data;
-                if o_ope_store_to_memory_finish {
-                    status_next = Status::Ready;
-                    o_s_next    = if_ope_store_to_memory_register.s;
-                    o_p_next    = if_ope_store_to_memory_register.p;
-                    o_pc_next   = if_ope_store_to_memory_register.pc;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next = 0;
+                        status_next            = Status::Ready;
+                        o_s_next               = if_ope_store_to_memory_register.s;
+                        o_p_next               = if_ope_store_to_memory_register.p;
+                        o_pc_next              = if_ope_store_to_memory_register.pc;
+                    }
+                } else {
+                    latched_io_finish_next |= o_ope_store_to_memory_finish;
                 }
             }
             Status::OpeCompare: {
@@ -922,20 +1004,30 @@ module Debug (
                 if_memory_mst_we_next   = if_ope_compare_memory.we;
                 if_memory_mst_addr_next = if_ope_compare_memory.addr;
                 if_memory_mst_data_next = if_ope_compare_memory.data;
-                if o_ope_compare_finish {
-                    status_next = Status::Ready;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next = 0;
+                        status_next            = Status::Ready;
+                    }
+                } else {
+                    latched_io_finish_next |= o_ope_compare_finish;
                 }
             }
 
             Status::OpeOther: {
-                if o_ope_other_finish {
-                    o_a_next    = if_ope_other_register.a;
-                    o_x_next    = if_ope_other_register.x;
-                    o_y_next    = if_ope_other_register.y;
-                    o_s_next    = if_ope_other_register.s;
-                    o_p_next    = if_ope_other_register.p;
-                    o_pc_next   = if_ope_other_register.pc;
-                    status_next = Status::Ready;
+                o_a_next  = if_ope_other_register.a;
+                o_x_next  = if_ope_other_register.x;
+                o_y_next  = if_ope_other_register.y;
+                o_s_next  = if_ope_other_register.s;
+                o_p_next  = if_ope_other_register.p;
+                o_pc_next = if_ope_other_register.pc;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next = 0;
+                        status_next            = Status::Ready;
+                    }
+                } else {
+                    latched_io_finish_next |= o_ope_other_finish;
                 }
             }
         }
@@ -944,11 +1036,10 @@ module Debug (
         } else {
             0
         };
-
     }
 
     assign o_rw = o_rw_handler_rw;
-    always_ff (posedge i_clk, async_high i_rst) {
+    always_ff (posedge i_mst_clk, async_high i_rst) {
         if_reset {
             o_tx                     = 1;
             if_register_mst.a        = 0;
@@ -969,6 +1060,7 @@ module Debug (
             tmp_inst_mode            = 0;
             o_cycles                 = 0;
             o_finish                 = 0;
+            latched_io_finish        = 0;
         } else {
             o_tx                     = o_tx_next;
             if_register_mst.a        = o_a_next;
@@ -984,11 +1076,14 @@ module Debug (
             o_busy                   = o_busy_next;
             o_rts                    = o_rts_next;
             register_transfer_finish = register_transfer_finish_next;
-            status                   = status_next;
             current_sequence_count   = current_sequence_count_next;
             tmp_inst_mode            = tmp_inst_mode_next;
             o_cycles                 = o_cycles_next;
-            o_finish                 = o_finish_next;
+            latched_io_finish        = latched_io_finish_next;
+            if (i_clk) {
+                status   = status_next;
+                o_finish = o_finish_next;
+            }
         }
     }
 }

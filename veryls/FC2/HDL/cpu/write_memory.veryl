@@ -1,5 +1,6 @@
 module WriteMemory (
     i_clk                 : input   logic              ,
+    i_mst_clk             : input   logic              ,
     i_rst                 : input   logic              ,
     i_en                  : input   logic              ,
     i_we                  : input   logic              ,
@@ -34,7 +35,7 @@ module WriteMemory (
     var o_low_tx_busy  : logic   ;
     var o_low_tx_finish: logic   ;
     inst low_tx: uarty::Tx (
-        i_clk                    ,
+        i_clk   : i_mst_clk      ,
         i_rst                    ,
         i_en    : i_low_tx_en    ,
         i_data  : i_low_tx_data  ,
@@ -49,7 +50,7 @@ module WriteMemory (
     var o_high_tx_busy  : logic   ;
     var o_high_tx_finish: logic   ;
     inst high_tx: uarty::Tx (
-        i_clk                     ,
+        i_clk   : i_mst_clk       ,
         i_rst                     ,
         i_en    : i_high_tx_en    ,
         i_data  : i_high_tx_data  ,
@@ -63,7 +64,7 @@ module WriteMemory (
     var o_memory_tx_busy  : logic   ;
     var o_memory_tx_finish: logic   ;
     inst memory_tx: uarty::Tx (
-        i_clk                       ,
+        i_clk   : i_mst_clk         ,
         i_rst                       ,
         i_en    : i_memory_tx_en    ,
         i_data  : i_send_data       ,
@@ -76,6 +77,8 @@ module WriteMemory (
     var if_memory_mst_we_next  : logic    ;
     var if_memory_mst_addr_next: logic<16>;
     var if_memory_mst_data_next: logic<8> ;
+    var latched_io_finish      : logic    ;
+    var latched_io_finish_next : logic    ;
     always_comb {
         status_next             = status;
         o_finish_next           = o_finish;
@@ -84,6 +87,7 @@ module WriteMemory (
         if_memory_mst_we_next   = if_memory_mst.we;
         if_memory_mst_addr_next = if_memory_mst.addr;
         if_memory_mst_data_next = if_memory_mst.data;
+        latched_io_finish_next  = latched_io_finish;
         case status {
             Status::Ready: {
                 o_tx_next = 1;
@@ -91,11 +95,13 @@ module WriteMemory (
                     if i_debug_mock_memory_en {
                         status_next = Status::LowTx;
                     } else {
-                        if_memory_mst_en_next   = 1;
-                        if_memory_mst_we_next   = 1;
-                        if_memory_mst_addr_next = utilPkg::combine_byte_to_short(i_high_tx_data, i_low_tx_data);
-                        if_memory_mst_data_next = i_send_data;
-                        status_next             = Status::WriteMemory;
+                        if i_clk {
+                            if_memory_mst_en_next   = 1;
+                            if_memory_mst_we_next   = 1;
+                            if_memory_mst_addr_next = utilPkg::combine_byte_to_short(i_high_tx_data, i_low_tx_data);
+                            if_memory_mst_data_next = i_send_data;
+                            status_next             = Status::WriteMemory;
+                        }
                     }
                 }
             }
@@ -106,20 +112,35 @@ module WriteMemory (
             }
             Status::LowTx: {
                 o_tx_next = o_low_tx_tx;
-                if o_low_tx_finish {
-                    status_next = Status::HighTx;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next = 0;
+                        status_next            = Status::HighTx;
+                    }
+                } else {
+                    latched_io_finish_next |= o_low_tx_finish;
                 }
             }
             Status::HighTx: {
                 o_tx_next = o_high_tx_tx;
-                if o_high_tx_finish {
-                    status_next = Status::MemoryTx;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next = 0;
+                        status_next            = Status::MemoryTx;
+                    }
+                } else {
+                    latched_io_finish_next |= o_high_tx_finish;
                 }
             }
             Status::MemoryTx: {
                 o_tx_next = o_memory_tx_tx;
-                if o_memory_tx_finish {
-                    status_next = Status::Finish;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next = 0;
+                        status_next            = Status::Finish;
+                    }
+                } else {
+                    latched_io_finish_next |= o_memory_tx_finish;
                 }
             }
             Status::Finish: {
@@ -129,7 +150,7 @@ module WriteMemory (
         o_finish_next = status_next == Status::Finish;
     }
 
-    always_ff (posedge i_clk, async_high i_rst) {
+    always_ff (posedge i_mst_clk, async_high i_rst) {
         if_reset {
             o_busy             = 0;
             o_finish           = 0;
@@ -139,15 +160,20 @@ module WriteMemory (
             if_memory_mst.we   = 0;
             if_memory_mst.addr = 0;
             if_memory_mst.data = 0;
+            latched_io_finish  = 0;
         } else {
             o_busy             = o_busy_next;
-            o_finish           = o_finish_next;
-            status             = status_next;
             o_tx               = o_tx_next;
             if_memory_mst.en   = if_memory_mst_en_next;
             if_memory_mst.we   = if_memory_mst_we_next;
             if_memory_mst.addr = if_memory_mst_addr_next;
             if_memory_mst.data = if_memory_mst_data_next;
+            latched_io_finish  = latched_io_finish_next;
+            o_finish           = 0;
+            if (i_clk) {
+                status   = status_next;
+                o_finish = o_finish_next;
+            }
         }
     }
 }

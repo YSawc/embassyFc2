@@ -1,5 +1,6 @@
 module ModeHandler (
     i_clk          : input  logic                ,
+    i_mst_clk      : input  logic                ,
     i_rst          : input  logic                ,
     i_en           : input  logic                ,
     i_rx           : input  logic                ,
@@ -25,7 +26,7 @@ module ModeHandler (
     var o_cpu_mode_read_busy  : logic   ;
     var o_cpu_mode_read_finish: logic   ;
     inst cpu_mode_read_rx: uarty::Rx (
-        i_clk                           ,
+        i_clk   : i_mst_clk             ,
         i_rst                           ,
         i_en    : i_cpu_mode_read_en    ,
         i_rx                            ,
@@ -58,7 +59,7 @@ module ModeHandler (
     var o_cassette_mode_read_busy  : logic   ;
     var o_cassette_mode_read_finish: logic   ;
     inst cassette_read_rx: uarty::Rx (
-        i_clk                                ,
+        i_clk   : i_mst_clk                  ,
         i_rst                                ,
         i_en    : i_cassette_mode_read_en    ,
         i_rx                                 ,
@@ -70,28 +71,48 @@ module ModeHandler (
     assign o_cassette_mode = o_cassette_mode_read_data as ModePkg::CassetteMode;
     assign o_busy          = ~(o_cassette_mode != ModePkg::CassetteMode::Nop);
 
+    var latched_io_finish     : logic;
+    var latched_io_finish_next: logic;
     always_comb {
-        status_next   = status;
-        o_finish_next = o_finish;
+        status_next            = status;
+        o_finish_next          = o_finish;
+        latched_io_finish_next = latched_io_finish;
         case status {
             Status::Ready: {
-                if i_en {
-                    status_next = Status::ReadCpuMode;
+                if i_clk {
+                    if i_en {
+                        status_next = Status::ReadCpuMode;
+                    }
                 }
             }
             Status::ReadCpuMode: {
-                if o_cpu_mode_read_finish {
-                    status_next = Status::CpuModeSelect;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next = 0;
+                        status_next            = Status::CpuModeSelect;
+                    }
+                } else {
+                    latched_io_finish_next |= o_cpu_mode_read_finish;
                 }
             }
             Status::CpuModeSelect: {
-                if o_mode_selector_finish {
-                    status_next = Status::ReadCassetteMode;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next = 0;
+                        status_next            = Status::ReadCassetteMode;
+                    }
+                } else {
+                    latched_io_finish_next |= o_mode_selector_finish;
                 }
             }
             Status::ReadCassetteMode: {
-                if o_cassette_mode_read_finish {
-                    status_next = Status::Finish;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next = 0;
+                        status_next            = Status::Finish;
+                    }
+                } else {
+                    latched_io_finish_next |= o_cassette_mode_read_finish;
                 }
             }
             Status::Finish: {}
@@ -99,14 +120,17 @@ module ModeHandler (
         o_finish_next = status_next == Status::Finish;
     }
 
-    always_ff (posedge i_clk, async_high i_rst) {
+    always_ff (posedge i_mst_clk, async_high i_rst) {
         if_reset {
-            status   = Status::Ready;
-            o_finish = 0;
+            status            = Status::Ready;
+            o_finish          = 0;
+            latched_io_finish = 0;
         } else {
-            status   = status_next;
-            o_finish = o_finish_next;
+            latched_io_finish = latched_io_finish_next;
+            if (i_clk) {
+                status   = status_next;
+                o_finish = o_finish_next;
+            }
         }
     }
-
 }

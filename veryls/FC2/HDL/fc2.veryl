@@ -11,6 +11,8 @@ module main (
     gpio_0_5: output logic   , // Nop(Low if cpumode is not nop)
 ) {
     let i_clk     : logic    = clk;
+    let i_en_hz   : logic    = (clk_cnt >= 7);
+    var clk_cnt   : logic<4>;
     let i_rst     : logic    = rst;
     let _i_key    : logic<3> = key;
     let i_gpio_0_1: logic    = gpio_0_1;
@@ -30,16 +32,17 @@ module main (
     var o_cpu_6502_nop   : logic   ;
     var o_cpu_6502_cycles: logic<8>;
     inst cpu_6502: Cpu6502 (
-        i_clk                      ,
-        i_rst   : reset            ,
-        i_rx                       ,
-        i_cts                      ,
-        i_resb                     ,
-        o_tx    : o_cpu_6502_tx    ,
-        o_rts   : o_cpu_6502_rts   ,
-        o_rw    : o_cpu_6502_rw    ,
-        o_nop   : o_cpu_6502_nop   ,
-        o_cycles: o_cpu_6502_cycles,
+        i_clk    : i_en_hz          ,
+        i_mst_clk: i_clk            ,
+        i_rst    : reset            ,
+        i_rx                        ,
+        i_cts                       ,
+        i_resb                      ,
+        o_tx     : o_cpu_6502_tx    ,
+        o_rts    : o_cpu_6502_rts   ,
+        o_rw     : o_cpu_6502_rw    ,
+        o_nop    : o_cpu_6502_nop   ,
+        o_cycles : o_cpu_6502_cycles,
     );
 
     var o_ppu_tx : logic;
@@ -68,7 +71,23 @@ module main (
     }
 
     assign gpio_0_0 = o_cpu_6502_tx;
-    assign gpio_0_2 = o_cpu_6502_rts;
+    assign gpio_0_2 = if i_en_hz {
+        o_cpu_6502_rts
+    } else {
+        1
+    };
     assign gpio_0_4 = o_cpu_6502_rw;
     assign gpio_0_5 = o_cpu_6502_nop;
+
+    always_ff (posedge i_clk, async_high i_rst) {
+        if_reset {
+            clk_cnt = 0;
+        } else {
+            if i_en_hz {
+                clk_cnt = 0;
+            } else {
+                clk_cnt += 1;
+            }
+        }
+    }
 }

@@ -1,5 +1,6 @@
 module OpeReadAndStoreToAccOrMemory (
     i_clk                 : input   logic                    ,
+    i_mst_clk             : input   logic                    ,
     i_rst                 : input   logic                    ,
     i_en                  : input   logic                    ,
     i_we                  : input   logic                    ,
@@ -45,6 +46,7 @@ module OpeReadAndStoreToAccOrMemory (
     inst if_read_memory_memory: MemoryIf;
     inst read_memory: ReadMemory (
         i_clk                                        ,
+        i_mst_clk                                    ,
         i_rst                                        ,
         i_en                  : i_read_memory_en     ,
         i_we                                         ,
@@ -70,6 +72,7 @@ module OpeReadAndStoreToAccOrMemory (
     inst if_write_memory_memory: MemoryIf;
     inst write_memory: WriteMemory (
         i_clk                                         ,
+        i_mst_clk                                     ,
         i_rst                                         ,
         i_en                  : i_write_memory_en     ,
         i_we                                          ,
@@ -103,6 +106,8 @@ module OpeReadAndStoreToAccOrMemory (
     var if_memory_mst_we_next  : logic    ;
     var if_memory_mst_addr_next: logic<16>;
     var if_memory_mst_data_next: logic<8> ;
+    var latched_io_finish      : logic    ;
+    var latched_io_finish_next : logic    ;
     always_comb {
         a_next                  = if_register_mst.a;
         p_next                  = if_register_mst.p;
@@ -115,6 +120,7 @@ module OpeReadAndStoreToAccOrMemory (
         if_memory_mst_we_next   = if_memory_mst.we;
         if_memory_mst_addr_next = if_memory_mst.addr;
         if_memory_mst_data_next = if_memory_mst.data;
+        latched_io_finish_next  = latched_io_finish;
         case status {
             Status::Ready: {
                 if i_en {
@@ -134,46 +140,57 @@ module OpeReadAndStoreToAccOrMemory (
                 if_memory_mst_we_next   = if_read_memory_memory.we;
                 if_memory_mst_addr_next = if_read_memory_memory.addr;
                 if_memory_mst_data_next = if_read_memory_memory.data;
-                if o_read_memory_finish {
-                    i_assign_data_next = o_read_memory_data;
-                    status_next        = Status::PreWrite;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next = 0;
+                        i_assign_data_next     = o_read_memory_data;
+                        status_next            = Status::PreWrite;
+                    }
+                } else {
+                    latched_io_finish_next |= o_read_memory_finish;
                 }
             }
             Status::PreWrite: {
-                if i_ope_kind == OperatorsPkg::OpeKind::Asl || i_ope_kind == OperatorsPkg::OpeKind::Rol {
-                    is_carry_next      =   (i_assign_data & 8'b10000000) != 0;
-                    i_assign_data_next <<= 1;
-                    if i_ope_kind == OperatorsPkg::OpeKind::Rol && (if_register_mst.p & 8'b00000001) == 1 {
-                        i_assign_data_next |= 8'b00000001;
+                if i_clk {
+                    if i_ope_kind == OperatorsPkg::OpeKind::Asl || i_ope_kind == OperatorsPkg::OpeKind::Rol {
+                        is_carry_next      =   (i_assign_data & 8'b10000000) != 0;
+                        i_assign_data_next <<= 1;
+                        if i_ope_kind == OperatorsPkg::OpeKind::Rol && (if_register_mst.p & 8'b00000001) == 1 {
+                            i_assign_data_next |= 8'b00000001;
+                        }
+                    } else if i_ope_kind == OperatorsPkg::OpeKind::Lsr || i_ope_kind == OperatorsPkg::OpeKind::Ror {
+                        is_carry_next      =   (i_assign_data & 8'b00000001) != 0;
+                        i_assign_data_next >>= 1;
+                        if i_ope_kind == OperatorsPkg::OpeKind::Ror && (if_register_mst.p & 8'b00000001) == 1 {
+                            i_assign_data_next |= 8'b10000000;
+                        }
                     }
-                } else if i_ope_kind == OperatorsPkg::OpeKind::Lsr || i_ope_kind == OperatorsPkg::OpeKind::Ror {
-                    is_carry_next      =   (i_assign_data & 8'b00000001) != 0;
-                    i_assign_data_next >>= 1;
-                    if i_ope_kind == OperatorsPkg::OpeKind::Ror && (if_register_mst.p & 8'b00000001) == 1 {
-                        i_assign_data_next |= 8'b10000000;
+                    if i_addr_mode == OperatorsPkg::AddrMode::Acc {
+                        status_next = Status::WriteAcc;
+                    } else {
+                        status_next = Status::WriteMemory;
                     }
-                }
-                if i_addr_mode == OperatorsPkg::AddrMode::Acc {
-                    status_next = Status::WriteAcc;
-                } else {
-                    status_next = Status::WriteMemory;
                 }
             }
             Status::WriteAcc: {
-                a_next              = i_assign_data;
-                RegisterPkg::set_c (p_next, is_carry);
-                RegisterPkg::set_nz(p_next, i_assign_data);
-                status_next         = Status::Finish;
+                if i_clk {
+                    a_next              = i_assign_data;
+                    RegisterPkg::set_c (p_next, is_carry);
+                    RegisterPkg::set_nz(p_next, i_assign_data);
+                    status_next         = Status::Finish;
+                }
             }
             Status::WriteMemory: {
                 if_memory_mst_en_next   = if_write_memory_memory.en;
                 if_memory_mst_we_next   = if_write_memory_memory.we;
                 if_memory_mst_addr_next = if_write_memory_memory.addr;
                 if_memory_mst_data_next = if_write_memory_memory.data;
-                if o_write_memory_finish {
-                    RegisterPkg::set_c (p_next, is_carry);
-                    RegisterPkg::set_nz(p_next, i_assign_data);
-                    status_next         = Status::Finish;
+                if i_clk {
+                    if o_write_memory_finish {
+                        RegisterPkg::set_c (p_next, is_carry);
+                        RegisterPkg::set_nz(p_next, i_assign_data);
+                        status_next         = Status::Finish;
+                    }
                 }
             }
             Status::Finish: {
@@ -183,7 +200,7 @@ module OpeReadAndStoreToAccOrMemory (
         o_finish_next = status_next == Status::Finish;
     }
 
-    always_ff (posedge i_clk, async_high i_rst) {
+    always_ff (posedge i_mst_clk, async_high i_rst) {
         if_reset {
             if_register_mst.a  = 0;
             if_register_mst.p  = 36;
@@ -197,19 +214,24 @@ module OpeReadAndStoreToAccOrMemory (
             if_memory_mst.we   = 0;
             if_memory_mst.addr = 0;
             if_memory_mst.data = 0;
+            latched_io_finish  = 0;
         } else {
             if_register_mst.a  = a_next;
             if_register_mst.p  = p_next;
             if_register_mst.pc = pc_next;
-            status             = status_next;
             i_assign_data      = i_assign_data_next;
             is_carry           = is_carry_next;
             o_busy             = o_busy_next;
-            o_finish           = o_finish_next;
             if_memory_mst.en   = if_memory_mst_en_next;
             if_memory_mst.we   = if_memory_mst_we_next;
             if_memory_mst.addr = if_memory_mst_addr_next;
             if_memory_mst.data = if_memory_mst_data_next;
+            latched_io_finish  = latched_io_finish_next;
+            o_finish           = 0;
+            if (i_clk) {
+                status   = status_next;
+                o_finish = o_finish_next;
+            }
         }
     }
 }

@@ -1,7 +1,8 @@
 module ReadAddr #(
-    param READ_LOCK_COUNT: logic<8> = 6,
+    param READ_LOCK_COUNT: logic<8> = 1,
 ) (
     i_clk          : input   logic                ,
+    i_mst_clk      : input   logic                ,
     i_rst          : input   logic                ,
     i_en           : input   logic                ,
     i_rx           : input   logic                ,
@@ -32,7 +33,7 @@ module ReadAddr #(
     var o_addr_read_busy  : logic   ;
     var o_addr_read_finish: logic   ;
     inst i_addr_read_rx: uarty::Rx (
-        i_clk                       ,
+        i_clk   : i_mst_clk         ,
         i_rst                       ,
         i_en    : i_addr_read_en    ,
         i_rx                        ,
@@ -53,6 +54,8 @@ module ReadAddr #(
     var if_memory_mst_en_next  : logic    ;
     var if_memory_mst_we_next  : logic    ;
     var if_memory_mst_addr_next: logic<16>;
+    var latched_io_finish      : logic    ;
+    var latched_io_finish_next : logic    ;
     always_comb {
         status_next             = status;
         o_finish_next           = o_finish;
@@ -61,6 +64,7 @@ module ReadAddr #(
         if_memory_mst_addr_next = if_memory_mst.addr;
         o_data_next             = o_data;
         wait_c_next             = wait_c;
+        latched_io_finish_next  = latched_io_finish;
         case status {
             Status::Ready: {
                 if i_en {
@@ -74,9 +78,14 @@ module ReadAddr #(
                 }
             }
             Status::ReadAddrWithRx: {
-                o_data_next = o_addr_data;
-                if o_addr_read_finish {
-                    status_next = Status::Finish;
+                if i_clk {
+                    if latched_io_finish {
+                        latched_io_finish_next = 0;
+                        o_data_next            = o_addr_data;
+                        status_next            = Status::Finish;
+                    }
+                } else {
+                    latched_io_finish_next |= o_addr_read_finish;
                 }
             }
             Status::ReadAddrWithRam: {
@@ -96,7 +105,7 @@ module ReadAddr #(
         o_finish_next = status_next == Status::Finish;
     }
 
-    always_ff (posedge i_clk, async_high i_rst) {
+    always_ff (posedge i_mst_clk, async_high i_rst) {
         if_reset {
             o_busy             = 0;
             o_finish           = 0;
@@ -107,16 +116,21 @@ module ReadAddr #(
             if_memory_mst.addr = 0;
             o_data             = 0;
             wait_c             = 0;
+            latched_io_finish  = 0;
         } else {
             o_busy             = o_busy_next;
-            o_finish           = o_finish_next;
-            status             = status_next;
             o_rts              = o_rts_next;
             if_memory_mst.en   = if_memory_mst_en_next;
             if_memory_mst.we   = if_memory_mst_we_next;
             if_memory_mst.addr = if_memory_mst_addr_next;
             o_data             = o_data_next;
             wait_c             = wait_c_next;
+            latched_io_finish  = latched_io_finish_next;
+            o_finish           = 0;
+            if (i_clk) {
+                status   = status_next;
+                o_finish = o_finish_next;
+            }
         }
     }
 }
