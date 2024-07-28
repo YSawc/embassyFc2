@@ -85,7 +85,7 @@ module OpeStoreToMemory (
         latched_io_finish_next    = latched_io_finish;
         case status {
             Status::Ready: {
-                if i_en {
+                if i_clk && i_en {
                     if write_count == 0 {
                         s_next           = if_register_slv.s;
                         p_next           = if_register_slv.p;
