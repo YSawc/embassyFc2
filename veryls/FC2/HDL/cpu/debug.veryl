@@ -946,14 +946,14 @@ module Debug (
                 if_memory_mst_addr_next = if_ope_read_and_store_to_register_memory.addr;
                 if_memory_mst_data_next = if_ope_read_and_store_to_register_memory.data;
                 if i_clk {
+                    o_a_next  = if_ope_read_and_store_to_register_register.a;
+                    o_x_next  = if_ope_read_and_store_to_register_register.x;
+                    o_y_next  = if_ope_read_and_store_to_register_register.y;
+                    o_s_next  = if_ope_read_and_store_to_register_register.s;
+                    o_p_next  = if_ope_read_and_store_to_register_register.p;
+                    o_pc_next = if_ope_read_and_store_to_register_register.pc;
                     if latched_io_finish {
                         latched_io_finish_next = 0;
-                        o_a_next               = if_ope_read_and_store_to_register_register.a;
-                        o_x_next               = if_ope_read_and_store_to_register_register.x;
-                        o_y_next               = if_ope_read_and_store_to_register_register.y;
-                        o_s_next               = if_ope_read_and_store_to_register_register.s;
-                        o_p_next               = if_ope_read_and_store_to_register_register.p;
-                        o_pc_next              = if_ope_read_and_store_to_register_register.pc;
                         status_next            = Status::Ready;
                     }
                 } else {
@@ -967,11 +967,11 @@ module Debug (
                 if_memory_mst_addr_next = if_ope_read_and_store_to_acc_or_memory_memory.addr;
                 if_memory_mst_data_next = if_ope_read_and_store_to_acc_or_memory_memory.data;
                 if i_clk {
+                    o_a_next  = if_ope_read_and_store_to_acc_or_memory_register.a;
+                    o_p_next  = if_ope_read_and_store_to_acc_or_memory_register.p;
+                    o_pc_next = if_ope_read_and_store_to_acc_or_memory_register.pc;
                     if latched_io_finish {
                         latched_io_finish_next = 0;
-                        o_a_next               = if_ope_read_and_store_to_acc_or_memory_register.a;
-                        o_p_next               = if_ope_read_and_store_to_acc_or_memory_register.p;
-                        o_pc_next              = if_ope_read_and_store_to_acc_or_memory_register.pc;
                         status_next            = Status::Ready;
                     }
                 } else {
@@ -985,26 +985,26 @@ module Debug (
                 if_memory_mst_addr_next = if_ope_store_to_memory_memory.addr;
                 if_memory_mst_data_next = if_ope_store_to_memory_memory.data;
                 if i_clk {
+                    o_s_next  = if_ope_store_to_memory_register.s;
+                    o_p_next  = if_ope_store_to_memory_register.p;
+                    o_pc_next = if_ope_store_to_memory_register.pc;
                     if latched_io_finish {
                         latched_io_finish_next = 0;
                         status_next            = Status::Ready;
-                        o_s_next               = if_ope_store_to_memory_register.s;
-                        o_p_next               = if_ope_store_to_memory_register.p;
-                        o_pc_next              = if_ope_store_to_memory_register.pc;
                     }
                 } else {
                     latched_io_finish_next |= o_ope_store_to_memory_finish;
                 }
             }
             Status::OpeCompare: {
-                o_tx_next               = o_ope_compare_tx;
-                o_p_next                = if_ope_compare_register.p;
-                o_pc_next               = if_ope_compare_register.pc;
                 if_memory_mst_en_next   = if_ope_compare_memory.en;
                 if_memory_mst_we_next   = if_ope_compare_memory.we;
                 if_memory_mst_addr_next = if_ope_compare_memory.addr;
                 if_memory_mst_data_next = if_ope_compare_memory.data;
                 if i_clk {
+                    o_tx_next = o_ope_compare_tx;
+                    o_p_next  = if_ope_compare_register.p;
+                    o_pc_next = if_ope_compare_register.pc;
                     if latched_io_finish {
                         latched_io_finish_next = 0;
                         status_next            = Status::Ready;
@@ -1015,13 +1015,14 @@ module Debug (
             }
 
             Status::OpeOther: {
-                o_a_next  = if_ope_other_register.a;
-                o_x_next  = if_ope_other_register.x;
-                o_y_next  = if_ope_other_register.y;
-                o_s_next  = if_ope_other_register.s;
-                o_p_next  = if_ope_other_register.p;
-                o_pc_next = if_ope_other_register.pc;
                 if i_clk {
+                    o_a_next  = if_ope_other_register.a;
+                    o_x_next  = if_ope_other_register.x;
+                    o_y_next  = if_ope_other_register.y;
+                    o_s_next  = if_ope_other_register.s;
+                    o_p_next  = if_ope_other_register.p;
+                    o_pc_next = if_ope_other_register.pc;
+
                     if latched_io_finish {
                         latched_io_finish_next = 0;
                         status_next            = Status::Ready;

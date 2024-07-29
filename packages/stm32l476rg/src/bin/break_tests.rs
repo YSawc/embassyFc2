@@ -46,7 +46,7 @@ pub fn test_brk_impl_without_b_flag_within_internal_memory<T: BasicInstance, P: 
     check_valid_register_status(usart, TxReg::A, &[0xC5]);
     check_valid_register_status(usart, TxReg::P, &[0b10110100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0xAD, 0xFC, 0x01]);
-    check_valid_register_status(usart, TxReg::A, &[0xF5]);
+    check_valid_register_status(usart, TxReg::A, &[0xF6]);
     check_valid_register_status(usart, TxReg::P, &[0b10110100]);
 
     info!("test_brk_impl_without_b_flag_within_internal_memory passed!");
@@ -116,7 +116,7 @@ pub fn test_brk_impl_without_b_flag_within_mocking_memory<T: BasicInstance, P: P
     check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x00]);
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFD, 0x01, 0xC5]);
-    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFC, 0x01, 0xF5]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFC, 0x01, 0xF6]);
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFB, 0x01, 0b10100100]);
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0xFE, 0xFF]);
     usart_write(usart, &[0xC6]);
@@ -145,7 +145,7 @@ pub fn test_brk_impl_with_b_flag_within_mocking_memory<T: BasicInstance, P: Pin,
     check_valid_register_status(usart, TxReg::P, &[0b10100100]);
     usart_write(usart, &[OpeMode::Inst as u8, 0x00]);
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFD, 0x01, 0xC5]);
-    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFC, 0x01, 0xF5]);
+    usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFC, 0x01, 0xF6]);
     usart_read_with_check(usart, &mut [0x0u8; 3], &[0xFB, 0x01, 0b10100100]);
     usart_read_with_check(usart, &mut [0x0u8; 2], &[0xFE, 0xFF]);
     usart_write(usart, &[0xC6]);
